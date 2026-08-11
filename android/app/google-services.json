@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "458361446708",
+    "project_id": "surveybookingapp",
+    "storage_bucket": "surveybookingapp.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:458361446708:android:62d6b42068c28c1e354561",
+        "android_client_info": {
+          "package_name": "com.sensrs.surveydesk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0ZwbRFdD-22oFP7eviwsPMBALeUC1978"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
