@@ -1,0 +1,254 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Approval Decision Portal | Sage &amp; Stone</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,600;0,700;1,400&amp;family=Nunito+Sans:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-error": "#ffffff", "secondary-fixed": "#ece1d3", "tertiary-fixed-dim": "#e2c284", "primary-container": "#4a7c59", background: "#f7faf4", "error-container": "#ffdad6", "on-secondary-container": "#696156", "tertiary-fixed": "#ffdea0", "on-primary-container": "#e1ffe5", "surface-variant": "#e0e3de", "surface-tint": "#376847", secondary: "#655d52", "secondary-dim": "#595248", "on-tertiary-fixed-variant": "#594311", "inverse-surface": "#2d312e", "tertiary-dim": "#67501c", "surface-container-lowest": "#ffffff", "on-secondary-fixed": "#201b12", "inverse-on-surface": "#eff2ec", "on-primary-fixed": "#00210e", "on-primary": "#ffffff", "on-tertiary-container": "#fff6ed", "on-error-container": "#93000a", "on-tertiary": "#ffffff", "surface-bright": "#f7faf4", "surface-container": "#ecefe9", "secondary-container": "#e9ded0", primary: "#316342", surface: "#f7faf4", "primary-dim": "#2b5d3c", "surface-container-highest": "#e0e3de", "surface-container-high": "#e6e9e3", "on-tertiary-fixed": "#261a00", "surface-container-low": "#f1f5ef", outline: "#717971", "primary-fixed": "#b9efc5", "on-primary-fixed-variant": "#1e5031", "tertiary-container": "#886e38", "on-secondary": "#ffffff", error: "#ba1a1a", "surface-dim": "#d8dbd5", "on-secondary-fixed-variant": "#4d463c", "primary-fixed-dim": "#9dd3aa", "on-surface": "#191d19", "on-surface-variant": "#414942", "secondary-fixed-dim": "#d0c5b8", tertiary: "#6d5622", "inverse-primary": "#9dd3aa", "error-dim": "#67040d", "on-background": "#191d19", "outline-variant": "#c1c9bf"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Literata"], display: ["Literata"], body: ["Nunito Sans"], label: ["Nunito Sans"]}, fontSize: {}}}};</script>
+<style>
+        body { font-family: 'Nunito Sans', sans-serif; background-color: #f7faf4; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .font-headline { font-family: 'Literata', serif; }
+        .custom-radio:checked { background-color: #386948; border-color: #386948; }
+        .glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(171, 180, 172, 0.3); }
+        
+        /* Mobile Drawer State Handling */
+        #mobile-drawer.open { transform: translateX(0); }
+        #mobile-overlay.open { opacity: 1; visibility: visible; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen transition-opacity duration-500 opacity-100">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface flex justify-between items-center px-4 md:px-8 h-16 w-full z-50 fixed top-0 left-0 border-b border-outline-variant">
+<div class="flex items-center gap-2 md:gap-4">
+
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed text-2xl hidden sm:block" data-icon="account_balance">account_balance</span>
+
+</div>
+<div class="flex items-center gap-4">
+<div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border border-outline-variant">
+<img alt="Committee Member Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a middle-aged academic committee member..." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBF-Lpqtov8Ek43bfknwq-2waH-mwcwbaQ3hIkf2Q1ZHbV4PYmKUqQJAmnxzpvro9i3VFxBQzebPvRqmhLY4GHjmSUXDf0cPPro_B-VAKhGaIi6mRxKhzi7L0FPJb39lPwb8nHcJfHHBgBU0uJBdzt5B1gG9rJKvl3eMhogm2utcyITBw7D2WK5lvy6avumlh5Xcci0hEalQ1Y3Yl00-9gYNszkXFvJ_6iZqtNT6uR2szfIpLM_GZyW_xw4ZcvT2e7Hz-E-18zZKCc">
+</div>
+</div>
+</header>
+<!-- NavigationDrawer Overlay (Mobile Only) -->
+
+<!-- NavigationDrawer -->
+
+<!-- Main Content Canvas -->
+<main class="mt-16 p-4 md:p-8 min-h-[calc(100vh-64px-56px)] w-full">
+<div class="max-w-4xl mx-auto space-y-8">
+<!-- Section Header -->
+<header class="flex flex-col gap-1">
+<span class="font-label text-xs md:text-label-md uppercase tracking-wider text-secondary font-semibold">Decision Terminal</span>
+<h2 class="font-headline text-2xl md:text-3xl font-bold text-on-surface">Final Committee Determination</h2>
+</header>
+<!-- Bento Summary Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+<!-- Main Context Card -->
+<div class="md:col-span-2 glass-panel p-5 md:p-6 rounded-xl relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-5 md:opacity-10 pointer-events-none">
+<span class="material-symbols-outlined text-4xl md:text-6xl" data-icon="assignment">assignment</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex flex-wrap items-center gap-2">
+<span class="bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-full text-[10px] md:text-xs font-bold uppercase whitespace-nowrap">Pending Decision</span>
+<span class="text-on-surface-variant font-label text-xs md:text-label-md font-semibold">Ref: SS-2024-0892</span>
+</div>
+<h3 class="font-headline text-xl md:text-2xl font-semibold text-primary">Annual Campus Sustainability Survey</h3>
+<p class="font-body text-sm md:text-base max-w-lg text-on-surface leading-relaxed">
+                            Proposed by the Department of Environmental Sciences to assess student engagement with renewable energy initiatives and waste management protocols for the 2024-2025 academic year.
+                        </p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+<div>
+<p class="text-[10px] font-label text-secondary uppercase font-bold">Principal Investigator</p>
+<p class="font-body text-sm md:text-base text-on-surface">Dr. Elena Thorne</p>
+</div>
+<div>
+<p class="text-[10px] font-label text-secondary uppercase font-bold">Submission Date</p>
+<p class="font-body text-sm md:text-base text-on-surface">October 14, 2024</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Metrics / Context Side -->
+<div class="bg-surface-container p-5 md:p-6 rounded-xl flex flex-col justify-between border border-outline-variant/30">
+<div>
+<h4 class="font-label text-label-md font-bold mb-4 uppercase text-on-surface">Internal Status</h4>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-sm font-body">Ethical Review</span>
+<span class="text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span> Pass
+                                </span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm font-body">GDPR Compliance</span>
+<span class="text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span> Pass
+                                </span>
+</div>
+<div class="flex items-center justify-between">
+<span class="text-sm font-body">Sampling Size</span>
+<span class="text-tertiary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-sm" data-icon="warning">warning</span> Flagged
+                                </span>
+</div>
+</div>
+</div>
+<button class="mt-6 w-full flex items-center justify-center gap-2 py-2 px-4 border border-primary text-primary rounded-lg font-label text-sm md:text-label-md hover:bg-primary hover:text-on-primary transition-all">
+<span class="material-symbols-outlined text-sm" data-icon="visibility">visibility</span>
+                        View Full Dossier
+                    </button>
+</div>
+</div>
+<!-- Decision Form Area -->
+<div class="bg-surface-container-high rounded-xl p-5 md:p-8 border border-outline-variant/20 shadow-sm pb-10">
+<form class="space-y-8">
+<!-- Final Decision Radios -->
+<div class="space-y-4">
+<h3 class="font-headline text-lg md:text-xl font-bold text-on-surface">Final Decision</h3>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+<!-- Approve -->
+<label class="relative flex items-start md:items-center p-4 bg-surface-container-lowest border border-outline-variant rounded-xl cursor-pointer hover:border-primary transition-colors group">
+<input class="mt-1 md:mt-0 w-5 h-5 text-primary focus:ring-primary border-outline-variant custom-radio" name="decision" type="radio" value="approve">
+<div class="ml-4">
+<span class="block font-bold text-sm md:text-base text-on-surface">Approve</span>
+<span class="block text-xs text-on-surface-variant">Grant immediate authorization.</span>
+</div>
+</label>
+<!-- Request Clarification -->
+<label class="relative flex items-start md:items-center p-4 bg-surface-container-lowest border border-outline-variant rounded-xl cursor-pointer hover:border-primary transition-colors group">
+<input class="mt-1 md:mt-0 w-5 h-5 text-primary focus:ring-primary border-outline-variant custom-radio" name="decision" type="radio" value="clarification">
+<div class="ml-4">
+<span class="block font-bold text-sm md:text-base text-on-surface">Clarification</span>
+<span class="block text-xs text-on-surface-variant">Return with specific notes.</span>
+</div>
+</label>
+<!-- Reject -->
+<label class="relative flex items-start md:items-center p-4 bg-surface-container-lowest border border-outline-variant rounded-xl cursor-pointer hover:border-primary transition-colors group">
+<input class="mt-1 md:mt-0 w-5 h-5 text-primary focus:ring-primary border-outline-variant custom-radio" name="decision" type="radio" value="reject">
+<div class="ml-4">
+<span class="block font-bold text-sm md:text-base text-on-surface text-error">Reject</span>
+<span class="block text-xs text-on-surface-variant">Deny based on criteria.</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Committee Comments -->
+<div class="space-y-2">
+<label class="font-headline text-lg font-semibold text-on-surface" for="comments">Committee Comments</label>
+<p class="text-sm font-body mb-4 text-on-surface">Provide a detailed rationale for your decision. These comments will be shared with the principal investigator.</p>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg p-4 font-body focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none resize-none text-on-surface text-sm md:text-base" id="comments" placeholder="Type decision notes here..." rows="6"></textarea>
+</div>
+<!-- Submit Actions -->
+<div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-4 pt-4 border-t border-outline-variant/30">
+<button class="w-full sm:w-auto px-6 py-3 font-label text-label-md font-bold text-on-surface-variant hover:text-on-surface transition-colors" type="button">Save Progress</button>
+<button class="w-full sm:w-auto bg-primary text-on-primary px-8 py-3 rounded-lg font-headline font-bold text-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/10 hover:shadow-primary/20 hover:scale-[1.02] transition-all" type="submit">
+                            Submit Decision
+                            <span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</form>
+</div>
+<!-- History / Audit Trail -->
+<section class="mt-12">
+<h4 class="font-headline text-lg font-bold text-secondary mb-4">Review History</h4>
+<div class="space-y-3">
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 py-3 px-4 bg-surface-container/50 rounded-lg text-sm font-body border-l-4 border-primary">
+<span class="w-24 text-on-surface-variant text-xs font-semibold uppercase sm:normal-case sm:text-sm sm:font-semibold">15 Oct, 14:20</span>
+<div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+<span class="font-bold text-primary">Initial Review</span>
+<span class="text-on-surface/80">Completed by Dr. Aris Thorne. Passed with 2 minor annotations.</span>
+</div>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 py-3 px-4 bg-surface-container/50 rounded-lg text-sm font-body border-l-4 border-outline">
+<span class="w-24 text-on-surface-variant text-xs font-semibold uppercase sm:normal-case sm:text-sm sm:font-semibold">16 Oct, 09:15</span>
+<div class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+<span class="font-bold text-on-surface">Legal Check</span>
+<span class="text-on-surface/80">Data governance model verified and approved for survey release.</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- Footer -->
+
+<!-- Interactive Logic -->
+<script>
+        // Sidebar Toggle Logic
+        const drawerToggle = document.getElementById('drawer-toggle');
+        const drawerClose = document.getElementById('drawer-close');
+        const mobileDrawer = document.getElementById('mobile-drawer');
+        const mobileOverlay = document.getElementById('mobile-overlay');
+
+        function toggleDrawer() {
+            mobileDrawer.classList.toggle('open');
+            mobileDrawer.classList.toggle('-translate-x-full');
+            mobileOverlay.classList.toggle('open');
+            mobileOverlay.classList.toggle('opacity-0');
+            mobileOverlay.classList.toggle('visibility-hidden');
+            document.body.classList.toggle('overflow-hidden');
+        }
+
+        drawerToggle?.addEventListener('click', toggleDrawer);
+        drawerClose?.addEventListener('click', toggleDrawer);
+        mobileOverlay?.addEventListener('click', toggleDrawer);
+
+        // Simple micro-interaction for decision selection
+        document.querySelectorAll('input[name="decision"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Clear all active classes
+                document.querySelectorAll('label').forEach(label => {
+                    label.classList.remove('ring-2', 'ring-primary', 'bg-primary-container/10');
+                });
+                
+                // Add active class to selected
+                if (e.target.checked) {
+                    e.target.closest('label').classList.add('ring-2', 'ring-primary', 'bg-primary-container/10');
+                }
+            });
+        });
+
+        // Atmospheric fade-in
+        window.addEventListener('load', () => {
+            document.body.classList.add('opacity-0');
+            setTimeout(() => {
+                document.body.classList.remove('opacity-0');
+                document.body.classList.add('transition-opacity', 'duration-500', 'opacity-100');
+            }, 10);
+        });
+    </script>
+
+
+
+
+<nav class="fixed bottom-0 left-0 right-0 bg-surface-container border-t border-outline-variant z-50 flex justify-around items-center px-4 py-2 pb-6 md:pb-2">
+    <a href="#" class="flex flex-col items-center gap-1 p-2 text-on-surface-variant hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">dashboard</span>
+        <span class="text-[10px] font-label font-semibold">Overview</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-1 p-2 text-on-surface-variant hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">list_alt</span>
+        <span class="text-[10px] font-label font-semibold">Queue</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-1 p-2 text-on-surface-variant hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">analytics</span>
+        <span class="text-[10px] font-label font-semibold">Details</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-1 px-4 py-2 bg-primary-container text-on-primary-container rounded-full transition-all">
+        <span class="material-symbols-outlined">fact_check</span>
+        <span class="text-[10px] font-label font-semibold">Decisions</span>
+    </a>
+</nav>
+
+</body></html>

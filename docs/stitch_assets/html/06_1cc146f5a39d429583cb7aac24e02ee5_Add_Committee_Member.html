@@ -1,0 +1,294 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Add Member - Sage &amp; Stone</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-tint": "#376847",
+                    "outline": "#717971",
+                    "secondary-container": "#e9ded0",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#e0e3de",
+                    "surface-container-low": "#f1f5ef",
+                    "surface-variant": "#e0e3de",
+                    "error-container": "#ffdad6",
+                    "on-secondary": "#ffffff",
+                    "on-surface": "#191d19",
+                    "on-tertiary-container": "#fff6ed",
+                    "on-secondary-fixed-variant": "#4d463c",
+                    "on-primary-fixed-variant": "#1e5031",
+                    "surface-bright": "#f7faf4",
+                    "surface-dim": "#d8dbd5",
+                    "surface-container": "#ecefe9",
+                    "tertiary-fixed-dim": "#e2c284",
+                    "on-tertiary-fixed-variant": "#594311",
+                    "primary-fixed-dim": "#9dd3aa",
+                    "on-error": "#ffffff",
+                    "on-primary-container": "#e1ffe5",
+                    "error": "#ba1a1a",
+                    "on-background": "#191d19",
+                    "secondary-fixed": "#ece1d3",
+                    "primary": "#316342",
+                    "on-secondary-container": "#696156",
+                    "primary-container": "#4a7c59",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f7faf4",
+                    "inverse-on-surface": "#eff2ec",
+                    "inverse-primary": "#9dd3aa",
+                    "on-primary-fixed": "#00210e",
+                    "secondary": "#655d52",
+                    "on-tertiary-fixed": "#261a00",
+                    "secondary-fixed-dim": "#d0c5b8",
+                    "outline-variant": "#c1c9bf",
+                    "on-secondary-fixed": "#201b12",
+                    "tertiary-fixed": "#ffdea0",
+                    "inverse-surface": "#2d312e",
+                    "primary-fixed": "#b9efc5",
+                    "on-primary": "#ffffff",
+                    "background": "#f7faf4",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#6d5622",
+                    "surface-container-high": "#e6e9e3",
+                    "on-surface-variant": "#414942",
+                    "tertiary-container": "#886e38"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "margin-mobile": "16px",
+                    "gutter": "16px",
+                    "md": "16px",
+                    "xl": "48px",
+                    "base": "8px",
+                    "sm": "8px",
+                    "xs": "4px",
+                    "margin-desktop": "32px"
+            },
+            "fontFamily": {
+                    "body-lg": [
+                            "Nunito Sans"
+                    ],
+                    "label-md": [
+                            "Nunito Sans"
+                    ],
+                    "headline-md": [
+                            "Literata"
+                    ],
+                    "headline-lg": [
+                            "Literata"
+                    ]
+            },
+            "fontSize": {
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "label-md": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.5px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "700"
+                            }
+                    ]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body-lg antialiased min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar (Mobile) -->
+<header class="md:hidden flex justify-between items-center px-4 h-16 w-full bg-surface w-full top-0 sticky shadow-sm z-40">
+<div class="flex items-center gap-4">
+<button aria-label="Go back" class="text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-primary font-bold tracking-tight">Add Member</h1>
+</div>
+<button aria-label="More options" class="text-on-surface-variant hover:bg-surface-container-high transition-colors p-2 rounded-full cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</header>
+<div class="flex flex-col md:flex-row min-h-screen">
+<!-- Navigation Drawer (Desktop) -->
+<nav class="hidden md:flex flex-col gap-base p-md h-full w-80 fixed left-0 top-0 bg-surface-container-low border-r border-outline-variant/30 z-40">
+<div class="px-4 py-6 mb-4">
+<h2 class="font-headline-md text-headline-md font-bold text-primary tracking-tight">Admin Panel</h2>
+<p class="text-on-surface-variant text-sm mt-1">Committee Management</p>
+<p class="text-on-surface-variant/70 text-xs mt-1">v1.2.0</p>
+</div>
+<div class="flex flex-col gap-2">
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest rounded-full transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest rounded-full transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="">Committees</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest rounded-full transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="poll">poll</span>
+<span class="">Surveys</span>
+</a>
+<a class="flex items-center gap-3 bg-secondary-container text-on-secondary-container font-bold rounded-full px-4 py-3 transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+<span class="">Members</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant px-4 py-3 hover:bg-surface-container-highest rounded-full transition-all duration-200 ease-in-out mt-auto" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="">Settings</span>
+</a>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="flex-1 md:ml-80 p-margin-mobile md:p-margin-desktop w-full max-w-4xl mx-auto">
+<!-- Desktop Header -->
+<div class="hidden md:flex items-center justify-between mb-8">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Add New Member</h1>
+<p class="text-on-surface-variant mt-2">Enter the details below to register a new committee member.</p>
+</div>
+<button class="bg-primary-container text-on-primary-container hover:bg-primary-container/90 px-6 py-2.5 rounded-lg font-label-md text-label-md transition-colors shadow-sm active:scale-95">
+                    Save Draft
+                </button>
+</div>
+<!-- Form Container -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/30 p-6 md:p-8 space-y-8">
+<!-- Profile Photo -->
+
+<!-- Personal Information -->
+<div class="space-y-5">
+<h3 class="font-headline-md text-headline-md text-on-surface text-xl">Personal Details</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block" for="fullName">Full Name</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50" id="fullName" placeholder="Jane Doe" type="text">
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block" for="email">Email Address</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50" id="email" placeholder="jane.doe@sageandstone.org" type="email">
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block" for="empId">Employee ID</label>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50" id="empId" placeholder="EMP-2024-001" type="text">
+</div>
+</div>
+</div>
+<!-- Committee Information -->
+<div class="space-y-5 pt-6 border-t border-outline-variant/30">
+<h3 class="font-headline-md text-headline-md text-on-surface text-xl">Committee Allocation</h3>
+<div class="space-y-4">
+<label class="font-label-md text-label-md text-on-surface-variant block">Department</label>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-1.5 rounded-full border border-outline-variant text-sm text-on-surface hover:bg-surface-container-high transition-colors focus:bg-secondary-container focus:border-secondary-container focus:text-on-secondary-container">Socio-Economic</button>
+<button class="px-4 py-1.5 rounded-full border border-outline-variant text-sm text-on-surface hover:bg-surface-container-high transition-colors focus:bg-secondary-container focus:border-secondary-container focus:text-on-secondary-container">Environmental</button>
+<button class="px-4 py-1.5 rounded-full border border-outline-variant text-sm text-on-surface hover:bg-surface-container-high transition-colors focus:bg-secondary-container focus:border-secondary-container focus:text-on-secondary-container">Infrastructure</button>
+<button class="px-4 py-1.5 rounded-full border border-outline-variant text-sm text-on-surface hover:bg-surface-container-high transition-colors focus:bg-secondary-container focus:border-secondary-container focus:text-on-secondary-container">Governance</button>
+<button class="px-4 py-1.5 rounded-full border border-outline-variant text-sm text-on-surface hover:bg-surface-container-high transition-colors focus:bg-secondary-container focus:border-secondary-container focus:text-on-secondary-container">Public Health</button>
+</div>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block" for="roleSelect">Committee Role</label>
+<select class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none" id="roleSelect">
+<option disabled="" selected="" value="">Select a role...</option>
+<option value="lead">Lead Reviewer</option>
+<option value="senior">Senior Reviewer</option>
+<option value="junior">Junior Auditor</option>
+<option value="observer">Observer</option>
+</select>
+</div>
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant block" for="expertise">Role / Expertise Description</label>
+<textarea class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg px-4 py-2.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-on-surface-variant/50 resize-none" id="expertise" placeholder="Briefly describe the specific expertise or focus area for this member..." rows="3"></textarea>
+</div>
+</div>
+<!-- Action Area -->
+<div class="pt-6 flex flex-col sm:flex-row justify-end gap-3 border-t border-outline-variant/30">
+<button class="px-6 py-3 rounded-lg font-label-md text-label-md text-on-surface border border-outline-variant hover:bg-surface-container-highest transition-colors active:scale-95 text-center sm:w-auto w-full">
+                        Cancel
+                    </button>
+<button class="px-6 py-3 rounded-lg font-label-md text-label-md bg-primary text-on-primary hover:bg-primary/90 transition-colors shadow-sm active:scale-95 flex items-center justify-center gap-2 sm:w-auto w-full">
+<span class="material-symbols-outlined text-sm" data-icon="check_circle">check_circle</span>
+                        Add Member
+                    </button>
+</div>
+</div>
+</main>
+</div>
+<!-- BottomNavBar (Mobile) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-margin-mobile bg-surface shadow-[0_-2px_10px_rgba(0,0,0,0.05)] border-t border-outline-variant/20">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-container-highest rounded-2xl active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="font-label-md text-label-md text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-container-highest rounded-2xl active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="groups">groups</span>
+<span class="font-label-md text-label-md text-[10px]">Committees</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-5 py-1 active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person_add">person_add</span>
+<span class="font-label-md text-label-md text-[10px]">Add Member</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-5 py-1 hover:bg-surface-container-highest rounded-2xl active:scale-90 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings">settings</span>
+<span class="font-label-md text-label-md text-[10px]">Settings</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for chips
+        document.querySelectorAll('.flex-wrap button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active state from all
+                this.parentElement.querySelectorAll('button').forEach(btn => {
+                    btn.classList.remove('bg-secondary-container', 'border-secondary-container', 'text-on-secondary-container');
+                    btn.classList.add('border-outline-variant', 'text-on-surface');
+                });
+                // Add active state to clicked
+                this.classList.remove('border-outline-variant', 'text-on-surface');
+                this.classList.add('bg-secondary-container', 'border-secondary-container', 'text-on-secondary-container');
+            });
+        });
+    </script>
+
+
+</body></html>

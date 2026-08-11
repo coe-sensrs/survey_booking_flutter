@@ -1,0 +1,231 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sage &amp; Stone Admin - Approval Committee Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400..700;1,400..700&amp;family=Nunito+Sans:ital,wght@0,200..1000;1,200..1000&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-error": "#ffffff", "secondary-fixed": "#ece1d3", "tertiary-fixed-dim": "#e2c284", "primary-container": "#4a7c59", background: "#f7faf4", "error-container": "#ffdad6", "on-secondary-container": "#696156", "tertiary-fixed": "#ffdea0", "on-primary-container": "#e1ffe5", "surface-variant": "#e0e3de", "surface-tint": "#376847", secondary: "#655d52", "secondary-dim": "#595248", "on-tertiary-fixed-variant": "#594311", "inverse-surface": "#2d312e", "tertiary-dim": "#67501c", "surface-container-lowest": "#ffffff", "on-secondary-fixed": "#201b12", "inverse-on-surface": "#eff2ec", "on-primary-fixed": "#00210e", "on-primary": "#ffffff", "on-tertiary-container": "#fff6ed", "on-error-container": "#93000a", "on-tertiary": "#ffffff", "surface-bright": "#f7faf4", "surface-container": "#ecefe9", "secondary-container": "#e9ded0", primary: "#316342", surface: "#f7faf4", "primary-dim": "#2b5d3c", "surface-container-highest": "#e0e3de", "surface-container-high": "#e6e9e3", "on-tertiary-fixed": "#261a00", "surface-container-low": "#f1f5ef", outline: "#717971", "primary-fixed": "#b9efc5", "on-primary-fixed-variant": "#1e5031", "tertiary-container": "#886e38", "on-secondary": "#ffffff", error: "#ba1a1a", "surface-dim": "#d8dbd5", "on-secondary-fixed-variant": "#4d463c", "primary-fixed-dim": "#9dd3aa", "on-surface": "#191d19", "on-surface-variant": "#414942", "secondary-fixed-dim": "#d0c5b8", tertiary: "#6d5622", "inverse-primary": "#9dd3aa", "error-dim": "#67040d", "on-background": "#191d19", "outline-variant": "#c1c9bf"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Literata"], display: ["Literata"], body: ["Nunito Sans"], label: ["Nunito Sans"]}, fontSize: {}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background-color: #f7faf4;
+        }
+        .font-headline { font-family: 'Literata', serif; }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="flex flex-col min-h-screen text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-surface flex justify-between items-center px-8 h-16 w-full z-50 fixed top-0 docked full-width">
+<div class="flex items-center gap-4">
+
+
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container-highest transition-colors">
+
+</button>
+<button class="p-2 rounded-full hover:bg-surface-container-highest transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="notifications">notifications</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center border-2 border-primary overflow-hidden">
+<img alt="Committee Member Profile" data-alt="A professional headshot of an older academic male with a warm, encouraging smile, wearing a charcoal grey suit and a forest green tie. The background is a soft-focus library with leather-bound books and warm wooden shelves. The lighting is bright yet soft, maintaining a professional and reliable Sage &amp; Stone aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWtPomoTceNOCa7Im9yuGY71pR6JsMd9KIE4yBpJOJbZaxKhp1EyTxUdsuiKM2MAIRbburfeCpmaJFpC2kst1whQSBUEjVSVzUyyySbiX9fRCrfecZi8UOEofOBlFcYfl-19MotYhgCIyfWPk4WyXyQKyCMtShUY-djefLyILH0KBGl24bvLvtj8knpcva2LF-u9z7Q_W6ZdNQIlJJgN6VkzRzBuTt4UGXw1P1QkCZFlDTXXbG1uCc3U3hia43Yehp2pK6ZdQR0S4">
+</div>
+</div>
+</header>
+<div class="flex pt-16 flex-1">
+<!-- NavigationDrawer -->
+<aside class="fixed left-0 top-0 h-full flex flex-col py-6 border-r border-outline-variant bg-surface-container-low w-72 z-40 hidden md:flex">
+<div class="px-6 mb-8 pt-16">
+<h2 class="font-headline font-bold text-primary text-xl">Survey Approvals</h2>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Overview: Active State -->
+<a class="bg-primary-container text-on-primary-container rounded-full mx-2 my-1 px-4 py-3 flex items-center gap-3 active:scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body text-body-lg">Overview</span>
+</a>
+<a class="text-on-surface-variant mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+<span class="font-body text-body-lg">Request Queue</span>
+</a>
+<a class="text-on-surface-variant mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-body text-body-lg">Review Details</span>
+</a>
+<a class="text-on-surface-variant mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-surface-container-highest transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="fact_check">fact_check</span>
+<span class="font-body text-body-lg">Decisions</span>
+</a>
+</nav>
+<div class="px-4 py-4 border-t border-outline-variant">
+<a class="text-on-surface-variant mx-2 px-4 py-3 flex items-center gap-3 hover:bg-surface-container-highest rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body text-body-lg">Settings</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 md:ml-72 p-8 overflow-y-auto">
+<header class="mb-10">
+<p class="font-label font-semibold text-label-md text-primary uppercase tracking-widest mb-2">Institutional Dashboard</p>
+<h2 class="font-headline font-bold text-4xl text-on-surface">Welcome, Committee Member</h2>
+<p class="text-on-surface-variant mt-2 text-lg">System status: All services operational. 3 reviews pending your attention.</p>
+</header>
+<!-- KPI Section (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<!-- KPI 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl hover:shadow-lg transition-shadow group relative overflow-hidden">
+<div class="absolute -right-4 -top-4 text-primary opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="pending_actions">pending_actions</span>
+</div>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" data-icon="pending_actions">pending_actions</span>
+</div>
+<span class="font-label font-semibold text-on-surface-variant">Pending Requests</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline font-bold text-5xl text-on-surface">12</span>
+<span class="text-error font-semibold flex items-center text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="trending_up">trending_up</span>
+                            +3 today
+                        </span>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl hover:shadow-lg transition-shadow group relative overflow-hidden">
+<div class="absolute -right-4 -top-4 text-primary opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="check_circle">check_circle</span>
+</div>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-lg bg-tertiary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-tertiary-container" data-icon="task_alt">task_alt</span>
+</div>
+<span class="font-label font-semibold text-on-surface-variant">Approved This Week</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline font-bold text-5xl text-on-surface">45</span>
+<span class="text-primary font-semibold flex items-center text-sm">
+<span class="material-symbols-outlined text-sm" data-icon="arrow_upward">arrow_upward</span>
+                            12% vs last week
+                        </span>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-xl hover:shadow-lg transition-shadow group relative overflow-hidden">
+<div class="absolute -right-4 -top-4 text-primary opacity-5 group-hover:opacity-10 transition-opacity">
+<span class="material-symbols-outlined text-8xl" data-icon="timer">timer</span>
+</div>
+<div class="flex items-center gap-3 mb-4">
+<div class="w-10 h-10 rounded-lg bg-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="avg_time">avg_time</span>
+</div>
+<span class="font-label font-semibold text-on-surface-variant">Average Review Time</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline font-bold text-5xl text-on-surface">1.5</span>
+<span class="font-headline font-semibold text-2xl text-on-surface-variant">days</span>
+</div>
+<div class="mt-4 w-full bg-surface-container h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[85%] rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Dashboard Body -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Recent Submissions List -->
+<section class="lg:col-span-2">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-headline font-bold text-2xl">Recent Submissions</h3>
+<a class="text-primary font-semibold hover:underline flex items-center gap-1" href="#">
+                            View full queue
+                            <span class="material-symbols-outlined text-lg" data-icon="chevron_right">chevron_right</span>
+</a>
+</div>
+<div class="space-y-4">
+<!-- Request 1 -->
+<div class="bg-surface-container-low p-5 rounded-xl border border-outline-variant flex items-center gap-4 hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="person">person</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline font-semibold text-lg">Dr. Aris Thorne</h4>
+<p class="text-on-surface-variant text-sm">Socio Economic Survey • Submitted 2h ago</p>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 rounded-full bg-tertiary-container text-on-tertiary-container text-xs font-bold uppercase tracking-wider">In Review</span>
+<button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Request 2 -->
+<div class="bg-surface-container-low p-5 rounded-xl border border-outline-variant flex items-center gap-4 hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="science">science</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline font-semibold text-lg">Sarah Jenkins</h4>
+<p class="text-on-surface-variant text-sm">Public Health Assessment • Submitted 5h ago</p>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 rounded-full bg-primary-container text-on-primary-container text-xs font-bold uppercase tracking-wider">New</span>
+<button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Request 3 -->
+<div class="bg-surface-container-low p-5 rounded-xl border border-outline-variant flex items-center gap-4 hover:bg-surface-container transition-colors cursor-pointer group">
+<div class="w-12 h-12 bg-white rounded-lg flex items-center justify-center shadow-sm border border-outline-variant">
+<span class="material-symbols-outlined text-primary" data-icon="school">school</span>
+</div>
+<div class="flex-1">
+<h4 class="font-headline font-semibold text-lg">Prof. Michael Chen</h4>
+<p class="text-on-surface-variant text-sm">Education Outcome Analysis • Submitted yesterday</p>
+</div>
+<div class="flex items-center gap-6">
+<span class="px-3 py-1 rounded-full bg-error-container text-on-error-container text-xs font-bold uppercase tracking-wider">Urgent</span>
+<button class="p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Sidebar Activity/Tools -->
+<aside class="space-y-6">
+
+
+</aside>
+</div>
+</main>
+</div>
+<!-- Footer -->
+
+<!-- FAB (Suppressed based on logic for Dashboard, but included as a potential action if needed) -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-tertiary text-on-tertiary rounded-2xl shadow-xl flex items-center justify-center hover:scale-110 active:scale-90 transition-all z-[60]">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+
+
+
+
+
+
+</body></html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Scheduling | GovSurvey Official</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,300..900;1,300..900&amp;family=Nunito+Sans:ital,wght@0,200..1000;1,200..1000&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+    /* Simple custom scrollbar for the sidebar/content */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3c6d1;
+      border-radius: 10px;
+    }
+  </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"secondary-fixed-dim": "#d0c5b8", "secondary-container": "#e9ded0", "on-background": "#191d19", "tertiary-fixed-dim": "#e2c284", surface: "#f7faf4", "on-primary": "#ffffff", "primary-dim": "#2b5d3c", "surface-container-high": "#e6e9e3", "on-tertiary-container": "#fff6ed", background: "#f7faf4", "inverse-primary": "#9dd3aa", "primary-container": "#4a7c59", tertiary: "#6d5622", "surface-dim": "#d8dbd5", "primary-fixed-dim": "#9dd3aa", "tertiary-fixed": "#ffdea0", "on-secondary": "#ffffff", error: "#ba1a1a", "on-surface-variant": "#414942", "on-secondary-fixed-variant": "#4d463c", "on-secondary-fixed": "#201b12", outline: "#717971", "surface-container": "#ecefe9", "on-tertiary-fixed": "#261a00", "on-tertiary": "#ffffff", "on-surface": "#191d19", secondary: "#655d52", "tertiary-dim": "#67501c", "surface-container-highest": "#e0e3de", "on-tertiary-fixed-variant": "#594311", "surface-container-lowest": "#ffffff", "secondary-fixed": "#ece1d3", "inverse-surface": "#2d312e", "on-secondary-container": "#696156", "error-dim": "#67040d", "error-container": "#ffdad6", "tertiary-container": "#886e38", "on-error-container": "#93000a", "on-primary-fixed": "#00210e", "on-primary-container": "#e1ffe5", "surface-variant": "#e0e3de", "primary-fixed": "#b9efc5", "on-primary-fixed-variant": "#1e5031", primary: "#316342", "inverse-on-surface": "#eff2ec", "surface-tint": "#376847", "outline-variant": "#c1c9bf", "on-error": "#ffffff", "surface-container-low": "#f1f5ef", "secondary-dim": "#595248", "surface-bright": "#f7faf4"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {gutter: "24px", xs: "0.5rem", md: "1.5rem", lg: "2rem", "container-max": "1200px", base: "4px", xl: "3rem", sm: "1rem"}, fontFamily: {headline: ["Literata"], display: ["Literata"], body: ["Nunito Sans"], label: ["Nunito Sans"]}, fontSize: {}}}};</script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+      font-family: 'Nunito Sans', sans-serif;
+    }
+    h1, h2, h3, h4, .font-headline {
+      font-family: 'Literata', serif;
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline fixed top-0 w-full z-40 h-16">
+<div class="flex items-center justify-between px-gutter w-full h-full max-w-container-max mx-auto">
+<div class="flex items-center gap-3 cursor-pointer active:opacity-80">
+
+<h1 class="text-2xl font-bold text-primary">Survey Booking</h1>
+</div>
+<nav class="hidden md:flex gap-8">
+<a class="text-on-surface-variant font-semibold hover:bg-surface-container-low transition-colors px-2 py-1" href="#">Dashboard</a>
+<a class="text-on-surface-variant font-semibold hover:bg-surface-container-low transition-colors px-2 py-1" href="#">Support</a>
+<a class="text-primary font-bold hover:bg-surface-container-low transition-colors px-2 py-1" href="#">New Request</a>
+</nav>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="mt-16 mb-24 flex-grow flex flex-col items-center">
+<!-- Progress Stepper -->
+<div class="w-full bg-surface-container-low py-8 border-b border-outline-variant">
+<div class="max-w-container-max mx-auto px-gutter">
+<div class="flex justify-between items-center relative">
+<!-- Connector Lines -->
+<div class="absolute top-1/2 left-0 w-full h-0.5 bg-outline-variant -translate-y-1/2 z-0"></div>
+<div class="absolute top-1/2 left-0 h-0.5 bg-primary -translate-y-1/2 z-0" style="width: 100%;"></div>
+<!-- Steps -->
+<div class="relative z-10 flex flex-col items-center gap-2 group">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold text-primary">Location</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold text-primary">Type</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold text-primary">Scope</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold text-primary">Team</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm">check</span>
+</div>
+<span class="text-xs font-bold text-primary">Security</span>
+</div>
+<div class="relative z-10 flex flex-col items-center gap-2">
+<div class="w-10 h-10 rounded-full bg-primary border-4 border-surface-container-lowest flex items-center justify-center text-on-primary font-bold">6</div>
+<span class="text-xs font-bold text-primary underline decoration-2 underline-offset-4">Scheduling</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Content Section -->
+<div class="max-w-4xl w-full px-gutter py-xl flex flex-col gap-lg animate-in fade-in slide-in-from-bottom-4 duration-700">
+<div class="flex flex-col gap-2">
+<h2 class="text-3xl font-headline text-primary">Select Survey Start Date</h2>
+<p class="text-on-surface-variant text-lg">Please coordinate with onsite facilities to ensure access is granted on the chosen commencement date.</p>
+</div>
+<!-- Bento Grid Layout for Content -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Main Calendar Card -->
+<div class="md:col-span-8 bg-surface-container-lowest border border-outline-variant p-lg shadow-sm rounded-lg">
+<div class="flex items-center justify-between mb-lg">
+<h3 class="text-xl font-headline text-primary flex items-center gap-2">
+<span class="material-symbols-outlined">calendar_month</span>
+              October 2024
+            </h3>
+<div class="flex gap-2">
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="p-2 hover:bg-surface-container-low transition-colors rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Calendar Interface -->
+<div class="calendar-grid gap-1 mb-md">
+<!-- Days header -->
+<div class="text-center text-sm font-bold text-on-surface-variant py-2">Sun</div>
+<div class="text-center text-sm font-bold text-on-surface-variant py-2">Mon</div>
+<div class="text-center text-sm font-bold text-on-surface-variant py-2">Tue</div>
+<div class="text-center text-sm font-bold text-on-surface-variant py-2">Wed</div>
+<div class="text-center text-sm font-bold text-on-surface-variant py-2">Thu</div>
+<div class="text-center text-sm font-bold text-on-surface-variant py-2">Fri</div>
+<div class="text-center text-sm font-bold text-on-surface-variant py-2">Sat</div>
+<!-- Placeholder dates -->
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 opacity-20">29</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 opacity-20">30</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">1</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">2</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">3</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">4</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">5</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">6</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">7</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">8</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">9</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">10</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 bg-primary text-on-primary rounded-sm">11</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">12</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">13</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">14</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">15</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">16</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">17</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">18</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">19</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">20</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">21</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">22</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">23</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">24</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">25</div>
+<div class="h-16 border border-outline-variant/30 flex items-start p-2 hover:bg-surface-container-low cursor-pointer transition-colors rounded-sm">26</div>
+</div>
+<div class="flex items-center gap-4 py-md border-t border-outline-variant mt-md">
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 bg-primary rounded-sm"></div>
+<span class="text-xs font-semibold">Selected Start</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 bg-surface-container-highest rounded-sm border border-outline-variant"></div>
+<span class="text-xs font-semibold">Processing Window</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-4 h-4 bg-white border border-outline-variant rounded-sm"></div>
+<span class="text-xs font-semibold">Available</span>
+</div>
+</div>
+</div>
+<!-- Sidebar Info Section -->
+<div class="md:col-span-4 flex flex-col gap-gutter">
+<!-- Processing Notice -->
+<div class="bg-primary-container p-md border border-primary text-on-primary-container shadow-md rounded-lg">
+<div class="flex items-start gap-3 mb-2">
+<span class="material-symbols-outlined text-primary">info</span>
+<h4 class="text-lg font-headline font-bold text-on-primary-container">Institutional Timeline</h4>
+</div>
+<p class="text-sm text-on-primary-container opacity-90 mb-4">
+              Our protocols require a standardized window for rigorous verification.
+            </p>
+<div class="bg-primary/10 p-3 border-l-4 border-primary rounded-r-lg">
+<p class="text-sm font-bold text-on-primary-container">5 Days for each survey &amp; Data Processing</p>
+</div>
+</div>
+<!-- Selection Summary Card -->
+<div class="bg-surface-container-low border border-outline-variant p-md rounded-lg">
+<h4 class="text-xs font-bold text-secondary uppercase tracking-wider mb-4">Booking Details</h4>
+<div class="flex flex-col gap-4">
+<div class="flex flex-col">
+<span class="text-xs text-on-surface-variant">Selected Start Date</span>
+<span class="text-sm font-bold text-primary">Friday, Oct 11, 2024</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-on-surface-variant">Estimated Completion</span>
+<span class="text-sm font-bold text-primary">Wednesday, Oct 16, 2024</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs text-on-surface-variant">Jurisdiction</span>
+<span class="text-sm font-bold text-primary">Industrial District 7A</span>
+</div>
+</div>
+</div>
+<!-- Representative Image -->
+<div class="relative overflow-hidden group aspect-video rounded-lg">
+
+
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-gutter py-md bg-surface dark:bg-surface-dim border-t border-outline-variant dark:border-outline">
+<button class="flex flex-col items-center justify-center border border-primary text-primary rounded-lg px-8 py-2 hover:bg-primary/5 transition-colors active:scale-95 duration-150 group">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm font-bold">arrow_back</span>
+<span class="text-sm font-bold">Back</span>
+</div>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary text-on-primary rounded-lg px-12 py-3 hover:opacity-90 transition-opacity active:scale-95 duration-150 shadow-md">
+<div class="flex items-center gap-2">
+<span class="text-sm font-bold">Confirm Booking</span>
+<span class="material-symbols-outlined text-sm font-bold">arrow_forward</span>
+</div>
+</button>
+</footer>
+<script>
+    // Micro-interaction for calendar selection
+    document.querySelectorAll('.calendar-grid div[class*="hover:bg-surface-container-low"]').forEach(cell => {
+      cell.addEventListener('click', function() {
+        // Reset current selection
+        document.querySelectorAll('.calendar-grid div.bg-primary').forEach(active => {
+          active.classList.remove('bg-primary', 'text-on-primary');
+          active.classList.add('hover:bg-surface-container-low', 'cursor-pointer');
+        });
+        
+        // Apply new selection
+        this.classList.remove('hover:bg-surface-container-low', 'cursor-pointer');
+        this.classList.add('bg-primary', 'text-on-primary');
+        
+        // Interaction feedback
+        this.style.transform = 'scale(0.95)';
+        setTimeout(() => {
+          this.style.transform = 'scale(1)';
+        }, 100);
+      });
+    });
+  </script>
+
+
+
+
+</body></html>

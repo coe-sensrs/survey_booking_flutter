@@ -1,0 +1,273 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sage &amp; Stone Admin - Request Queue</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Nunito+Sans:ital,opsz,wght@0,200..1000;1,200..1000&amp;display=swap" rel="stylesheet">
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"on-error": "#ffffff", "secondary-fixed": "#ece1d3", "tertiary-fixed-dim": "#e2c284", "primary-container": "#4a7c59", background: "#f7faf4", "error-container": "#ffdad6", "on-secondary-container": "#696156", "tertiary-fixed": "#ffdea0", "on-primary-container": "#e1ffe5", "surface-variant": "#e0e3de", "surface-tint": "#376847", secondary: "#655d52", "secondary-dim": "#595248", "on-tertiary-fixed-variant": "#594311", "inverse-surface": "#2d312e", "tertiary-dim": "#67501c", "surface-container-lowest": "#ffffff", "on-secondary-fixed": "#201b12", "inverse-on-surface": "#eff2ec", "on-primary-fixed": "#00210e", "on-primary": "#ffffff", "on-tertiary-container": "#fff6ed", "on-error-container": "#93000a", "on-tertiary": "#ffffff", "surface-bright": "#f7faf4", "surface-container": "#ecefe9", "secondary-container": "#e9ded0", primary: "#316342", surface: "#f7faf4", "primary-dim": "#2b5d3c", "surface-container-highest": "#e0e3de", "surface-container-high": "#e6e9e3", "on-tertiary-fixed": "#261a00", "surface-container-low": "#f1f5ef", outline: "#717971", "primary-fixed": "#b9efc5", "on-primary-fixed-variant": "#1e5031", "tertiary-container": "#886e38", "on-secondary": "#ffffff", error: "#ba1a1a", "surface-dim": "#d8dbd5", "on-secondary-fixed-variant": "#4d463c", "primary-fixed-dim": "#9dd3aa", "on-surface": "#191d19", "on-surface-variant": "#414942", "secondary-fixed-dim": "#d0c5b8", tertiary: "#6d5622", "inverse-primary": "#9dd3aa", "error-dim": "#67040d", "on-background": "#191d19", "outline-variant": "#c1c9bf"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Literata"], display: ["Literata"], body: ["Nunito Sans"], label: ["Nunito Sans"]}, fontSize: {}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-chip {
+            background-color: #386948;
+            color: #e8ffe9;
+        }
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            background-color: #f7faf4;
+        }
+        h1, h2, h3 {
+            font-family: 'Literata', serif;
+        }
+        #mobile-drawer.open {
+            transform: translateX(0);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased overflow-x-hidden">
+<!-- Overlay for mobile drawer -->
+
+<!-- TopAppBar -->
+<header class="bg-surface flex justify-between items-center px-4 md:px-8 h-16 w-full z-50 fixed top-0 left-0 border-b border-outline-variant">
+<div class="flex items-center gap-2 md:gap-3">
+
+<span class="material-symbols-outlined text-primary text-2xl hidden xs:block" data-icon="account_balance">account_balance</span>
+
+</div>
+<div class="flex items-center gap-2 md:gap-4">
+<span class="font-label font-semibold text-label-md text-on-surface-variant hidden sm:block">Admin Portal</span>
+<div class="w-8 h-8 md:w-10 md:h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border border-outline-variant">
+<img alt="Committee Member Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a mature academic committee member in a well-lit home office, featuring soft natural lighting and a background of organized bookshelves. The aesthetic is clean, warm, and professional, utilizing the Sage and Stone palette of muted greens and earthy browns to evoke reliability and academic wisdom." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdeNo8Wwod3UBFUvEha_ywMMvZPSX3eDZpUzoM05wsVazTtg4BAzll2Gqt8MMPBkQGYo4xlNjJf1AvihMu2P9iwp_3NeUJn4DwC4t955G-6jsUfYCrWZrTEFHSe4jm0rozdr9ARlrLzllkP06AivZMSJ-nRTqzBav91uHpZYzU_4nGK-Wh_iBkB9nd-lHFBbmPhYClK6YOGNem-ggXeNREa7oO7jGuq2CYAY3Hs2z1vmpbB9_jfwzCyF0Wn42_mKKxspoOZLTWjGI">
+</div>
+</div>
+</header>
+<!-- NavigationDrawer -->
+
+<!-- Main Content -->
+<main class="pt-20 pb-16 px-4 md:px-8 min-h-screen pb-24">
+<!-- Search & Filter Header -->
+<div class="max-w-6xl mx-auto mb-8">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+<div>
+<h2 class="font-headline text-headline-md md:text-headline-lg text-on-surface mb-1 md:mb-2">Request Management Queue</h2>
+<p class="font-body text-body-md text-on-surface opacity-80">Browse and manage pending survey authorization requests.</p>
+</div>
+<!-- Search Bar -->
+<div class="relative w-full md:w-80 lg:w-96">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2.5 bg-surface-container border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none font-body text-body-md" placeholder="Search by ID, District..." type="text">
+</div>
+</div>
+<!-- Filter Chips -->
+<div class="mt-8 flex flex-wrap gap-2 md:gap-3 border-b border-outline-variant pb-6 overflow-x-auto no-scrollbar">
+<button class="active-chip whitespace-nowrap px-4 md:px-5 py-2 rounded-full font-label font-semibold text-label-md transition-all shadow-sm ring-2 ring-primary ring-offset-2">All</button>
+<button class="bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest whitespace-nowrap px-4 md:px-5 py-2 rounded-full font-label font-semibold text-label-md transition-all">Pending</button>
+<button class="bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest whitespace-nowrap px-4 md:px-5 py-2 rounded-full font-label font-semibold text-label-md transition-all">Reviewing</button>
+<button class="bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest whitespace-nowrap px-4 md:px-5 py-2 rounded-full font-label font-semibold text-label-md transition-all">Completed</button>
+</div>
+</div>
+<!-- Request Queue Grid -->
+<div class="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+<!-- Request Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 md:p-6 hover:shadow-lg transition-shadow group flex flex-col justify-between min-h-[260px]">
+<div>
+<div class="flex justify-between items-start mb-4">
+<div class="bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-full text-xs font-bold font-label">PENDING</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+<h3 class="text-on-surface font-headline font-semibold text-xl mb-1 tracking-tight">SRV-2024-001</h3>
+<div class="space-y-3 mt-4">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-sm shrink-0" data-icon="location_on">location_on</span>
+<span class="font-body text-body-md md:text-body-lg">Ludhiana, Punjab</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-sm shrink-0" data-icon="calendar_today">calendar_today</span>
+<span class="font-body text-body-md md:text-body-lg">Oct 12, 2023</span>
+</div>
+</div>
+</div>
+<div class="mt-6 flex items-center justify-between">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-primary-fixed flex items-center justify-center text-[10px] font-bold">JD</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-secondary-fixed flex items-center justify-center text-[10px] font-bold">AS</div>
+</div>
+<button class="text-primary font-label font-semibold text-label-md hover:underline flex items-center gap-1">
+                        View <span class="hidden xs:inline">Details</span> <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Request Card 2 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 md:p-6 hover:shadow-lg transition-shadow group flex flex-col justify-between min-h-[260px]">
+<div>
+<div class="flex justify-between items-start mb-4">
+<div class="bg-primary-container text-on-primary-container px-3 py-1 rounded-full text-xs font-bold font-label">REVIEWING</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+<h3 class="text-on-surface font-headline font-semibold text-xl mb-1 tracking-tight">SRV-2024-004</h3>
+<div class="space-y-3 mt-4">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-sm shrink-0" data-icon="location_on">location_on</span>
+<span class="font-body text-body-md md:text-body-lg">Amritsar, Punjab</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-sm shrink-0" data-icon="calendar_today">calendar_today</span>
+<span class="font-body text-body-md md:text-body-lg">Oct 14, 2023</span>
+</div>
+</div>
+</div>
+<div class="mt-6 flex items-center justify-between">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-tertiary-fixed flex items-center justify-center text-[10px] font-bold">MK</div>
+</div>
+<button class="text-primary font-label font-semibold text-label-md hover:underline flex items-center gap-1">
+                        View <span class="hidden xs:inline">Details</span> <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Request Card 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 md:p-6 hover:shadow-lg transition-shadow group flex flex-col justify-between min-h-[260px]">
+<div>
+<div class="flex justify-between items-start mb-4">
+<div class="bg-tertiary-container text-on-tertiary-container px-3 py-1 rounded-full text-xs font-bold font-label">PENDING</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+<h3 class="text-on-surface font-headline font-semibold text-xl mb-1 tracking-tight">SRV-2024-007</h3>
+<div class="space-y-3 mt-4">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-sm shrink-0" data-icon="location_on">location_on</span>
+<span class="font-body text-body-md md:text-body-lg">Jalandhar, Punjab</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-sm shrink-0" data-icon="calendar_today">calendar_today</span>
+<span class="font-body text-body-md md:text-body-lg">Oct 15, 2023</span>
+</div>
+</div>
+</div>
+<div class="mt-6 flex items-center justify-between">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-secondary-fixed flex items-center justify-center text-[10px] font-bold">RB</div>
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-primary-fixed flex items-center justify-center text-[10px] font-bold">TP</div>
+</div>
+<button class="text-primary font-label font-semibold text-label-md hover:underline flex items-center gap-1">
+                        View <span class="hidden xs:inline">Details</span> <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Request Card 4 -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-5 md:p-6 hover:shadow-lg transition-shadow group flex flex-col justify-between min-h-[260px]">
+<div>
+<div class="flex justify-between items-start mb-4">
+<div class="bg-surface-container-highest px-3 py-1 rounded-full text-xs font-bold font-label">COMPLETED</div>
+<span class="material-symbols-outlined text-outline group-hover:text-primary transition-colors cursor-pointer" data-icon="more_vert">more_vert</span>
+</div>
+<h3 class="text-on-surface font-headline font-semibold text-xl mb-1 tracking-tight">SRV-2023-992</h3>
+<div class="space-y-3 mt-4">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-sm shrink-0" data-icon="location_on">location_on</span>
+<span class="font-body text-body-md md:text-body-lg">Patiala, Punjab</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-sm shrink-0" data-icon="calendar_today">calendar_today</span>
+<span class="font-body text-body-md md:text-body-lg">Oct 01, 2023</span>
+</div>
+</div>
+</div>
+<div class="mt-6 flex items-center justify-between">
+<div class="flex -space-x-2">
+<div class="w-8 h-8 rounded-full border-2 border-surface bg-outline-variant flex items-center justify-center text-[10px] font-bold text-white">SA</div>
+</div>
+<button class="text-primary font-label font-semibold text-label-md hover:underline flex items-center gap-1">
+                        View <span class="hidden xs:inline">Details</span> <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Empty State / Add Suggestion Card -->
+<div class="border-2 border-dashed border-outline-variant rounded-xl flex flex-col items-center justify-center p-6 text-center bg-surface-container-low opacity-60 hover:opacity-100 transition-opacity cursor-pointer min-h-[260px]">
+<span class="material-symbols-outlined text-4xl text-outline-variant mb-3" data-icon="add_circle">add_circle</span>
+<p class="font-headline font-semibold">New Request Entry</p>
+<p class="font-label text-label-md text-outline-variant">Manual submission for walk-in surveys</p>
+</div>
+</div>
+</main>
+<!-- Footer -->
+
+<script>
+        // Drawer Logic
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeDrawer = document.getElementById('close-drawer');
+        const mobileDrawer = document.getElementById('mobile-drawer');
+        const drawerOverlay = document.getElementById('drawer-overlay');
+
+        function toggleDrawer() {
+            mobileDrawer.classList.toggle('-translate-x-full');
+            drawerOverlay.classList.toggle('hidden');
+            document.body.classList.toggle('overflow-hidden');
+        }
+
+        menuToggle.addEventListener('click', toggleDrawer);
+        closeDrawer.addEventListener('click', toggleDrawer);
+        drawerOverlay.addEventListener('click', toggleDrawer);
+
+        // Micro-interactions for Filter Chips
+        document.querySelectorAll('button').forEach(button => {
+            if (button.classList.contains('font-label') && !button.id) {
+                button.addEventListener('click', function() {
+                    const parent = button.parentElement;
+                    if (parent) {
+                        const chips = parent.querySelectorAll('button');
+                        chips.forEach(chip => {
+                            chip.classList.remove('active-chip', 'ring-2', 'ring-primary', 'ring-offset-2');
+                            chip.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+                        });
+                        this.classList.add('active-chip', 'ring-2', 'ring-primary', 'ring-offset-2');
+                        this.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
+                    }
+                });
+            }
+        });
+
+        // Search Input Focus Effect
+        const searchInput = document.querySelector('input[type="text"]');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('ring-2', 'ring-primary/20');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('ring-2', 'ring-primary/20');
+        });
+    </script>
+
+
+
+
+<nav class="fixed bottom-0 left-0 right-0 bg-surface-container-low border-t border-outline-variant flex justify-around items-center py-2 px-4 z-[60]">
+  <a href="#" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
+    <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+    <span class="text-[10px] font-label font-semibold">Overview</span>
+  </a>
+  <a href="#" class="flex flex-col items-center gap-1 bg-primary-container text-on-primary-container px-6 py-1 rounded-full transition-all">
+    <span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+    <span class="text-[10px] font-label font-semibold">Queue</span>
+  </a>
+  <a href="#" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
+    <span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+    <span class="text-[10px] font-label font-semibold">Details</span>
+  </a>
+  <a href="#" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
+    <span class="material-symbols-outlined" data-icon="fact_check">fact_check</span>
+    <span class="text-[10px] font-label font-semibold">Decisions</span>
+  </a>
+</nav>
+
+</body></html>

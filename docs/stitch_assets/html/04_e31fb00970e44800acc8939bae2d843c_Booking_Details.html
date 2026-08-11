@@ -1,0 +1,278 @@
+<!DOCTYPE html><html class="h-full" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Booking Details - Sage &amp; Stone</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c1c9bf",
+                        "surface-bright": "#f7faf4",
+                        "surface-container": "#ecefe9",
+                        "surface-container-highest": "#e0e3de",
+                        "secondary-container": "#e9ded0",
+                        "on-surface-variant": "#414942",
+                        "on-primary-container": "#e1ffe5",
+                        "secondary-fixed": "#ece1d3",
+                        "on-secondary-fixed-variant": "#4d463c",
+                        "surface-dim": "#d8dbd5",
+                        "primary-container": "#4a7c59",
+                        "on-primary-fixed-variant": "#1e5031",
+                        "on-background": "#191d19",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#9dd3aa",
+                        "tertiary-fixed-dim": "#e2c284",
+                        "surface": "#f7faf4",
+                        "tertiary": "#6d5622",
+                        "surface-variant": "#e0e3de",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#376847",
+                        "inverse-primary": "#9dd3aa",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "secondary-fixed-dim": "#d0c5b8",
+                        "on-error-container": "#93000a",
+                        "outline": "#717971",
+                        "tertiary-fixed": "#ffdea0",
+                        "on-primary-fixed": "#00210e",
+                        "on-secondary-container": "#696156",
+                        "surface-container-low": "#f1f5ef",
+                        "on-secondary-fixed": "#201b12",
+                        "on-tertiary-fixed-variant": "#594311",
+                        "inverse-surface": "#2d312e",
+                        "error-container": "#ffdad6",
+                        "on-surface": "#191d19",
+                        "on-secondary": "#ffffff",
+                        "secondary": "#655d52",
+                        "primary-fixed": "#b9efc5",
+                        "tertiary-container": "#886e38",
+                        "surface-container-high": "#e6e9e3",
+                        "on-tertiary-container": "#fff6ed",
+                        "background": "#f7faf4",
+                        "primary": "#316342",
+                        "inverse-on-surface": "#eff2ec",
+                        "on-tertiary-fixed": "#261a00",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "lg": "24px",
+                        "margin-desktop": "32px",
+                        "gutter": "16px",
+                        "margin-mobile": "16px",
+                        "base": "8px",
+                        "xl": "48px",
+                        "md": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Literata"],
+                        "headline-lg": ["Literata"],
+                        "body-lg": ["Nunito Sans"],
+                        "label-md": ["Nunito Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,600;7..72,700&amp;family=Nunito+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background h-full font-body-lg antialiased">
+<!-- Shell suppressed because this is a sub-page/transactional (Booking Details with a Back button) -->
+<div class="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop py-lg">
+<!-- Header -->
+<header class="flex items-center gap-gutter mb-lg">
+<button aria-label="Go Back" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-lg text-headline-lg text-on-background">Booking Details</h1>
+</header>
+<!-- Main Content Canvas -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Left Column: Primary Details -->
+<div class="md:col-span-2 space-y-gutter">
+<!-- Summary Card -->
+<section class="bg-surface-container-low rounded-xl p-lg border border-outline-variant/30 shadow-sm">
+<div class="flex justify-between items-start mb-md">
+<div>
+<p class="font-label-md text-label-md text-primary font-semibold tracking-wider">SRV-2024-001</p>
+<h2 class="font-headline-md text-headline-md text-on-surface mt-xs">Socio Economic Survey</h2>
+</div>
+<div class="bg-tertiary-fixed text-on-tertiary-fixed px-3 py-1 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span class="font-label-md text-label-md">Upcoming</span>
+</div>
+</div>
+<!-- Progress Tracker -->
+<div class="mt-lg">
+    <div class="relative flex items-center justify-between">
+        <!-- Progress Line Background -->
+        <div class="absolute top-4 left-0 w-full h-0.5 bg-surface-variant/50 z-0"></div>
+        <!-- Active Progress Line -->
+        <div class="absolute top-4 left-0 w-2/3 h-0.5 bg-primary z-0"></div>
+
+        <!-- Step 1: Requested (Completed) -->
+        <div class="relative z-10 flex flex-col items-center gap-2 flex-1">
+            <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">check</span>
+            </div>
+            <div class="text-center">
+                <p class="font-label-md text-label-md text-on-surface font-semibold">Requested</p>
+                <p class="text-[10px] text-on-surface-variant leading-tight">Oct 01, 2024</p>
+            </div>
+        </div>
+
+        <!-- Step 2: Reviewed (Completed) -->
+        <div class="relative z-10 flex flex-col items-center gap-2 flex-1">
+            <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm">
+                <span class="material-symbols-outlined text-[18px]">check</span>
+            </div>
+            <div class="text-center">
+                <p class="font-label-md text-label-md text-on-surface font-semibold">Reviewed</p>
+                <p class="text-[10px] text-on-surface-variant leading-tight">Oct 05, 2024</p>
+            </div>
+        </div>
+
+        <!-- Step 3: Scheduled (Active) -->
+        <div class="relative z-10 flex flex-col items-center gap-2 flex-1">
+            <div class="w-8 h-8 rounded-full bg-surface-bright border-2 border-primary flex items-center justify-center shadow-md ring-4 ring-primary/10">
+                <div class="w-3 h-3 rounded-full bg-primary"></div>
+            </div>
+            <div class="text-center">
+                <p class="font-label-md text-label-md text-primary font-bold">Scheduled</p>
+                <p class="text-[10px] text-primary/80 leading-tight">Oct 15, 2024</p>
+            </div>
+        </div>
+
+        <!-- Step 4: Completed (Pending) -->
+        <div class="relative z-10 flex flex-col items-center gap-2 flex-1">
+            <div class="w-8 h-8 rounded-full bg-surface-variant/50 text-on-surface-variant/40 flex items-center justify-center">
+                <span class="material-symbols-outlined text-[18px]">flag</span>
+            </div>
+            <div class="text-center">
+                <p class="font-label-md text-label-md text-on-surface-variant/60">Completed</p>
+                <p class="text-[10px] text-on-surface-variant/40 leading-tight">Pending</p>
+            </div>
+        </div>
+    </div>
+</div>
+</section>
+<!-- Location Details Card -->
+<section class="bg-surface-container-lowest rounded-xl p-lg border border-surface-variant shadow-sm flex flex-col md:flex-row gap-lg">
+<div class="flex-1">
+<div class="flex items-center gap-sm mb-md text-on-surface">
+<span class="material-symbols-outlined text-primary">location_on</span>
+<h3 class="font-headline-md text-[20px] font-semibold">Location &amp; Area</h3>
+</div>
+<ul class="space-y-md">
+<li class="">
+<p class="font-label-md text-label-md text-on-surface-variant">District</p>
+<p class="font-body-lg text-body-lg text-on-surface">Okanagan Valley District</p>
+</li>
+<li class="">
+<p class="font-label-md text-label-md text-on-surface-variant">Area Name</p>
+<p class="font-body-lg text-body-lg text-on-surface">Sector 4, North Rim</p>
+</li>
+</ul>
+<button class="mt-lg flex items-center gap-2 text-primary hover:bg-surface-container-low px-4 py-2 rounded-lg transition-colors border border-primary/20">
+<span class="material-symbols-outlined">map</span>
+<span class="font-label-md text-label-md">View KML Data</span>
+</button>
+</div>
+<!-- Map Graphic -->
+
+</section>
+</div>
+<!-- Right Column: Sidebar Details -->
+<div class="space-y-gutter">
+<!-- Timeline Card -->
+<section class="bg-surface-container rounded-xl p-lg shadow-sm border border-outline-variant/20">
+<div class="flex items-center gap-sm mb-md text-on-surface">
+<span class="material-symbols-outlined text-tertiary">schedule</span>
+<h3 class="font-headline-md text-[20px] font-semibold">Timeline</h3>
+</div>
+<div class="space-y-md">
+<div class="bg-surface-bright p-sm rounded-lg border border-surface-variant">
+<p class="font-label-md text-label-md text-on-surface-variant">Scheduled Date</p>
+<p class="font-body-lg text-body-lg text-on-surface font-medium mt-1">Oct 15, 2024</p>
+<p class="font-body-lg text-body-lg text-on-surface-variant">09:00 AM</p>
+</div>
+<div class="bg-surface-bright p-sm rounded-lg border border-surface-variant">
+<p class="font-label-md text-label-md text-on-surface-variant">Est. Duration</p>
+<p class="font-body-lg text-body-lg text-on-surface mt-1">4 Hours</p>
+</div>
+</div>
+</section>
+<!-- Personnel Card -->
+<section class="bg-secondary-container/30 rounded-xl p-lg shadow-sm border border-secondary-fixed">
+<div class="flex items-center gap-sm mb-md text-on-surface">
+<span class="material-symbols-outlined text-secondary">group</span>
+<h3 class="font-headline-md text-[20px] font-semibold">Assigned Personnel</h3>
+</div>
+<div class="space-y-md">
+<div class="flex items-center gap-md bg-surface-bright p-sm rounded-lg border border-surface-variant">
+
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant">Official (XEN)</p>
+<p class="font-body-lg text-body-lg font-semibold text-on-surface">David Chen</p>
+</div>
+</div>
+
+</div>
+</section>
+<!-- Actions -->
+<section class="flex flex-col gap-sm pt-md">
+<button class="w-full bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container transition-colors font-label-md text-label-md py-3 rounded-lg shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">event_repeat</span>
+                        Reschedule
+                    </button>
+<button class="w-full bg-surface-container-high text-on-surface hover:bg-surface-variant transition-colors font-label-md text-label-md py-3 rounded-lg border border-outline-variant flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">support_agent</span>
+                        Contact Support
+                    </button>
+</section>
+</div>
+</div>
+</div>
+
+
+
+
+</body></html>

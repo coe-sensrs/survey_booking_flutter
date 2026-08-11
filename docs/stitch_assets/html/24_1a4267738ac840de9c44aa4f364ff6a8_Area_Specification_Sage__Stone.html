@@ -1,0 +1,170 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>GovSurvey - Area Specification</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,600;0,700;1,400&amp;family=Nunito+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"secondary-fixed-dim": "#d0c5b8", "secondary-container": "#e9ded0", "on-background": "#191d19", "tertiary-fixed-dim": "#e2c284", surface: "#f7faf4", "on-primary": "#ffffff", "primary-dim": "#2b5d3c", "surface-container-high": "#e6e9e3", "on-tertiary-container": "#fff6ed", background: "#f7faf4", "inverse-primary": "#9dd3aa", "primary-container": "#4a7c59", tertiary: "#6d5622", "surface-dim": "#d8dbd5", "primary-fixed-dim": "#9dd3aa", "tertiary-fixed": "#ffdea0", "on-secondary": "#ffffff", error: "#ba1a1a", "on-surface-variant": "#414942", "on-secondary-fixed-variant": "#4d463c", "on-secondary-fixed": "#201b12", outline: "#717971", "surface-container": "#ecefe9", "on-tertiary-fixed": "#261a00", "on-tertiary": "#ffffff", "on-surface": "#191d19", secondary: "#655d52", "tertiary-dim": "#67501c", "surface-container-highest": "#e0e3de", "on-tertiary-fixed-variant": "#594311", "surface-container-lowest": "#ffffff", "secondary-fixed": "#ece1d3", "inverse-surface": "#2d312e", "on-secondary-container": "#696156", "error-dim": "#67040d", "error-container": "#ffdad6", "tertiary-container": "#886e38", "on-error-container": "#93000a", "on-primary-fixed": "#00210e", "on-primary-container": "#e1ffe5", "surface-variant": "#e0e3de", "primary-fixed": "#b9efc5", "on-primary-fixed-variant": "#1e5031", primary: "#316342", brand: "#4a7c59", "inverse-on-surface": "#eff2ec", "surface-tint": "#376847", "outline-variant": "#c1c9bf", "on-error": "#ffffff", "surface-container-low": "#f1f5ef", "secondary-dim": "#595248", "surface-bright": "#f7faf4"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Literata"], display: ["Literata"], body: ["Nunito Sans"], label: ["Nunito Sans"]}, fontSize: {}}}};</script>
+<style>
+        body {
+            font-family: 'Nunito Sans', sans-serif;
+            min-height: max(884px, 100dvh);
+        }
+        h1, h2, h3, .font-headline {
+            font-family: 'Literata', serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-surface border-b border-outline-variant fixed top-0 w-full z-50">
+<div class="flex items-center justify-between px-6 w-full h-16 max-w-7xl mx-auto">
+<div class="flex items-center gap-2 cursor-pointer active:opacity-80">
+
+<span class="font-headline text-xl font-bold text-primary">Survey Booking</span>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 py-1 rounded font-label" href="#">Dashboard</a>
+<a class="text-on-surface-variant hover:bg-surface-container-low transition-colors px-2 py-1 rounded font-label" href="#">Surveys</a>
+<a class="text-primary font-semibold font-label" href="#">New Request</a>
+</nav>
+</div>
+</header>
+<main class="flex-grow pt-24 pb-32 px-6 max-w-7xl mx-auto w-full">
+<!-- Progress Stepper -->
+<div class="mb-12 max-w-4xl mx-auto overflow-x-auto">
+<div class="flex items-center justify-between min-w-[700px] border-b border-outline-variant pb-4">
+<div class="flex items-center gap-2 text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label text-sm">1. Project Init</span>
+</div>
+<div class="h-[1px] w-6 bg-outline-variant"></div>
+<div class="flex items-center gap-2 text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label text-sm">2. Site Details</span>
+</div>
+<div class="h-[1px] w-6 bg-outline-variant"></div>
+<div class="flex items-center gap-2 text-on-surface-variant opacity-60">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-label text-sm">3. Parameters</span>
+</div>
+<div class="h-[1px] w-6 bg-outline-variant"></div>
+<div class="flex items-center gap-2 text-primary border-b-2 border-primary pb-4 relative -bottom-4">
+<span class="font-label text-sm font-bold">4. Area Specification</span>
+</div>
+<div class="h-[1px] w-6 bg-outline-variant"></div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="font-label text-sm">5. Review</span>
+</div>
+<div class="h-[1px] w-6 bg-outline-variant"></div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="font-label text-sm">6. Submit</span>
+</div>
+</div>
+</div>
+<!-- Content Canvas -->
+<div class="max-w-2xl mx-auto">
+<div class="mb-8">
+<h1 class="text-3xl font-bold text-primary mb-2">Define Survey Area</h1>
+<p class="font-body text-on-surface-variant">Provide a descriptive name and technical spatial data for the target zone.</p>
+</div>
+<!-- Form Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-lg p-8 shadow-sm">
+<form class="space-y-6">
+<!-- Area Name -->
+<div class="space-y-2">
+<label class="block font-label text-sm font-bold text-on-surface" for="area-name">Name of Area</label>
+<input class="w-full h-12 px-4 border border-outline rounded focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-surface-container-low transition-all font-body" id="area-name" placeholder="e.g. Northern Industrial Sector 4" type="text">
+</div>
+<!-- KML Upload Area -->
+<div class="space-y-2">
+<label class="block font-label text-sm font-bold text-on-surface">KML of the Area</label>
+<div class="border-2 border-dashed border-outline-variant rounded-lg p-10 flex flex-col items-center justify-center gap-4 hover:bg-surface-container-low hover:border-brand transition-all cursor-pointer group" id="drop-zone">
+<div class="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center text-primary group-hover:scale-110 duration-300">
+<span class="material-symbols-outlined text-[32px]" data-icon="layers">layers</span>
+</div>
+<div class="text-center">
+<p class="font-headline text-lg text-primary mb-1">Upload KML File</p>
+<p class="font-body text-sm text-on-surface-variant">Drag and drop or <span class="text-brand underline font-semibold">browse files</span></p>
+</div>
+<p class="text-xs text-outline">Maximum file size: 25MB (.kml, .kmz)</p>
+<input accept=".kml,.kmz" class="hidden" id="kml-upload" type="file">
+</div>
+</div>
+<!-- Informational Alert -->
+
+</form>
+</div>
+<!-- Area Preview Concept -->
+<div class="mt-8 border border-outline-variant rounded-lg overflow-hidden relative group">
+
+<div class="absolute inset-0 bg-gradient-to-t from-primary/70 to-transparent flex flex-col justify-end p-4">
+<p class="text-white font-label text-sm">Live Preview will appear here after upload</p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-between items-center px-6 py-4 bg-surface border-t border-outline-variant">
+<button class="flex items-center gap-2 border-2 border-primary text-primary rounded-lg px-6 py-2.5 hover:bg-primary/5 active:scale-95 duration-150 transition-all font-label font-bold" onclick="history.back()">
+<span class="material-symbols-outlined text-lg" data-icon="arrow_back">arrow_back</span>
+<span class="">Back</span>
+</button>
+<button class="flex items-center gap-2 bg-brand text-on-primary rounded-lg px-8 py-2.5 hover:opacity-90 active:scale-95 duration-150 transition-all shadow-md font-label font-bold" onclick="window.location.href='#next'">
+<span class="">Next</span>
+<span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</nav>
+<script>
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('kml-upload');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('bg-surface-container-high', 'border-brand');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('bg-surface-container-high', 'border-brand');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('bg-surface-container-high', 'border-brand');
+            const files = e.dataTransfer.files;
+            if (files.length) {
+                handleFileUpload(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleFileUpload(e.target.files[0]);
+            }
+        });
+
+        function handleFileUpload(file) {
+            const textEl = dropZone.querySelector('.text-center p:first-child');
+            textEl.textContent = `File Ready: ${file.name}`;
+            textEl.classList.add('text-brand');
+            dropZone.classList.add('bg-primary-container/10', 'border-brand');
+        }
+    </script>
+
+
+
+
+</body></html>

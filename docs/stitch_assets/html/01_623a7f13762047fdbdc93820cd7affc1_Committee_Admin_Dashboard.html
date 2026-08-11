@@ -1,0 +1,328 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sage &amp; Stone Admin Dashboard</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600;7..72,700&amp;family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet">
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"inverse-primary": "#9dd3aa", "surface-tint": "#376847", "error-container": "#ffdad6", "primary-container": "#4a7c59", secondary: "#655d52", "tertiary-container": "#886e38", "secondary-dim": "#595248", "primary-fixed": "#b9efc5", "surface-container-lowest": "#ffffff", "inverse-surface": "#2d312e", "on-primary-fixed-variant": "#1e5031", "on-secondary-fixed-variant": "#4d463c", "on-surface-variant": "#414942", "surface-container-high": "#e6e9e3", tertiary: "#6d5622", "on-tertiary-fixed-variant": "#594311", "tertiary-dim": "#67501c", "primary-dim": "#2b5d3c", "surface-dim": "#d8dbd5", "on-error": "#ffffff", "error-dim": "#67040d", outline: "#717971", "secondary-fixed": "#ece1d3", "secondary-container": "#e9ded0", "surface-variant": "#e0e3de", "on-tertiary": "#ffffff", surface: "#f7faf4", "surface-container": "#ecefe9", "surface-bright": "#f7faf4", primary: "#316342", error: "#ba1a1a", "on-tertiary-container": "#fff6ed", "inverse-on-surface": "#eff2ec", "on-primary-fixed": "#00210e", "outline-variant": "#c1c9bf", "secondary-fixed-dim": "#d0c5b8", "tertiary-fixed-dim": "#e2c284", "on-primary": "#ffffff", "on-secondary-container": "#696156", "on-tertiary-fixed": "#261a00", "on-primary-container": "#e1ffe5", "tertiary-fixed": "#ffdea0", "surface-container-highest": "#e0e3de", "on-secondary": "#ffffff", "primary-fixed-dim": "#9dd3aa", "on-background": "#191d19", "on-error-container": "#93000a", "surface-container-low": "#f1f5ef", "on-surface": "#191d19", "on-secondary-fixed": "#201b12", background: "#f7faf4"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, spacing: {"margin-desktop": "32px", "margin-mobile": "16px"}, fontFamily: {headline: ["Literata"], display: ["Literata"], body: ["Nunito Sans"], label: ["Nunito Sans"]}, fontSize: {}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .font-headline { font-family: 'Literata', serif; }
+        .font-body { font-family: 'Nunito Sans', sans-serif; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #abb4ac; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #747d75; }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 24px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="bg-surface-container-high dark:bg-surface-container-highest flex justify-between items-center w-full px-margin-desktop z-40 fixed top-0 h-16">
+<div class="flex items-center gap-4">
+
+<h1 class="font-headline text-headline-md font-bold text-primary dark:text-inverse-primary">Admin</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center bg-surface-container p-1 px-3 rounded-full border border-outline-variant">
+<span class="material-symbols-outlined text-on-surface-variant text-sm mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm w-48 placeholder-on-surface-variant" placeholder="Search tasks..." type="text">
+</div>
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold overflow-hidden ring-2 ring-primary">
+<img alt="Admin Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_6U_BBy-PBXeIYbMa4acdHXgtbIqcO8TyyA2f-MWcQCcwvw6UiUo-VsPOzmmQPwMP8u1eBJ5VWfalzGX9DZAXvgkjovAmC9Raq5DB_f6ht-nIllzD7xxCzbUrawDk8t9xBr34TaiMCGY_itHJgEezi41wq_MkJxxp5nbbSO8k3YdHa3cut4kdYZmLB-FS4qxBQXoQBEEXzagtlckyExrw34ACvLm-pds7hr-4BMA7bZIl7D4fdo7DPa4EEDILrro5o5_MV8Vc_S8">
+</div>
+</div>
+</header>
+<div class="flex pt-16 min-h-screen">
+<!-- NavigationDrawer -->
+<aside class="hidden md:flex flex-col h-[calc(100vh-64px)] w-64 fixed left-0 top-16 bg-surface-container-low dark:bg-surface-dim py-6 transition-all duration-300">
+<div class="px-6 mb-8">
+<h2 class="font-headline text-lg font-semibold text-primary">Survey Management</h2>
+</div>
+<nav class="flex-grow space-y-1">
+<!-- Dashboard Active -->
+<a class="bg-primary-container text-on-primary-container dark:bg-primary-fixed-dim dark:text-on-primary-fixed-variant rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 transition-all duration-200 Active:scale-95" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="text-body-lg">Dashboard</span>
+</a>
+<a class="text-secondary dark:text-secondary-fixed-dim rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-secondary-container dark:hover:bg-secondary-dim transition-all Active:scale-95" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-body-lg">Committee Members</span>
+</a>
+<a class="text-secondary dark:text-secondary-fixed-dim rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-secondary-container dark:hover:bg-secondary-dim transition-all Active:scale-95" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="text-body-lg">Survey Tasks</span>
+</a>
+<a class="text-secondary dark:text-secondary-fixed-dim rounded-lg mx-2 my-1 px-4 py-3 flex items-center gap-3 hover:bg-secondary-container dark:hover:bg-secondary-dim transition-all Active:scale-95" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-body-lg">System Settings</span>
+</a>
+</nav>
+<div class="mt-auto px-6 py-4">
+<div class="bg-tertiary-container rounded-lg p-4 text-on-tertiary-container text-sm">
+<p class="font-bold flex items-center gap-2"><span class="material-symbols-outlined text-sm">info</span> System Status</p>
+<p class="mt-1 opacity-90">All systems operational. Next sync in 12m.</p>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-grow ml-0 md:ml-64 p-6 lg:p-margin-desktop bg-surface transition-all duration-300 pb-24">
+<div class="max-w-7xl mx-auto space-y-8">
+<!-- Header & Greetings -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<p class="text-secondary font-semibold uppercase tracking-wider text-xs mb-1">Administrative Overview</p>
+<h2 class="font-headline text-headline-lg text-on-surface">Committee Dashboard</h2>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-surface-container-high text-on-surface px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 hover:bg-surface-container-highest transition-all">
+<span class="material-symbols-outlined">file_download</span>
+                            Export Report
+                        </button>
+<button class="bg-primary text-on-primary px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 shadow-sm hover:opacity-90 transition-all">
+<span class="material-symbols-outlined">sync</span>
+                            Refresh Data
+                        </button>
+</div>
+</div>
+<!-- Bento Grid Layout for Metrics & Actions -->
+<div class="bento-grid">
+<!-- Metrics Card: Total Members -->
+<div class="col-span-12 md:col-span-6 lg:col-span-3 bg-surface-container-low rounded-xl p-6 border border-outline-variant hover:border-primary transition-all group">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-container text-on-primary-container rounded-lg">
+<span class="material-symbols-outlined">group</span>
+</div>
+<span class="text-primary text-sm font-bold bg-primary-container/50 px-2 py-0.5 rounded-full">+4%</span>
+</div>
+<h3 class="text-on-surface-variant font-semibold text-sm">Total Committee Members</h3>
+<p class="font-headline text-3xl font-bold text-on-surface mt-1">128</p>
+<div class="mt-4 flex items-center gap-4 text-xs">
+<span class="flex items-center gap-1 text-on-surface"><span class="w-2 h-2 rounded-full bg-primary"></span> 112 Active</span>
+<span class="flex items-center gap-1 text-on-surface-variant"><span class="w-2 h-2 rounded-full bg-outline"></span> 16 Inactive</span>
+</div>
+</div>
+<!-- Metrics Card: Pending Assignments -->
+<div class="col-span-12 md:col-span-6 lg:col-span-3 bg-surface-container-low rounded-xl p-6 border border-outline-variant hover:border-tertiary transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-tertiary-container text-on-tertiary-container rounded-lg">
+<span class="material-symbols-outlined">pending_actions</span>
+</div>
+<span class="text-tertiary text-sm font-bold bg-tertiary-container/50 px-2 py-0.5 rounded-full">High</span>
+</div>
+<h3 class="text-on-surface-variant font-semibold text-sm">Pending Assignments</h3>
+<p class="font-headline text-3xl font-bold text-on-surface mt-1">24</p>
+<div class="mt-4 w-full bg-surface-container-highest rounded-full h-1.5 overflow-hidden">
+<div class="bg-tertiary h-full w-[65%]"></div>
+</div>
+</div>
+<!-- Metrics Card: Turnaround -->
+<div class="col-span-12 md:col-span-6 lg:col-span-3 bg-surface-container-low rounded-xl p-6 border border-outline-variant hover:border-secondary transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-secondary-container text-on-secondary-container rounded-lg">
+<span class="material-symbols-outlined">timer</span>
+</div>
+<span class="text-secondary text-sm font-bold bg-secondary-container/50 px-2 py-0.5 rounded-full">-2d</span>
+</div>
+<h3 class="text-on-surface-variant font-semibold text-sm">Avg. Decision Turnaround</h3>
+<p class="font-headline text-3xl font-bold text-on-surface mt-1">4.2 Days</p>
+<p class="mt-4 text-xs text-on-surface-variant">Improving trend vs previous month</p>
+</div>
+<!-- Quick Actions Section -->
+<div class="col-span-12 md:col-span-6 lg:col-span-3 bg-primary rounded-xl p-6 text-on-primary shadow-lg flex flex-col justify-between">
+<div>
+<h3 class="font-headline text-lg font-bold">Quick Actions</h3>
+<p class="text-on-primary/80 text-sm mt-1">Manage committee flow</p>
+</div>
+<div class="space-y-2 mt-6">
+<button class="w-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-on-primary py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all">
+<span class="material-symbols-outlined text-lg">person_add</span>
+                                Add New Member
+                            </button>
+<button class="w-full bg-white text-primary py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-all">
+<span class="material-symbols-outlined text-lg">add_task</span>
+                                Assign Task
+                            </button>
+</div>
+</div>
+<!-- Large Table/List: Recently Active Members -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<div class="p-6 border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-headline text-headline-md font-semibold text-on-surface">Recently Active Members</h3>
+<a class="text-primary text-sm font-bold hover:underline" href="#">View All</a>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-surface-container text-on-surface-variant text-xs uppercase tracking-wider">
+<tr>
+<th class="px-6 py-4 font-semibold">Member</th>
+<th class="px-6 py-4 font-semibold">Status</th>
+<th class="px-6 py-4 font-semibold">Current Workload</th>
+<th class="px-6 py-4 font-semibold">Last Action</th>
+<th class="px-6 py-4 font-semibold"></th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Member" class="w-8 h-8 rounded-full bg-secondary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeuSj7OYMSZXIOA53TJpoXJQolSD0d1TVqIMsGJiVpOIisMRxSv-SwUdqNAjrFhU_Cd2vpX4Bvrv5jy0Ow6XnXgT3dyWPbuhe917MBcWK0ho9k_MOnOi9PrpVjHDkXM8EP9dG0PiKg36cO_4xhZE0xyAoXaiKJjxTrz4qhFshCrTJD5bdTPjUyQo4qdZEANcu7dR6kDG3Y48Tw4vE1iN0zVVtlC_0AKmtQSpy0GWRKBrWMio53xQE_F3ds9frEpsNQceWdDwryKRg">
+<div>
+<p class="font-bold text-sm">Dr. Eleanor Vance</p>
+<p class="text-xs text-on-surface-variant">Senior Reviewer</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Online
+                                            </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 bg-surface-container-highest rounded-full h-1">
+<div class="bg-primary h-full w-[80%]"></div>
+</div>
+<span class="text-xs font-semibold">80%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs text-on-surface-variant">Completed Survey #402</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Member" class="w-8 h-8 rounded-full bg-secondary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8T-dDuY6WWjfiezuICXo88vUthgE7ChdSWlfJkoQbc9L9RV5gmXF1yozl-S_Z9MWhXcpHb-fwoXOTKs7OgiRPQcAc0AVT-9w0fHHnnRxA0J4ZS4NHygawWOoemvgliATE9ub0ss_udfMtGoEKrTc1C6009UKzqhvUfwV5BHChNRR5hOpgeogXKeJaFl_2KtqyxgNeEhZyjLh2oNbvuyCLEg0i-SLts3lZH2FkUreHwg5TrLscFdroW9Nh1UvXIi0W1cP7iCjkXeg">
+<div>
+<p class="font-bold text-sm">Julian Blackwood</p>
+<p class="text-xs text-on-surface-variant">Committee Lead</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-[10px] font-bold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span> Away
+                                            </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 bg-surface-container-highest rounded-full h-1">
+<div class="bg-tertiary h-full w-[30%]"></div>
+</div>
+<span class="text-xs font-semibold">30%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs text-on-surface-variant">Approved Task #198</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<img alt="Member" class="w-8 h-8 rounded-full bg-secondary-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDN3Ja4X_lslAh9IqxCmnoI9d9HtbkRcrDvzvuVl5fS_nybli7dqGW1J8yOEveWEG4iQbKWiPYKb2b9q-duuMAVvyjgtpnmMT10etxkbXYEcHqnhLO8PqayghhF3P7NRthym4_IPyz_6LszTTrC_etxmj288wtZmiGktmboX1HkCLcIwFQEqcqEqXIRP94BHazglzpEfbi8rAiNYhihE2zqBN9vHrPz2sgIS5vLByCgpubjam7_0nBe4TMMB9pbRD90VBqmSP5_gJE">
+<div>
+<p class="font-bold text-sm">Sophia Sterling</p>
+<p class="text-xs text-on-surface-variant">Junior Auditor</p>
+</div>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold uppercase">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span> Online
+                                            </span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-16 bg-surface-container-highest rounded-full h-1">
+<div class="bg-primary h-full w-[55%]"></div>
+</div>
+<span class="text-xs font-semibold">55%</span>
+</div>
+</td>
+<td class="px-6 py-4 text-xs text-on-surface-variant">Login from 10.0.1.5</td>
+<td class="px-6 py-4 text-right">
+<button class="material-symbols-outlined text-outline hover:text-primary transition-colors">more_vert</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Right Column: Performance Breakdown (Circular) -->
+<div class="col-span-12 lg:col-span-4 space-y-6">
+
+<!-- Info Card / Spotlight -->
+
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+
+<!-- Script for simple color variables in SVG (Tailwind doesn't easily inject into SVG attributes) -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const rootStyle = getComputedStyle(document.documentElement);
+            const primary = rootStyle.getPropertyValue('--primary').trim() || '#386948';
+            const primaryContainer = rootStyle.getPropertyValue('--primary-container').trim() || '#b9efc5';
+            
+            // Apply colors directly to SVG if standard CSS variables fail
+            document.querySelectorAll('circle').forEach(circle => {
+                if(circle.getAttribute('stroke') === 'var(--primary)') circle.setAttribute('stroke', '#386948');
+                if(circle.getAttribute('stroke') === 'var(--primary-container)') circle.setAttribute('stroke', '#b9efc5');
+            });
+        });
+    </script>
+
+
+
+
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-low border-t border-outline-variant px-4 py-3 flex justify-around items-center z-50 pb-safe">
+    <a href="#" class="flex flex-col items-center gap-1 text-primary">
+        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Overview</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">groups</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Committees</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">person_add</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Add Member</span>
+    </a>
+    <a href="#" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="text-[10px] font-bold uppercase tracking-wider">Settings</span>
+    </a>
+</nav>
+
+</body></html>

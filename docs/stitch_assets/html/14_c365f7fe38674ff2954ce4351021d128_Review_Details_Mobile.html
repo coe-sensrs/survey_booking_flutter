@@ -1,0 +1,415 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Technical Review Detail | Sage &amp; Stone</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400..700;1,400..700&amp;family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface-variant": "#e0e3de",
+                "secondary-container": "#e9ded0",
+                "on-secondary-fixed-variant": "#4d463c",
+                "error": "#ba1a1a",
+                "inverse-surface": "#2d312e",
+                "background": "#f7faf4",
+                "on-secondary-fixed": "#201b12",
+                "surface-container-highest": "#e0e3de",
+                "primary-container": "#4a7c59",
+                "surface-dim": "#d8dbd5",
+                "on-surface": "#191d19",
+                "primary-fixed": "#b9efc5",
+                "primary-fixed-dim": "#9dd3aa",
+                "on-error": "#ffffff",
+                "on-tertiary-container": "#fff6ed",
+                "secondary": "#655d52",
+                "on-primary-fixed": "#00210e",
+                "surface": "#f7faf4",
+                "tertiary-fixed-dim": "#e2c284",
+                "surface-container-lowest": "#ffffff",
+                "on-primary-fixed-variant": "#1e5031",
+                "error-container": "#ffdad6",
+                "outline": "#717971",
+                "on-background": "#191d19",
+                "on-secondary-container": "#696156",
+                "inverse-primary": "#9dd3aa",
+                "outline-variant": "#c1c9bf",
+                "on-error-container": "#93000a",
+                "surface-container": "#ecefe9",
+                "inverse-on-surface": "#eff2ec",
+                "on-primary": "#ffffff",
+                "surface-container-low": "#f1f5ef",
+                "tertiary": "#6d5622",
+                "tertiary-fixed": "#ffdea0",
+                "on-secondary": "#ffffff",
+                "on-primary-container": "#e1ffe5",
+                "on-tertiary-fixed": "#261a00",
+                "on-tertiary-fixed-variant": "#594311",
+                "secondary-fixed": "#ece1d3",
+                "tertiary-container": "#886e38",
+                "surface-container-high": "#e6e9e3",
+                "on-tertiary": "#ffffff",
+                "primary": "#316342",
+                "secondary-fixed-dim": "#d0c5b8",
+                "on-surface-variant": "#414942",
+                "surface-bright": "#f7faf4",
+                "surface-tint": "#376847"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "xs": "4px",
+                "lg": "24px",
+                "gutter": "16px",
+                "sm": "8px",
+                "base": "8px",
+                "md": "16px",
+                "margin-desktop": "32px",
+                "xl": "48px",
+                "margin-mobile": "16px"
+        },
+        "fontFamily": {
+                "label-md": [
+                        "Nunito Sans"
+                ],
+                "body-lg": [
+                        "Nunito Sans"
+                ],
+                "headline-lg": [
+                        "Literata"
+                ],
+                "headline-md": [
+                        "Literata"
+                ]
+        },
+        "fontSize": {
+                "label-md": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.5px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-md": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "fontWeight": "600"
+                        }
+                ]
+        }
+},
+    },
+  }
+</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background font-body-lg">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-8 h-16 bg-surface-container-high dark:bg-surface-dim">
+<div class="flex items-center gap-3">
+
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed hidden md:block" data-icon="account_balance">account_balance</span>
+
+</div><nav class="hidden md:flex items-center gap-6 ml-8">
+<a class="text-on-surface-variant hover:text-primary font-body-lg transition-colors" href="#">Overview</a>
+<a class="text-on-surface-variant hover:text-primary font-body-lg transition-colors" href="#">Request Queue</a>
+<a class="text-primary font-bold font-body-lg border-b-2 border-primary pb-1" href="#">Review Details</a>
+<a class="text-on-surface-variant hover:text-primary font-body-lg transition-colors" href="#">Decisions</a>
+</nav>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden border-2 border-outline-variant shrink-0">
+<img alt="Committee Member Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvvLSLSdc-0GLjqBaKAVLGhu_8kgV_xWjSsrT-mNslhqVQQsX0K3MAUohKGl__vjBZZr0LABvxlv1_GSKvheLFZ5E4WqEyC34IY02hwdGf12MjhmEhp_NFPWqJEcIfpw_tPspYrhLkrSg8a-VZtTEopl7i6UrfgcqTttfWmCqqmvrjYCYEzmaigjoBdZAojgEoJCcsTNTK1rlx-6qHRb2efmYUb0A85oc2BPUiKDihUtNPx3tTLUNXn4Bxnl7Yy849jhb7QrbDscA">
+</div>
+</div>
+</header>
+<div class="flex pt-16 min-h-screen">
+<!-- NavigationDrawer -->
+
+<!-- Mobile Overlay -->
+
+<!-- Main Content Area -->
+<main class="w-full flex-1 p-margin-mobile md:p-8 pb-24 max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="space-y-2">
+<nav class="flex items-center gap-2 text-label-md text-on-surface-variant mb-4">
+<span class="hover:text-primary cursor-pointer">Requests</span>
+<span class="material-symbols-outlined text-[14px]" data-icon="chevron_right">chevron_right</span>
+<span class="text-primary font-semibold">BK-99284-Z</span>
+</nav>
+<h2 class="text-headline-md md:text-headline-lg font-headline-lg text-on-surface">Reviewing Booking ID: <span class="text-primary block md:inline mt-1 md:mt-0">BK-99284-Z</span></h2>
+<p class="text-body-lg text-on-surface-variant">Submitted on Oct 24, 2023 • High Priority Technical Audit</p>
+</div>
+<div class="flex items-center justify-center gap-3 px-6 py-3 bg-tertiary-container text-on-tertiary-container rounded-full border border-tertiary/20 self-start md:self-auto w-full md:w-auto">
+<span class="material-symbols-outlined text-[20px]" data-icon="hourglass_empty">hourglass_empty</span>
+<span class="font-label-md font-bold tracking-wider text-on-tertiary-container text-center text-xs md:text-sm">UNDER TECHNICAL REVIEW</span>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Project Summary Card -->
+<div class="col-span-1 md:col-span-12 lg:col-span-8 glass-card p-6 md:p-8 rounded-xl shadow-sm">
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-primary-container/30 rounded-lg text-primary">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+</div>
+<h3 class="text-headline-md font-headline-md">Project Summary</h3>
+</div>
+<div class="space-y-4">
+<h4 class="text-on-surface font-semibold text-lg">Socio Economic Survey 2024</h4>
+<p class="text-body-lg text-on-surface-variant leading-relaxed">
+                            A comprehensive demographic and economic feasibility study targeting rural expansion zones. The survey focuses on household income levels, access to infrastructure, and historical land usage patterns to inform the Stone-Grovner infrastructure initiative.
+                        </p>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-outline-variant">
+<div>
+<p class="text-label-md text-on-surface-variant">Duration</p>
+<p class="font-semibold text-on-surface">14 Days</p>
+</div>
+<div>
+<p class="text-label-md text-on-surface-variant">Field Team</p>
+<p class="font-semibold text-on-surface">6 Members</p>
+</div>
+<div>
+<p class="text-label-md text-on-surface-variant">Budget Type</p>
+<p class="font-semibold text-on-surface">Institutional</p>
+</div>
+<div>
+<p class="text-label-md text-on-surface-variant">Auth Level</p>
+<p class="font-semibold text-on-surface">Tier 2</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Area Data Card -->
+<div class="col-span-1 md:col-span-12 lg:col-span-4 glass-card overflow-hidden rounded-xl shadow-sm flex flex-col" style="transform: translateY(0px);">
+<div class="relative h-48 bg-surface-container-highest">
+<img class="w-full h-full object-cover" data-alt="A bird's eye view of a lush green topographic landscape featuring rolling hills and structured agricultural fields. The lighting is soft morning sun, casting gentle shadows that emphasize the terrain's texture. The aesthetic is clean, natural, and corporate, using a palette of forest greens and earthy stone greys to match the Sage and Stone brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwBPt7KRA1rEOgL44pbOxiTdR5oQitYGHo8exer3pCGOmEKIWmuNrBi50aBQzvUjaHF7OyS1knsnTXsQsKXHCZdKdv1kLmuZKlRg8K5_Axc6P-pSuQ4TBjLDfmvcpgKDcrmwtenRBkBFJ6YRrcRjSs0r6bD1TCIRBG2CSHvjgbnFQi_daIErjNDnTFUfnYVdgfv0jG6s2b7sQPykZgUWj1xlzhCfym_MwYXUUjHyUStsSd_dP6NLSaxabjrTeG57JjcXSxG7ftXoc">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+<div class="absolute bottom-4 left-6 text-white">
+<p class="text-label-md opacity-80 uppercase tracking-widest">Region Focus</p>
+<h3 class="text-headline-md font-headline-md">Area Data</h3>
+</div>
+</div>
+<div class="p-6 space-y-4 flex-1">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-label-md text-on-surface-variant">Target Name</p>
+<p class="font-semibold text-on-surface">Upper Rift-Valley Sector</p>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="location_on">location_on</span>
+</div>
+<a class="flex items-center justify-between p-4 bg-surface-container-low rounded-lg border border-outline-variant/30 hover:border-primary transition-colors group" href="#">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" data-icon="map">map</span>
+<div class="truncate">
+<p class="font-semibold text-on-surface truncate">Geometry_Export.kml</p>
+<p class="text-xs text-on-surface-variant uppercase">KML FILE • 4.2 MB</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-1 transition-transform shrink-0" data-icon="download">download</span>
+</a>
+</div>
+</div>
+<!-- Personnel Card -->
+<div class="col-span-1 md:col-span-6 glass-card p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-l-secondary">
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-secondary-container/30 rounded-lg text-secondary">
+<span class="material-symbols-outlined" data-icon="engineering">engineering</span>
+</div>
+<h3 class="text-headline-md font-headline-md">Personnel</h3>
+</div>
+<div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 bg-surface-container-low rounded-xl">
+<img alt="XEN Image" class="w-14 h-14 rounded-lg bg-secondary-fixed object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfeBX9kLbRH9zny_2B7wdu-_66pBoTHKh2JmV1vFCrSBpaZY8hWA87QpnnXVFpyRhgT8intF5WcaJqMnxAl_ZiCexICXTeFmzVRDOFAjVw71K0EskvXA0Jc4bEJ0QySN_MQd_n7HfrqV6RdPpSEClZWNy2jorCKinO36870mNSVjecPKBhcvBAAgoziDYQcNwO9mgPbsULVzz-MfzJRdkifmWNLxG9BMB8RwD-qL-xQdHUt6t8o6W7H9PlCZlJA8lNDEHO5LlJMdE">
+<div>
+<p class="text-label-md text-secondary uppercase font-bold">XEN Lead Officer</p>
+<h4 class="text-lg md:text-xl font-bold text-on-surface">Er. Julian Stonebrook</h4>
+<p class="text-body-lg text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]" data-icon="call">call</span>
+                                +44 20 7946 0128
+                            </p>
+</div>
+</div>
+<div class="mt-4 flex flex-col sm:flex-row gap-3">
+<button class="w-full py-3 px-4 border border-outline-variant rounded-lg text-label-md font-bold hover:bg-surface-container-highest transition-colors">VIEW LOGS</button>
+<button class="w-full py-3 px-4 border border-outline-variant rounded-lg text-label-md font-bold hover:bg-surface-container-highest transition-colors">MESSAGE</button>
+</div>
+</div>
+<!-- Logistics Card -->
+<div class="col-span-1 md:col-span-6 glass-card p-6 md:p-8 rounded-xl shadow-sm border-l-4 border-l-tertiary">
+<div class="flex items-center gap-3 mb-6">
+<div class="p-2 bg-tertiary-container/30 rounded-lg text-tertiary">
+<span class="material-symbols-outlined" data-icon="local_shipping">local_shipping</span>
+</div>
+<h3 class="text-headline-md font-headline-md">Logistics</h3>
+</div>
+<div class="space-y-4">
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-outline-variant/20 gap-1 sm:gap-0">
+<span class="text-on-surface-variant">Allocated Cab</span>
+<span class="font-bold text-on-surface">Stone-Fleet Transit (SUV 4x4)</span>
+</div>
+<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center py-2 border-b border-outline-variant/20 gap-1 sm:gap-0">
+<span class="text-on-surface-variant">Registration No.</span>
+<span class="font-bold text-on-surface">KBA 482L</span>
+</div>
+<div class="flex justify-between items-center py-2">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-sm" data-icon="person">person</span>
+</div>
+<span class="text-on-surface-variant">Driver</span>
+</div>
+<span class="font-bold text-on-surface">Samuel Vance</span>
+</div>
+<div class="bg-surface-container-high/50 p-3 rounded-lg flex items-start gap-3 text-on-surface-variant text-sm mt-2">
+<span class="material-symbols-outlined text-tertiary shrink-0 mt-0.5" data-icon="info">info</span>
+<span class="leading-tight">Vehicle equipped with GPRS and Field-Comms kit.</span>
+</div>
+</div>
+</div>
+<!-- Review Section -->
+<div class="col-span-1 md:col-span-12 bg-primary dark:bg-inverse-surface p-1 md:p-1.5 rounded-2xl shadow-xl mt-4 md:mt-8">
+<div class="bg-surface-container-lowest p-6 md:p-10 rounded-xl">
+<div class="max-w-3xl mx-auto text-center space-y-6 md:space-y-8">
+<div class="space-y-4">
+<h3 class="text-headline-md font-headline-md text-primary">Review Technical Data</h3>
+<p class="text-body-lg text-on-surface-variant">
+                                    Please confirm that all technical parameters including personnel assignments and geographic boundaries meet the institutional standards before proceeding to the final decision queue.
+                                </p>
+</div>
+<div class="flex flex-col gap-4">
+<button class="w-full px-6 py-4 bg-primary text-on-primary rounded-lg font-bold shadow-lg hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2 group">
+<span class="">Next to Decision</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<button class="w-full px-6 py-4 border-2 border-outline-variant text-on-surface rounded-lg font-bold hover:bg-surface-container-low transition-all">
+                                    Request Clarification
+                                </button>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-4 text-label-md text-on-surface-variant font-medium">
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="rounded border-outline-variant text-primary focus:ring-primary h-5 w-5" type="checkbox">
+<span class="">Data verified accurate</span>
+</label>
+<label class="flex items-center gap-2 cursor-pointer">
+<input class="rounded border-outline-variant text-primary focus:ring-primary h-5 w-5" type="checkbox">
+<span class="">Compliance checked</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+
+<script>
+        // Micro-interaction: Subtle hover effect for cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                if(window.innerWidth > 768) {
+                    card.style.transform = 'translateY(-2px)';
+                    card.style.transition = 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                }
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0px)';
+            });
+        });
+
+        // Simulating tab click
+        const navItems = document.querySelectorAll('aside nav a');
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                // e.preventDefault(); // Prevent jump for demo
+                navItems.forEach(i => {
+                    i.classList.remove('bg-primary-container', 'text-on-primary-container', 'dark:bg-primary-fixed', 'dark:text-on-primary-fixed', 'rounded-full', 'scale-95');
+                    i.classList.add('text-on-surface-variant', 'dark:text-outline-variant');
+                });
+                item.classList.add('bg-primary-container', 'text-on-primary-container', 'dark:bg-primary-fixed', 'dark:text-on-primary-fixed', 'rounded-full', 'scale-95');
+                item.classList.remove('text-on-surface-variant', 'dark:text-outline-variant');
+            });
+        });
+
+        // Mobile Menu Toggle
+        const menuToggle = document.getElementById('menu-toggle');
+        const closeMenu = document.getElementById('close-menu');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('mobile-overlay');
+
+        function toggleMenu() {
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
+
+        menuToggle.addEventListener('click', toggleMenu);
+        closeMenu.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+    </script>
+
+
+
+
+
+
+<nav class="md:hidden fixed bottom-0 left-0 right-0 bg-surface-container-high border-t border-outline-variant/30 px-4 pb-6 pt-3 flex justify-between items-center z-50">
+  <a href="#" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
+    <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+    <span class="text-label-md">Overview</span>
+  </a>
+  <a href="#" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
+    <span class="material-symbols-outlined" data-icon="list_alt">list_alt</span>
+    <span class="text-label-md">Queue</span>
+  </a>
+  <a href="#" class="flex flex-col items-center gap-1 text-primary font-bold">
+    <span class="material-symbols-outlined" data-icon="description">description</span>
+    <span class="text-label-md">Details</span>
+  </a>
+  <a href="#" class="flex flex-col items-center gap-1 text-on-surface-variant hover:text-primary transition-colors">
+    <span class="material-symbols-outlined" data-icon="gavel">gavel</span>
+    <span class="text-label-md">Decisions</span>
+  </a>
+</nav>
+
+</body></html>

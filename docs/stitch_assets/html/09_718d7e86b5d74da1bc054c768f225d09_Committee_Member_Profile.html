@@ -1,0 +1,260 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Committee Member Profile - Sage &amp; Stone Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed-dim": "#9dd3aa",
+                      "on-tertiary": "#ffffff",
+                      "inverse-on-surface": "#eff2ec",
+                      "secondary-fixed": "#ece1d3",
+                      "on-primary-container": "#e1ffe5",
+                      "secondary-fixed-dim": "#d0c5b8",
+                      "error-container": "#ffdad6",
+                      "on-surface-variant": "#414942",
+                      "on-secondary-fixed": "#201b12",
+                      "on-error": "#ffffff",
+                      "on-secondary-fixed-variant": "#4d463c",
+                      "surface-container-low": "#f1f5ef",
+                      "on-error-container": "#93000a",
+                      "outline": "#717971",
+                      "on-tertiary-fixed-variant": "#594311",
+                      "background": "#f7faf4",
+                      "surface-variant": "#e0e3de",
+                      "outline-variant": "#c1c9bf",
+                      "inverse-primary": "#9dd3aa",
+                      "tertiary-fixed": "#ffdea0",
+                      "on-tertiary-fixed": "#261a00",
+                      "on-primary-fixed": "#00210e",
+                      "on-secondary-container": "#696156",
+                      "on-surface": "#191d19",
+                      "secondary": "#655d52",
+                      "on-secondary": "#ffffff",
+                      "tertiary-container": "#886e38",
+                      "primary-fixed": "#b9efc5",
+                      "inverse-surface": "#2d312e",
+                      "on-primary-fixed-variant": "#1e5031",
+                      "surface-dim": "#d8dbd5",
+                      "on-primary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-tint": "#376847",
+                      "surface-container-high": "#e6e9e3",
+                      "tertiary": "#6d5622",
+                      "surface-bright": "#f7faf4",
+                      "surface-container": "#ecefe9",
+                      "primary-container": "#4a7c59",
+                      "surface-container-highest": "#e0e3de",
+                      "primary": "#316342",
+                      "tertiary-fixed-dim": "#e2c284",
+                      "on-tertiary-container": "#fff6ed",
+                      "surface": "#f7faf4",
+                      "on-background": "#191d19",
+                      "secondary-container": "#e9ded0",
+                      "error": "#ba1a1a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "lg": "24px",
+                      "sm": "8px",
+                      "base": "8px",
+                      "margin-mobile": "16px",
+                      "xs": "4px",
+                      "xl": "48px",
+                      "margin-desktop": "32px",
+                      "md": "16px"
+              },
+              "fontFamily": {
+                      "headline-md": [
+                              "Literata"
+                      ],
+                      "body-lg": [
+                              "Nunito Sans"
+                      ],
+                      "label-md": [
+                              "Nunito Sans"
+                      ],
+                      "headline-lg": [
+                              "Literata"
+                      ]
+              },
+              "fontSize": {
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.5px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body-lg text-body-lg">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface flex justify-between items-center px-8 h-16 w-full z-50 sticky top-0 bg-surface-container-high dark:bg-surface-dim flat no shadows">
+<div class="flex items-center gap-4">
+
+<h1 class="text-headline-md font-headline-md font-bold text-primary dark:text-primary-fixed">Profile</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="h-10 w-10 rounded-full overflow-hidden border-2 border-outline-variant">
+<img class="object-cover w-full h-full" data-alt="A professional headshot of an older academic male with glasses, wearing a tweed jacket, set against a blurred light natural green background indicating an institutional or university setting. Soft, natural lighting highlights a friendly yet serious demeanor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsZsoweihT-onE_R9iWBQhiKmOQQr0nTU5cGqFfTFPQp0TtootRPOZJiLDlpvqg013Dpj0AO7jtKJ-pnXOAa4PN_vXV_rlkJ3u8JZbXnQA70l2Xz65MEF4GfGU61WK5G9KzsOpW8O8-d5tDm6eJ4U3wXsbo8Uf9tmVBLUphlhrdvgAaJBT_d_cXESCs1z7ViwBpJgBAzFGnoFzw6tt_5O-pJRozA7cLOBRRKJA_Emy6LFGgE36WFU">
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop py-lg pb-32">
+<!-- Profile Header Bento -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-md mb-lg">
+<div class="md:col-span-12 bg-surface-container-low rounded-xl p-lg border border-outline-variant/30 flex flex-col md:flex-row items-center md:items-start gap-lg relative overflow-hidden">
+<div class="absolute -right-20 -top-20 w-64 h-64 bg-primary-fixed/20 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex-shrink-0 w-32 h-32 md:w-48 md:h-48 rounded-full overflow-hidden border-4 border-surface shadow-sm">
+<img class="w-full h-full object-cover" data-alt="A highly detailed professional portrait of Dr. Julian Vane, an academic in his late 50s with distinguished grey hair, wearing a dark green blazer over a white shirt. The background is a sophisticated, softly lit office environment with hints of natural wood and stone textures, conveying stability and intellectual authority." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdRaK2fXIbQKsnwNKc0yc6N5rFHqGoj0AtnjwlfTyk1S62QpL8Q3lx5ulWstrYwV6KtV09MKm93aW3A8e28WKVMmY3kzY2_e-isQTRCFsE38J232GDIfWm-0Ztz0jjl62H05c2NVkEZBjsm5UWTZ8OOSsemjkWweHp9f017pJPmtA9NbHIVI27Vh6h95jty_DIHeM9XhcKc_FFOc9XEWSMoNEWPRMf6eqKgtXY9aU0PPt2zTJYTag">
+</div>
+<div class="flex flex-col items-center md:items-start flex-grow text-center md:text-left z-10">
+
+<h2 class="font-headline-lg text-headline-lg text-primary">Harsh Raj</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2 flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="work">work</span>
+                        Committee Lead - Socio-Economic
+                    </p>
+<p class="font-body-lg text-body-lg text-secondary mt-1 flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="account_balance">account_balance</span>
+                        University of Environmental Sciences
+                    </p>
+</div>
+<div class="z-10 mt-4 md:mt-0">
+<button class="bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container px-6 py-2 rounded-lg font-label-md text-label-md transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="edit">edit</span>
+                        Edit Profile
+                    </button>
+</div>
+</div>
+</div>
+<!-- Info Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-md mb-lg">
+<!-- Personal Information -->
+<div class="md:col-span-4 bg-surface-container rounded-xl p-lg border border-outline-variant/30 flex flex-col gap-md">
+<div class="flex items-center gap-2 border-b border-outline-variant/50 pb-2 mb-2">
+<span class="material-symbols-outlined text-tertiary" data-icon="person">person</span>
+<h3 class="font-headline-md text-headline-md text-on-surface text-lg">Personal Information</h3>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Full Name</span>
+<span class="font-body-lg text-body-lg text-on-surface">Dr. Julian Vane</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Email Address</span>
+<span class="font-body-lg text-body-lg text-on-surface">j.vane@sageandstone.edu</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Employee ID</span>
+<span class="font-body-lg text-body-lg text-on-surface">SS-CM-4892</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-md text-label-md text-on-surface-variant">Joined Date</span>
+<span class="font-body-lg text-body-lg text-on-surface">Oct 12, 2021</span>
+</div>
+</div>
+<!-- Expertise & Roles -->
+<div class="md:col-span-4 bg-surface-container-high rounded-xl p-lg border border-outline-variant/30 flex flex-col gap-md">
+<div class="flex items-center gap-2 border-b border-outline-variant/50 pb-2 mb-2">
+<span class="material-symbols-outlined text-primary" data-icon="workspace_premium">workspace_premium</span>
+<h3 class="font-headline-md text-headline-md text-on-surface text-lg">Expertise &amp; Roles</h3>
+</div>
+<div class="flex flex-col gap-3">
+<div class="bg-surface p-3 rounded-lg border border-outline-variant/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-tertiary mt-1" data-icon="public">public</span>
+<div>
+<span class="font-label-md text-label-md text-on-surface block font-bold">Socio-Economic Survey Lead</span>
+<span class="font-body-lg text-body-lg text-on-surface-variant text-sm">Primary responsibility for all regional demographic studies.</span>
+</div>
+</div>
+<div class="bg-surface p-3 rounded-lg border border-outline-variant/20 flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary mt-1" data-icon="assignment_turned_in">assignment_turned_in</span>
+<div>
+<span class="font-label-md text-label-md text-on-surface block font-bold">Senior Auditor</span>
+<span class="font-body-lg text-body-lg text-on-surface-variant text-sm">Conducts secondary reviews for high-stakes environmental impact reports.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Performance Summary -->
+<div class="md:col-span-4 bg-surface-container-highest rounded-xl p-lg border border-outline-variant/30 flex flex-col gap-md relative overflow-hidden">
+<div class="absolute -right-10 -bottom-10 w-32 h-32 bg-tertiary-fixed/30 rounded-full blur-2xl pointer-events-none"></div>
+<div class="flex items-center gap-2 border-b border-outline-variant/50 pb-2 mb-2 z-10">
+<span class="material-symbols-outlined text-secondary" data-icon="analytics">analytics</span>
+<h3 class="font-headline-md text-headline-md text-on-surface text-lg">Performance Summary</h3>
+</div>
+<div class="grid grid-cols-2 gap-4 z-10">
+<div class="bg-surface-container-lowest p-4 rounded-lg text-center shadow-sm">
+<span class="font-headline-lg text-headline-lg text-primary block">45</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Total Reviews Completed</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-lg text-center shadow-sm">
+<span class="font-headline-lg text-headline-lg text-tertiary block">1.5<span class="text-sm">d</span></span>
+<span class="font-label-md text-label-md text-on-surface-variant">Avg. Turnaround Time</span>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-lg text-center shadow-sm col-span-2 flex items-center justify-between px-6">
+<div class="text-left">
+<span class="font-label-md text-label-md text-on-surface-variant block">Approval Rate</span>
+<span class="font-headline-md text-headline-md text-on-surface">92%</span>
+</div>
+<div class="w-16 h-16 rounded-full border-4 border-primary-container border-t-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="trending_up">trending_up</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Logout Action -->
+<div class="flex justify-center mt-xl mb-xl">
+<button class="px-8 py-3 rounded-lg border-2 border-error text-error hover:bg-error-container hover:text-on-error-container transition-colors font-label-md text-label-md flex items-center gap-2">
+<span class="material-symbols-outlined" data-icon="logout">logout</span>
+                 Logout Account
+             </button>
+</div>
+</main>
+<!-- Footer -->
+
+
+
+</body></html>

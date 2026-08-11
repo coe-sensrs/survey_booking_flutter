@@ -1,0 +1,303 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>My Bookings - Sage &amp; Stone Research</title>
+<!-- Google Fonts & Material Symbols -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&amp;family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#655d52",
+                    "surface-dim": "#d8dbd5",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#414942",
+                    "surface-container": "#ecefe9",
+                    "on-tertiary-fixed": "#261a00",
+                    "tertiary": "#6d5622",
+                    "background": "#f7faf4",
+                    "on-secondary-fixed-variant": "#4d463c",
+                    "on-secondary-container": "#696156",
+                    "error": "#ba1a1a",
+                    "on-background": "#191d19",
+                    "outline-variant": "#c1c9bf",
+                    "on-surface": "#191d19",
+                    "tertiary-fixed-dim": "#e2c284",
+                    "surface-variant": "#e0e3de",
+                    "tertiary-fixed": "#ffdea0",
+                    "surface-bright": "#f7faf4",
+                    "secondary-fixed": "#ece1d3",
+                    "inverse-primary": "#9dd3aa",
+                    "on-tertiary-fixed-variant": "#594311",
+                    "on-secondary-fixed": "#201b12",
+                    "inverse-surface": "#2d312e",
+                    "surface-tint": "#376847",
+                    "on-error-container": "#93000a",
+                    "tertiary-container": "#886e38",
+                    "surface-container-low": "#f1f5ef",
+                    "outline": "#717971",
+                    "on-primary-container": "#e1ffe5",
+                    "inverse-on-surface": "#eff2ec",
+                    "surface-container-high": "#e6e9e3",
+                    "on-primary-fixed-variant": "#1e5031",
+                    "primary-fixed": "#b9efc5",
+                    "on-tertiary-container": "#fff6ed",
+                    "primary-container": "#4a7c59",
+                    "on-primary-fixed": "#00210e",
+                    "secondary-fixed-dim": "#d0c5b8",
+                    "secondary-container": "#e9ded0",
+                    "surface-container-highest": "#e0e3de",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-error": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "primary": "#316342",
+                    "primary-fixed-dim": "#9dd3aa",
+                    "surface-container-lowest": "#ffffff",
+                    "surface": "#f7faf4"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "margin-desktop": "32px",
+                    "md": "16px",
+                    "lg": "24px",
+                    "xs": "4px",
+                    "base": "8px",
+                    "xl": "48px",
+                    "sm": "8px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "label-md": [
+                            "Nunito Sans", "sans-serif"
+                    ],
+                    "headline-md": [
+                            "Literata", "serif"
+                    ],
+                    "headline-lg": [
+                            "Literata", "serif"
+                    ],
+                    "body-lg": [
+                            "Nunito Sans", "sans-serif"
+                    ]
+            },
+            "fontSize": {
+                    "label-md": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.5px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+    </style>
+</head>
+<body class="font-body-lg text-body-lg antialiased pb-24 md:pb-0 flex min-h-screen">
+<!-- Top App Bar (Mobile) -->
+
+<!-- Navigation Drawer (Desktop) -->
+
+<!-- Main Content Canvas -->
+<main class="flex-1 px-margin-mobile md:px-margin-desktop py-lg max-w-7xl mx-auto w-full">
+<!-- Header Section -->
+<div class="mb-lg">
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-2">My Bookings</h2>
+<p class="text-on-surface-variant">Review and manage your scheduled research activities.</p>
+</div>
+<!-- Search and Filter Bar -->
+<div class="flex flex-col md:flex-row gap-4 mb-lg items-center justify-between">
+<div class="relative w-full md:max-w-md">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded-lg py-2 pl-10 pr-4 text-body-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder:text-on-surface-variant" placeholder="Search by ID or District..." type="text">
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-tertiary text-on-tertiary font-label-md text-label-md transition-colors shadow-sm">All</button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-surface-container border border-outline-variant text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md transition-colors">Pending</button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-surface-container border border-outline-variant text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md transition-colors">Upcoming</button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-surface-container border border-outline-variant text-on-surface-variant hover:bg-surface-container-high font-label-md text-label-md transition-colors">Completed</button>
+</div>
+</div>
+<!-- Bookings Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Booking Card 1 (Upcoming) -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div>
+<span class="font-label-md text-label-md text-secondary">SRV-2024-001</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1 text-lg">Socio Economic Survey</h3>
+</div>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-container text-on-primary-container border border-primary/20">
+                        Upcoming
+                    </span>
+</div>
+<div class="space-y-3 mb-6 relative z-10">
+<div class="flex items-center text-on-surface-variant gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="">Oct 15, 2024 - 09:00 AM</span>
+</div>
+<div class="flex items-center text-on-surface-variant gap-2">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="">Okanagan Valley District</span>
+</div>
+</div>
+<div class="flex justify-end relative z-10 border-t border-outline-variant pt-4">
+<button class="text-primary hover:text-primary-fixed-dim font-label-md text-label-md flex items-center gap-1 transition-colors">
+                        View Details <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Booking Card 2 (Pending) -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-tertiary-container/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div>
+<span class="font-label-md text-label-md text-secondary">SRV-2024-042</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1 text-lg">Forest Canopy Assessment</h3>
+</div>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-container text-on-secondary-container border border-secondary/20">
+                        Pending
+                    </span>
+</div>
+<div class="space-y-3 mb-6 relative z-10">
+<div class="flex items-center text-on-surface-variant gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="">Requested: Oct 12, 2024</span>
+</div>
+<div class="flex items-center text-on-surface-variant gap-2">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="">Northern Timberlands</span>
+</div>
+</div>
+<div class="flex justify-end relative z-10 border-t border-outline-variant pt-4">
+<button class="text-primary hover:text-primary-fixed-dim font-label-md text-label-md flex items-center gap-1 transition-colors">
+                        View Details <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Booking Card 3 (Completed) -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant hover:shadow-md transition-shadow relative overflow-hidden group opacity-80">
+<div class="absolute top-0 right-0 w-24 h-24 bg-surface-variant rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div>
+<span class="font-label-md text-label-md text-secondary">SRV-2024-008</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1 text-lg">Water Quality Sampling</h3>
+</div>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-surface-variant text-on-surface-variant border border-outline-variant">
+                        Completed
+                    </span>
+</div>
+<div class="space-y-3 mb-6 relative z-10">
+<div class="flex items-center text-on-surface-variant gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="">Oct 01, 2024</span>
+</div>
+<div class="flex items-center text-on-surface-variant gap-2">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="">Clearwater Basin</span>
+</div>
+</div>
+<div class="flex justify-end relative z-10 border-t border-outline-variant pt-4">
+<button class="text-primary hover:text-primary-fixed-dim font-label-md text-label-md flex items-center gap-1 transition-colors">
+                        View Report <span class="material-symbols-outlined text-sm">description</span>
+</button>
+</div>
+</div>
+<!-- Booking Card 4 (Upcoming) -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm border border-outline-variant hover:shadow-md transition-shadow relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"></div>
+<div class="flex justify-between items-start mb-4 relative z-10">
+<div>
+<span class="font-label-md text-label-md text-secondary">SRV-2024-015</span>
+<h3 class="font-headline-md text-headline-md text-on-surface mt-1 text-lg">Wildlife Migration Tracking</h3>
+</div>
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-container text-on-primary-container border border-primary/20">
+                        Upcoming
+                    </span>
+</div>
+<div class="space-y-3 mb-6 relative z-10">
+<div class="flex items-center text-on-surface-variant gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="">Nov 02, 2024 - 06:00 AM</span>
+</div>
+<div class="flex items-center text-on-surface-variant gap-2">
+<span class="material-symbols-outlined text-sm">location_on</span>
+<span class="">Alpine Ridge Corridor</span>
+</div>
+</div>
+<div class="flex justify-end relative z-10 border-t border-outline-variant pt-4">
+<button class="text-primary hover:text-primary-fixed-dim font-label-md text-label-md flex items-center gap-1 transition-colors">
+                        View Details <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Nav Bar (Mobile) -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-2 bg-surface-container dark:bg-surface-container-highest shadow-[0_-1px_3px_0_rgba(0,0,0,0.05)] md:hidden z-50">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-all active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="dashboard">dashboard</span>
+<span class="font-label-md text-label-md">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-on-primary-fixed-variant text-on-primary-container dark:text-primary-fixed rounded-full px-5 py-1 hover:text-primary dark:hover:text-primary-fixed transition-all active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="list_alt" data-weight="fill" style="font-variation-settings: &quot;FILL&quot; 1;">list_alt</span>
+<span class="font-label-md text-label-md">Bookings</span>
+</a>
+
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant hover:text-primary dark:hover:text-primary-fixed transition-all active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="person">person</span>
+<span class="font-label-md text-label-md">Account</span>
+</a>
+</nav>
+
+
+
+
+</body></html>

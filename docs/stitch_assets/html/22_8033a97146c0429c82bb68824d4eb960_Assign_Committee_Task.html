@@ -1,0 +1,292 @@
+<!DOCTYPE html><html class="light" lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Task Assignment | Sage &amp; Stone Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Literata:wght@600;700&amp;family=Nunito+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"inverse-primary": "#9dd3aa", "surface-tint": "#376847", "error-container": "#ffdad6", "primary-container": "#4a7c59", secondary: "#655d52", "tertiary-container": "#886e38", "secondary-dim": "#595248", "primary-fixed": "#b9efc5", "surface-container-lowest": "#ffffff", "inverse-surface": "#2d312e", "on-primary-fixed-variant": "#1e5031", "on-secondary-fixed-variant": "#4d463c", "on-surface-variant": "#414942", "surface-container-high": "#e6e9e3", tertiary: "#6d5622", "on-tertiary-fixed-variant": "#594311", "tertiary-dim": "#67501c", "primary-dim": "#2b5d3c", "surface-dim": "#d8dbd5", "on-error": "#ffffff", "error-dim": "#67040d", outline: "#717971", "secondary-fixed": "#ece1d3", "secondary-container": "#e9ded0", "surface-variant": "#e0e3de", "on-tertiary": "#ffffff", surface: "#f7faf4", "surface-container": "#ecefe9", "surface-bright": "#f7faf4", primary: "#316342", error: "#ba1a1a", "on-tertiary-container": "#fff6ed", "inverse-on-surface": "#eff2ec", "on-primary-fixed": "#00210e", "outline-variant": "#c1c9bf", "secondary-fixed-dim": "#d0c5b8", "tertiary-fixed-dim": "#e2c284", "on-primary": "#ffffff", "on-secondary-container": "#696156", "on-tertiary-fixed": "#261a00", "on-primary-container": "#e1ffe5", "tertiary-fixed": "#ffdea0", "surface-container-highest": "#e0e3de", "on-secondary": "#ffffff", "primary-fixed-dim": "#9dd3aa", "on-background": "#191d19", "on-error-container": "#93000a", "surface-container-low": "#f1f5ef", "on-surface": "#191d19", "on-secondary-fixed": "#201b12", background: "#f7faf4"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Literata"], display: ["Literata"], body: ["Nunito Sans"], label: ["Nunito Sans"]}, fontSize: {}}}};</script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Nunito Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Literata', serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col pb-16">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface flex justify-between items-center w-full px-8 z-40 fixed top-0 h-16 shadow-sm">
+<div class="flex items-center gap-4"><span class="font-headline text-2xl font-bold text-primary dark:text-inverse-primary">Admin</span></div>
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold border-2 border-primary overflow-hidden">
+<img alt="Admin Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXKPclTmpkV-RmotcPZ2Q6xj3U3dJEDvU1DZ-IIyHL1lfEN99qEh1CeJenQJdXbWGhGhvRE-ewwc0Sgq5zkMobj0jAsgci1O4TTqRo-TGCxMlquDpzRtYFYY14hDfRdd5hFU24x3xVF3-vYLFOdvigxQi0joT9pkNnqgoSMaf9nHzkZsJhMPyJOL6QV_nck6jgr6FKR943RlUwPxh9HnJaO4RYSSzKT1fY1dXddqwGVrEioTTxj_FcWj7Jo_WB8plaQ6gFlISe8HI">
+</div>
+</div>
+</header>
+<div class="flex pt-16 flex-1 h-full">
+<!-- NavigationDrawer -->
+<aside class="bg-surface-container-low dark:bg-surface-dim h-[calc(100vh-64px)] w-64 fixed left-0 top-16 hidden md:flex flex-col py-6">
+<div class="px-6 mb-8">
+<h2 class="font-headline text-xl text-primary font-semibold">Survey Management</h2>
+</div>
+<nav class="flex flex-col flex-1 px-4">
+<a class="text-secondary dark:text-secondary-fixed-dim rounded-lg my-1 px-4 py-3 flex items-center gap-3 hover:bg-secondary-container transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body text-lg">Dashboard</span>
+</a>
+<a class="text-secondary dark:text-secondary-fixed-dim rounded-lg my-1 px-4 py-3 flex items-center gap-3 hover:bg-secondary-container transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body text-lg">Committee Members</span>
+</a>
+<a class="bg-primary-container text-on-primary-container dark:bg-primary-fixed-dim dark:text-on-primary-fixed-variant rounded-lg my-1 px-4 py-3 flex items-center gap-3 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="font-body text-lg font-semibold">Survey Tasks</span>
+</a>
+<a class="text-secondary dark:text-secondary-fixed-dim rounded-lg my-1 px-4 py-3 flex items-center gap-3 hover:bg-secondary-container transition-all" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body text-lg">System Settings</span>
+</a>
+</nav>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 md:ml-64 p-8 flex flex-col gap-8 max-w-7xl mx-auto w-full">
+<!-- Header Section: Survey Context -->
+<section class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-outline-variant pb-6">
+<div>
+<nav class="flex items-center gap-2 text-on-surface-variant mb-2">
+<span class="text-xs font-semibold tracking-wider">TASKS</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+<span class="text-xs font-semibold tracking-wider uppercase text-primary">Assignment</span>
+</nav>
+<h1 class="text-4xl font-bold text-on-surface">SRV-2024-001</h1>
+<p class="text-on-surface-variant text-lg">Annual Sustainability Impact Audit - Phase 1</p>
+</div>
+<div class="flex gap-3">
+<div class="px-4 py-2 bg-tertiary-container text-on-tertiary-container rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+<span class="text-sm font-semibold">High Priority</span>
+</div>
+<div class="px-4 py-2 bg-surface-container-highest text-on-surface rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span class="text-sm font-semibold">Due Dec 12</span>
+</div>
+</div>
+</section>
+<!-- Bento Grid Layout for Assignment -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- Left: Search & Member Selection -->
+<div class="lg:col-span-7 flex flex-col gap-6">
+<div class="bg-surface-container rounded-xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xl font-semibold">Available Members</h3>
+<div class="relative w-64">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface rounded-lg border border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="Search members..." type="text">
+</div>
+</div>
+<div class="space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+<!-- Member Row 1 -->
+<div class="group bg-surface-container-lowest p-4 rounded-xl border border-transparent hover:border-primary-container transition-all flex items-center justify-between">
+<div class="flex items-center gap-4">
+<img alt="Felix Chen" class="w-12 h-12 rounded-full bg-secondary-container" data-alt="A professional headshot of a person with a warm smile, set against a soft bokeh background with natural earth tones. The lighting is diffused and professional, matching a corporate yet friendly environment. The image uses Sage and Stone brand colors like forest green and stone grey." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAM-CQ7faRSmLLZ1PBp092y89GB8Zc-l3_e1TbhuJe4mR6edj-U2LdQDB7Bc-VEgvHrDZK1fi4hhNdy8ZzLcQkdjTJWYgmEy7vtnCsHntfYBZwhpaIheO-yV7V9uhx4kT56xcutSPU95A-uWjE7yjJm07wj-_pIxn0_3M_SERoWW1_vzFwxTwKT-AwVf59zeyv-QyRq5KQRbMqqCFkW6kGEwqklIKZivtzID1ZAkmK3S_W2u1m4I9vFRMZsLVaFy5QRjeC5mjCVMWQ">
+<div>
+<h4 class="font-bold text-on-surface">Dr. Felix Chen</h4>
+<p class="text-sm text-on-surface-variant">Environmental Specialist • 12 Active Tasks</p>
+</div>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1 text-xs font-bold border border-primary text-primary rounded-lg hover:bg-primary hover:text-on-primary transition-colors" onclick="assign('Lead', 'Dr. Felix Chen')">Lead</button>
+<button class="px-3 py-1 text-xs font-bold border border-secondary text-secondary rounded-lg hover:bg-secondary hover:text-on-secondary transition-colors" onclick="assign('Co', 'Dr. Felix Chen')">Co-Reviewer</button>
+</div>
+</div>
+<!-- Member Row 2 -->
+<div class="group bg-surface-container-lowest p-4 rounded-xl border border-transparent hover:border-primary-container transition-all flex items-center justify-between">
+<div class="flex items-center gap-4">
+<img alt="Sarah J." class="w-12 h-12 rounded-full bg-secondary-container" data-alt="A professional woman in business attire with an approachable expression. The background is a clean, modern office space with natural lighting. The color scheme is consistent with Sage and Stone's organic palette, featuring deep greens and warm wooden tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAAvbd6JJ0fvQ1YbEQ8DgEJ-6ZmqmlAWacqSlBVMdm-SPF3Ulurvdxj9yYJYLtMLW3am_4-1mHW-sf2og6ZRwcfMja1Tn2O3o4Gl4a3hotJ9hHvJjOHKQ-_SKm_F6LjEo-xMH-Y0aIBnGRJam5saBrRpUGtXUlIhuzcmGwpdJFb9nXKh6vVErosG4rUfpeQxvdeyEv9nbDA092pwL-IWrL8_SC88gUDjtSJvESA3sK0-HCFk6zZXirDWsTT-K2IUFZEBUXioFgoBPQ">
+<div>
+<h4 class="font-bold text-on-surface">Sarah Jenkins</h4>
+<p class="text-sm text-on-surface-variant">Data Analyst • 4 Active Tasks</p>
+</div>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1 text-xs font-bold border border-primary text-primary rounded-lg hover:bg-primary hover:text-on-primary transition-colors" onclick="assign('Lead', 'Sarah Jenkins')">Lead</button>
+<button class="px-3 py-1 text-xs font-bold border border-secondary text-secondary rounded-lg hover:bg-secondary hover:text-on-secondary transition-colors" onclick="assign('Co', 'Sarah Jenkins')">Co-Reviewer</button>
+</div>
+</div>
+<!-- Member Row 3 -->
+<div class="group bg-surface-container-lowest p-4 rounded-xl border border-transparent hover:border-primary-container transition-all flex items-center justify-between">
+<div class="flex items-center gap-4">
+<img alt="Marcus T." class="w-12 h-12 rounded-full bg-secondary-container" data-alt="A man in his 40s with a sharp, professional look, wearing glasses and a focused expression. The setting is a bright, minimalist academic hall. The aesthetic is modern and sophisticated, incorporating stone textures and soft forest green highlights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDViNXhfn79I6Nhq3xnIAVw-RtzJ2TpCqKjI7HyTsmOnaNlYG4AoJA6WggRddr-7ki9vYBegvsCCQ5jUKeClZ5iBcTogdBzseuSTAMq_HtllwfcS6NKvjfJgEatItU90NCX7BrPaV4l1m443A_Omu8-cSA7YLRwfm30mCy_qHwu2EkG5RPGOzkmRmqJEgR6H0HgwC3yCO658jhHM7Yatqiu54omVdJn-zwJCLI-hSJynso_8dNv6MeEWaZlkrfwKf-DsjLjPUFSTZE">
+<div>
+<h4 class="font-bold text-on-surface">Marcus Thorne</h4>
+<p class="text-sm text-on-surface-variant">Compliance Officer • 8 Active Tasks</p>
+</div>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1 text-xs font-bold border border-primary text-primary rounded-lg hover:bg-primary hover:text-on-primary transition-colors" onclick="assign('Lead', 'Marcus Thorne')">Lead</button>
+<button class="px-3 py-1 text-xs font-bold border border-secondary text-secondary rounded-lg hover:bg-secondary hover:text-on-secondary transition-colors" onclick="assign('Co', 'Marcus Thorne')">Co-Reviewer</button>
+</div>
+</div>
+<!-- Member Row 4 -->
+<div class="group bg-surface-container-lowest p-4 rounded-xl border border-transparent hover:border-primary-container transition-all flex items-center justify-between">
+<div class="flex items-center gap-4">
+<img alt="Elena V." class="w-12 h-12 rounded-full bg-secondary-container" data-alt="A high-quality portrait of a professional woman with a confident stance. The background is a blurred library with soft, warm golden lighting. The styling follows the Sage and Stone design system with organic textures and a palette of earth browns and forest greens." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5LEmAR5LDD9KEPLrgw1AYxeL8SnqwtyRjYdQXp40qlK84RQjmHt4DNlKiFJHgLLl391-74DtPRO_w1bxz-ERk3QCrGKnsUV23J48TPJw0TC8GMIg4Ek1vfbInEM658iQLJ3H4kiuKqgmEa8bYFrSzHhsbUHz-1yNnEMopzZOwdYieoyUgh9DHzauOCUJ_7bhRN42IwyrpVgXvIotKhPcWhZrLtJMlV7GfLSTKvs1W1zncxQPtdDjm71Lmb4da5b6aOCuIbeaBu5Y">
+<div>
+<h4 class="font-bold text-on-surface">Elena Vance</h4>
+<p class="text-sm text-on-surface-variant">Project Manager • 2 Active Tasks</p>
+</div>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="px-3 py-1 text-xs font-bold border border-primary text-primary rounded-lg hover:bg-primary hover:text-on-primary transition-colors" onclick="assign('Lead', 'Elena Vance')">Lead</button>
+<button class="px-3 py-1 text-xs font-bold border border-secondary text-secondary rounded-lg hover:bg-secondary hover:text-on-secondary transition-colors" onclick="assign('Co', 'Elena Vance')">Co-Reviewer</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right: Assignment Summary -->
+<div class="lg:col-span-5 flex flex-col gap-6">
+<div class="glass-card rounded-xl p-8 sticky top-24 shadow-xl shadow-surface-dim/20">
+<h3 class="text-2xl font-bold mb-6 text-primary border-b border-primary-container pb-4">Assignment Roles</h3>
+<div class="space-y-6 mb-8">
+<!-- Lead Role Slot -->
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                    Lead Reviewer
+                                </label>
+<div class="p-4 rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low flex items-center justify-center min-h-[80px] transition-all" id="lead-slot">
+<span class="text-on-surface-variant italic">No one assigned yet</span>
+</div>
+</div>
+<!-- Co Role Slot -->
+<div class="space-y-2">
+<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">group</span>
+                                    Co-Reviewer
+                                </label>
+<div class="p-4 rounded-xl border-2 border-dashed border-outline-variant bg-surface-container-low flex items-center justify-center min-h-[80px] transition-all" id="co-slot">
+<span class="text-on-surface-variant italic">No one assigned yet</span>
+</div>
+</div>
+</div>
+<!-- Action Button -->
+<button class="w-full py-4 bg-primary text-on-primary rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:pointer-events-none" disabled="" id="confirm-btn">
+                            Confirm Assignment
+                        </button>
+
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+
+<script>
+        let assignments = {
+            Lead: null,
+            Co: null
+        };
+
+        function assign(role, name) {
+            assignments[role] = name;
+            updateUI();
+        }
+
+        function remove(role) {
+            assignments[role] = null;
+            updateUI();
+        }
+
+        function updateUI() {
+            const leadSlot = document.getElementById('lead-slot');
+            const coSlot = document.getElementById('co-slot');
+            const confirmBtn = document.getElementById('confirm-btn');
+
+            if (assignments.Lead) {
+                leadSlot.innerHTML = `
+                    <div class="w-full flex items-center justify-between bg-primary-container text-on-primary-container p-2 rounded-lg border border-primary">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-primary">person</span>
+                            <span class="font-bold">${assignments.Lead}</span>
+                        </div>
+                        <button onclick="remove('Lead')" class="material-symbols-outlined text-primary hover:bg-on-primary rounded-full transition-colors">close</button>
+                    </div>
+                `;
+                leadSlot.classList.remove('border-dashed');
+                leadSlot.classList.add('border-solid');
+            } else {
+                leadSlot.innerHTML = `<span class="text-on-surface-variant italic">No one assigned yet</span>`;
+                leadSlot.classList.add('border-dashed');
+                leadSlot.classList.remove('border-solid');
+            }
+
+            if (assignments.Co) {
+                coSlot.innerHTML = `
+                    <div class="w-full flex items-center justify-between bg-secondary-container text-on-secondary-container p-2 rounded-lg border border-secondary">
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined text-secondary">person</span>
+                            <span class="font-bold">${assignments.Co}</span>
+                        </div>
+                        <button onclick="remove('Co')" class="material-symbols-outlined text-secondary hover:bg-on-secondary rounded-full transition-colors">close</button>
+                    </div>
+                `;
+                coSlot.classList.remove('border-dashed');
+                coSlot.classList.add('border-solid');
+            } else {
+                coSlot.innerHTML = `<span class="text-on-surface-variant italic">No one assigned yet</span>`;
+                coSlot.classList.add('border-dashed');
+                coSlot.classList.remove('border-solid');
+            }
+
+            confirmBtn.disabled = !(assignments.Lead && assignments.Co);
+        }
+
+        // Micro-interaction for confirmation
+        document.getElementById('confirm-btn').addEventListener('click', function() {
+            this.innerHTML = `<span class="flex items-center justify-center gap-2"><span class="material-symbols-outlined animate-spin">sync</span>Processing...</span>`;
+            setTimeout(() => {
+                this.innerHTML = `<span class="flex items-center justify-center gap-2"><span class="material-symbols-outlined">check_circle</span>Assignment Complete</span>`;
+                this.classList.remove('bg-primary');
+                this.classList.add('bg-tertiary');
+            }, 1200);
+        });
+    </script>
+
+
+
+
+
+
+<nav class="fixed bottom-0 left-0 right-0 bg-surface-container border-t border-outline-variant flex justify-around items-center h-16 z-50 md:hidden"><a href="#" class="flex flex-col items-center justify-center flex-1 gap-1 text-on-surface-variant hover:text-primary transition-colors">
+    <span class="material-symbols-outlined">grid_view</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter">Overview</span>
+</a>
+<a href="#" class="flex flex-col items-center justify-center flex-1 gap-1 text-primary">
+    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">list_alt</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter">Queue</span>
+</a>
+<a href="#" class="flex flex-col items-center justify-center flex-1 gap-1 text-on-surface-variant hover:text-primary transition-colors">
+    <span class="material-symbols-outlined">analytics</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter">Details</span>
+</a>
+<a href="#" class="flex flex-col items-center justify-center flex-1 gap-1 text-on-surface-variant hover:text-primary transition-colors">
+    <span class="material-symbols-outlined">fact_check</span>
+    <span class="text-[10px] font-bold uppercase tracking-tighter">Decisions</span>
+</a></nav>
+
+
+
+</body></html>

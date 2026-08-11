@@ -1,0 +1,203 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sign Up - Sage &amp; Stone</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400..700&amp;family=Nunito+Sans:opsz,wght@6..12,400..700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f1f5ef",
+                    "on-secondary-container": "#696156",
+                    "on-secondary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "primary-container": "#4a7c59",
+                    "secondary-fixed": "#ece1d3",
+                    "on-tertiary-container": "#fff6ed",
+                    "on-tertiary-fixed-variant": "#594311",
+                    "outline-variant": "#c1c9bf",
+                    "surface-variant": "#e0e3de",
+                    "on-surface-variant": "#414942",
+                    "background": "#f7faf4",
+                    "secondary-container": "#e9ded0",
+                    "outline": "#717971",
+                    "tertiary-fixed": "#ffdea0",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#191d19",
+                    "on-secondary-fixed-variant": "#4d463c",
+                    "on-secondary-fixed": "#201b12",
+                    "primary-fixed": "#b9efc5",
+                    "surface-container-highest": "#e0e3de",
+                    "secondary": "#655d52",
+                    "secondary-fixed-dim": "#d0c5b8",
+                    "surface-tint": "#376847",
+                    "inverse-on-surface": "#eff2ec",
+                    "inverse-primary": "#9dd3aa",
+                    "surface-bright": "#f7faf4",
+                    "tertiary": "#6d5622",
+                    "on-tertiary": "#ffffff",
+                    "on-primary-fixed": "#00210e",
+                    "tertiary-fixed-dim": "#e2c284",
+                    "on-error-container": "#93000a",
+                    "on-background": "#191d19",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#ecefe9",
+                    "on-primary-container": "#e1ffe5",
+                    "on-primary-fixed-variant": "#1e5031",
+                    "inverse-surface": "#2d312e",
+                    "surface-container-high": "#e6e9e3",
+                    "surface": "#f7faf4",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#9dd3aa",
+                    "surface-dim": "#d8dbd5",
+                    "tertiary-container": "#886e38",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed": "#261a00",
+                    "primary": "#316342"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "md": "16px",
+                    "xl": "48px",
+                    "base": "8px",
+                    "sm": "8px",
+                    "margin-desktop": "32px",
+                    "lg": "24px",
+                    "margin-mobile": "16px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "label-md": [
+                            "Nunito Sans"
+                    ],
+                    "body-lg": [
+                            "Nunito Sans"
+                    ],
+                    "headline-md": [
+                            "Literata"
+                    ],
+                    "headline-lg": [
+                            "Literata"
+                    ]
+            },
+            "fontSize": {
+                    "label-md": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.5px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-lg": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-md": [
+                            "24px",
+                            {
+                                    "lineHeight": "32px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "700"
+                            }
+                    ]
+            }
+        },
+        },
+      }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-body-lg text-body-lg antialiased">
+<!-- Top App Bar (Suppressing Navigation Shell for Transactional Screen per Rules, but keeping a minimal brand header) -->
+<header class="bg-surface w-full top-0 sticky flex justify-between items-center px-4 h-16 shadow-sm z-50">
+<div class="flex items-center gap-2">
+
+
+</div>
+</header>
+<main class="flex-grow flex flex-col md:flex-row w-full h-full md:h-[calc(100vh-64px)]">
+<!-- Image Section (Matches Login Screen) -->
+<section class="w-full md:w-1/2 h-64 md:h-full relative overflow-hidden">
+
+<!-- Overlay to ensure text legibility if needed, though mostly decorative -->
+<div class="absolute inset-0 bg-primary/20 mix-blend-multiply"></div>
+</section>
+<!-- Form Section -->
+<section class="w-full md:w-1/2 flex items-center justify-center p-margin-mobile md:p-margin-desktop bg-surface-container-lowest">
+<div class="w-full max-w-md flex flex-col gap-lg">
+<!-- Header & Toggle -->
+<div class="flex flex-col gap-md items-center text-center">
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Create an Account</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Join the community to start sharing your insights.</p>
+<!-- Toggle -->
+<div class="flex bg-surface-container-highest p-1 rounded-full w-full max-w-xs mt-sm">
+<button class="flex-1 py-2 px-4 rounded-full font-label-md text-label-md text-on-surface-variant hover:bg-surface-variant transition-colors" type="button">Log In</button>
+<button class="flex-1 py-2 px-4 rounded-full font-label-md text-label-md bg-primary-container text-on-primary-container font-bold shadow-sm" type="button">Sign Up</button>
+</div>
+</div>
+<!-- Sign Up Form -->
+<form class="flex flex-col gap-md w-full">
+<!-- Full Name -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface" for="fullName">Full Name</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">person</span>
+<input class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow font-body-lg text-body-lg text-on-surface placeholder:text-outline-variant" id="fullName" name="fullName" placeholder="Jane Doe" type="text">
+</div>
+</div>
+<!-- Email -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">mail</span>
+<input class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow font-body-lg text-body-lg text-on-surface placeholder:text-outline-variant" id="email" name="email" placeholder="jane@example.com" type="email">
+</div>
+</div>
+<!-- Password -->
+<div class="flex flex-col gap-xs">
+<label class="font-label-md text-label-md text-on-surface" for="password">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">lock</span>
+<input class="w-full pl-10 pr-4 py-3 rounded-lg border border-outline-variant bg-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-shadow font-body-lg text-body-lg text-on-surface placeholder:text-outline-variant" id="password" name="password" placeholder="••••••••" type="password">
+</div>
+</div>
+<!-- Submit Button -->
+<button class="w-full mt-sm py-3 px-6 bg-primary hover:bg-surface-tint text-on-primary rounded-lg font-label-md text-label-md transition-colors active:scale-[0.98]" type="submit">
+                        Sign Up
+                    </button>
+<div class="text-center mt-sm">
+<p class="font-body-lg text-body-lg text-on-surface-variant text-sm">By signing up, you agree to our <a class="text-primary hover:underline" href="#">Terms of Service</a> and <a class="text-primary hover:underline" href="#">Privacy Policy</a>.</p>
+</div>
+</form>
+</div>
+</section>
+</main>
+
+
+</body></html>
