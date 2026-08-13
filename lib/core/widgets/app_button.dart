@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 
 class AppButton extends StatelessWidget {
   final String text;
@@ -19,22 +18,30 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return SizedBox(
-        height: 50,
-        child: Center(
-          child: CircularProgressIndicator(
-            color: isOutlined ? AppColors.primary : AppColors.surface,
-          ),
-        ),
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    final child = isLoading
+        ? SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2.5,
+              color: primaryColor,
+            ),
+          )
+        : _buildChild();
+
+    if (isOutlined) {
+      return OutlinedButton(
+        onPressed: isLoading ? null : onPressed,
+        child: child,
       );
     }
 
-    if (isOutlined) {
-      return OutlinedButton(onPressed: onPressed, child: _buildChild());
-    }
-
-    return ElevatedButton(onPressed: onPressed, child: _buildChild());
+    return ElevatedButton(
+      onPressed: isLoading ? null : onPressed,
+      child: child,
+    );
   }
 
   Widget _buildChild() {

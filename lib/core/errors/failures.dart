@@ -10,7 +10,8 @@ abstract class Failure {
 
 class NetworkFailure extends Failure {
   const NetworkFailure([
-    super.message = 'No internet connection or server timeout. Please try again.',
+    super.message =
+        'No internet connection or server timeout. Please try again.',
   ]);
 }
 

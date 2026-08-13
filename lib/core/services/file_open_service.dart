@@ -8,8 +8,9 @@ class MobileFileOpenService implements FileOpenService {
   @override
   Future<bool> openFile(String filePath) async {
     try {
-      // ignore: deprecated_member_use
-      final result = await Share.shareXFiles([XFile(filePath)]);
+      final result = await SharePlus.instance.share(
+        ShareParams(files: [XFile(filePath)]),
+      );
       return result.status == ShareResultStatus.success;
     } catch (_) {
       return false;
