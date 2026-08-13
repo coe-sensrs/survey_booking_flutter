@@ -8,6 +8,8 @@ import 'firebase_options.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/routing/app_router.dart';
+import 'core/services/firebase_app_check_setup.dart';
+import 'core/utils/app_snackbar.dart';
 
 void main() async {
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +17,7 @@ void main() async {
 
   await Hive.initFlutter();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseAppCheckSetup.initialize();
 
   runApp(const ProviderScope(child: SurveyDeskApp()));
 
@@ -35,6 +38,7 @@ class SurveyDeskApp extends ConsumerWidget {
       autoRebuild: false,
       builder: (context, child) {
         return MaterialApp.router(
+          scaffoldMessengerKey: AppSnackbar.scaffoldMessengerKey,
           title: 'Survey Desk',
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
