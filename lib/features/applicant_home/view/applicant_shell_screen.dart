@@ -49,25 +49,22 @@ class ApplicantShellScreen extends StatelessWidget {
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined),
-              selectedIcon: Icon(Icons.home, color: AppColors.primary),
+              selectedIcon: Icon(Icons.home),
               label: 'Home',
             ),
             NavigationDestination(
               icon: Icon(Icons.calendar_today_outlined),
-              selectedIcon: Icon(
-                Icons.calendar_today,
-                color: AppColors.primary,
-              ),
+              selectedIcon: Icon(Icons.calendar_today),
               label: 'My Bookings',
             ),
             NavigationDestination(
               icon: Icon(Icons.assignment_outlined),
-              selectedIcon: Icon(Icons.assignment, color: AppColors.primary),
+              selectedIcon: Icon(Icons.assignment),
               label: 'Details',
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline),
-              selectedIcon: Icon(Icons.person, color: AppColors.primary),
+              selectedIcon: Icon(Icons.person),
               label: 'Profile',
             ),
           ],
