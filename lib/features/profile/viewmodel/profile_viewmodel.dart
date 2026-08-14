@@ -60,6 +60,7 @@ class ProfileViewModel extends AsyncNotifier<void> {
     try {
       final storageUploadService = ref.read(storageUploadServiceProvider);
       final userRepository = ref.read(userRepositoryProvider);
+      final oldPhotoUrl = user.photoUrl;
 
       // 1. Upload to Firebase Storage
       final storagePath = await storageUploadService.uploadProfilePhoto(
@@ -79,7 +80,12 @@ class ProfileViewModel extends AsyncNotifier<void> {
         photoStoragePath: downloadUrl,
       );
 
-      // 4. Invalidate auth provider to refresh user data globally
+      // 4. Delete old photo from Firebase Storage if it exists
+      if (oldPhotoUrl != null && oldPhotoUrl.isNotEmpty) {
+        await storageUploadService.deleteFileByUrl(oldPhotoUrl);
+      }
+
+      // 5. Invalidate auth provider to refresh user data globally
       ref.invalidate(authViewModelProvider);
       state = const AsyncData(null);
     } catch (e) {

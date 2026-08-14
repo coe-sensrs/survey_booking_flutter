@@ -1,9 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/app_user.dart';
@@ -14,6 +14,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/profile_viewmodel.dart';
+import '../../../core/widgets/safe_profile_avatar.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -23,8 +24,6 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
-  bool _isUploadingPhoto = false;
-
   Future<void> _pickAndUploadPhoto() async {
     try {
       final result = await FilePicker.pickFiles(
@@ -64,11 +63,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         return;
       }
 
-      setState(() => _isUploadingPhoto = true);
+      // 3. Crop image to 1:1 ratio and resize to fixed dimension
+      final CroppedFile? croppedFile = await ImageCropper().cropImage(
+        sourcePath: file.path!,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        maxWidth: 512, // Fixed dimension for consistency and saving storage
+        maxHeight: 512,
+        compressQuality: 90,
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'Crop Profile Picture',
+            toolbarColor: const Color(0xFF2E5C45),
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.square,
+            lockAspectRatio: true,
+          ),
+          IOSUiSettings(
+            title: 'Crop Profile Picture',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+          ),
+          WebUiSettings(
+            context: context,
+            presentStyle: WebPresentStyle.dialog,
+            size: const CropperSize(width: 512, height: 512),
+          ),
+        ],
+      );
+
+      if (croppedFile == null) return;
 
       await ref
           .read(profileViewModelProvider.notifier)
-          .uploadProfilePhoto(filePath: file.path!, fileName: file.name);
+          .uploadProfilePhoto(filePath: croppedFile.path, fileName: file.name);
 
       if (mounted) {
         AppSnackbar.showSuccess(
@@ -85,8 +112,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           message: 'Failed to upload profile photo: $e',
         );
       }
-    } finally {
-      if (mounted) setState(() => _isUploadingPhoto = false);
     }
   }
 
@@ -256,7 +281,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final userState = ref.watch(authViewModelProvider);
+    final profileState = ref.watch(profileViewModelProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isUploading = profileState.isLoading;
 
     return Scaffold(
       appBar: AppBar(
@@ -286,15 +313,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           if (user == null) {
             return const Center(child: Text('No active user profile.'));
           }
-
-          final initials = user.fullName.isNotEmpty
-              ? user.fullName
-                    .split(' ')
-                    .where((e) => e.isNotEmpty)
-                    .take(2)
-                    .map((e) => e[0].toUpperCase())
-                    .join()
-              : 'A';
 
           return RefreshIndicator(
             onRefresh: () async {
@@ -329,30 +347,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Stack(
                           alignment: Alignment.bottomRight,
                           children: [
-                            CircleAvatar(
+                            SafeProfileAvatar(
+                              imageUrl: user.photoUrl,
                               radius: 45.r,
+                              fallbackIcon: Icons.person,
                               backgroundColor: Colors.white.withValues(
                                 alpha: 0.2,
                               ),
-                              backgroundImage:
-                                  user.photoUrl != null &&
-                                      user.photoUrl!.isNotEmpty
-                                  ? CachedNetworkImageProvider(user.photoUrl!)
-                                  : null,
-                              child:
-                                  user.photoUrl == null ||
-                                      user.photoUrl!.isEmpty
-                                  ? Text(
-                                      initials,
-                                      style: TextStyle(
-                                        fontSize: 28.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : null,
+                              iconColor: Colors.white,
                             ),
-                            if (_isUploadingPhoto)
+                            if (isUploading)
                               Positioned.fill(
                                 child: Container(
                                   decoration: BoxDecoration(
@@ -371,9 +375,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               bottom: 0,
                               right: 0,
                               child: InkWell(
-                                onTap: _isUploadingPhoto
-                                    ? null
-                                    : _pickAndUploadPhoto,
+                                onTap: isUploading ? null : _pickAndUploadPhoto,
                                 child: Container(
                                   padding: EdgeInsets.all(6.w),
                                   decoration: BoxDecoration(
@@ -595,7 +597,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 18.sp, color: Colors.grey[600]),
+        Icon(
+          icon,
+          size: 18.sp,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
         SizedBox(width: 10.w),
         Expanded(
           child: Column(
@@ -603,7 +609,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             children: [
               Text(
                 label,
-                style: TextStyle(fontSize: 11.sp, color: Colors.grey[600]),
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
               ),
               Text(
                 value,
