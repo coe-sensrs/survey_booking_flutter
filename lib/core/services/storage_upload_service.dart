@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:image/image.dart' as img;
+import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class StorageUploadService {
@@ -39,12 +41,68 @@ class StorageUploadService {
     final destination =
         'users/$uid/profile/${DateTime.now().millisecondsSinceEpoch}_$fileName';
     final ref = _storage.ref().child(destination);
-    await ref.putFile(File(filePath));
+
+    // Compress the image before uploading
+    final compressedFile = await _compressImage(File(filePath));
+    await ref.putFile(compressedFile);
+
+    // Clean up temporary compressed file
+    try {
+      if (await compressedFile.exists()) {
+        await compressedFile.delete();
+      }
+    } catch (_) {}
+
     return destination;
   }
 
   Future<String> getDownloadUrl(String storagePath) async {
     final ref = _storage.ref().child(storagePath);
     return await ref.getDownloadURL();
+  }
+
+  Future<void> deleteFileByUrl(String downloadUrl) async {
+    try {
+      final ref = _storage.refFromURL(downloadUrl);
+      await ref.delete();
+    } catch (e) {
+      // Ignore deletion errors (e.g., if file doesn't exist)
+    }
+  }
+
+  /// Compress image to reduce file size
+  Future<File> _compressImage(File imageFile) async {
+    try {
+      // Read image
+      final bytes = await imageFile.readAsBytes();
+      final image = img.decodeImage(bytes);
+
+      if (image == null) {
+        throw Exception('Failed to decode image');
+      }
+
+      // Resize if too large
+      img.Image resized = image;
+      if (image.width > 1024 || image.height > 1024) {
+        resized = img.copyResize(
+          image,
+          width: image.width > image.height ? 1024 : null,
+          height: image.height > image.width ? 1024 : null,
+        );
+      }
+
+      // Compress with quality 70
+      final compressed = img.encodeJpg(resized, quality: 70);
+
+      // Save compressed image
+      final tempDir = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final compressedFile = File('${tempDir.path}/compressed_$timestamp.jpg');
+      await compressedFile.writeAsBytes(compressed);
+
+      return compressedFile;
+    } catch (e) {
+      throw Exception('Failed to compress image: ${e.toString()}');
+    }
   }
 }
