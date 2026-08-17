@@ -96,4 +96,36 @@ class ProfileViewModel extends AsyncNotifier<void> {
       rethrow;
     }
   }
+
+  Future<void> deleteProfilePhoto() async {
+    final user = ref.read(authViewModelProvider).value;
+    if (user == null) {
+      throw const AuthFailure('No active user found. Please log in.');
+    }
+
+    state = const AsyncLoading();
+    try {
+      final storageUploadService = ref.read(storageUploadServiceProvider);
+      final userRepository = ref.read(userRepositoryProvider);
+      final oldPhotoUrl = user.photoUrl;
+
+      // 1. Delete old photo from Firebase Storage if it exists
+      if (oldPhotoUrl != null && oldPhotoUrl.isNotEmpty) {
+        await storageUploadService.deleteFileByUrl(oldPhotoUrl);
+      }
+
+      // 2. Remove photoUrl field from user's Firestore document
+      await userRepository.deleteProfilePhoto(user.uid);
+
+      // 3. Invalidate auth provider to refresh user data globally
+      ref.invalidate(authViewModelProvider);
+      state = const AsyncData(null);
+    } catch (e) {
+      state = AsyncError(
+        ServerFailure('Failed to remove profile photo: $e'),
+        StackTrace.current,
+      );
+      rethrow;
+    }
+  }
 }

@@ -115,6 +115,152 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
+  void _showPhotoOptionsSheet(AppUser user) {
+    final hasPhoto = user.photoUrl != null && user.photoUrl!.isNotEmpty;
+
+    if (!hasPhoto) {
+      _pickAndUploadPhoto();
+      return;
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Material(
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
+          clipBehavior: Clip.antiAlias,
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40.w,
+                    height: 4.h,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade400,
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'Profile Photo',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    leading: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.photo_library_outlined,
+                        color: AppColors.primary,
+                        size: 20.sp,
+                      ),
+                    ),
+                    title: const Text('Upload New Photo'),
+                    subtitle: const Text('JPG, PNG or WebP up to 5MB'),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _pickAndUploadPhoto();
+                    },
+                  ),
+                  ListTile(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    leading: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: AppColors.rejected.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.delete_outline,
+                        color: AppColors.rejected,
+                        size: 20.sp,
+                      ),
+                    ),
+                    title: const Text(
+                      'Remove Photo',
+                      style: TextStyle(color: AppColors.rejected),
+                    ),
+                    subtitle: const Text('Restore default avatar'),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      _confirmDeletePhoto();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _confirmDeletePhoto() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remove Profile Photo'),
+        content: const Text(
+          'Are you sure you want to remove your profile photo? This will restore the default avatar.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.rejected,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              try {
+                await ref
+                    .read(profileViewModelProvider.notifier)
+                    .deleteProfilePhoto();
+                if (mounted) {
+                  AppSnackbar.showSuccess(
+                    context,
+                    title: 'Photo Removed',
+                    message: 'Your profile photo has been removed.',
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  AppSnackbar.showError(
+                    context,
+                    title: 'Error',
+                    message: 'Failed to remove profile photo: $e',
+                  );
+                }
+              }
+            },
+            child: const Text('Remove'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showEditProfileDialog(AppUser user) {
     final nameController = TextEditingController(text: user.fullName);
     final orgController = TextEditingController(text: user.orgName ?? '');
@@ -347,14 +493,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         Stack(
                           alignment: Alignment.bottomRight,
                           children: [
-                            SafeProfileAvatar(
-                              imageUrl: user.photoUrl,
-                              radius: 45.r,
-                              fallbackIcon: Icons.person,
-                              backgroundColor: Colors.white.withValues(
-                                alpha: 0.2,
+                            GestureDetector(
+                              onTap: isUploading
+                                  ? null
+                                  : () => _showPhotoOptionsSheet(user),
+                              child: SafeProfileAvatar(
+                                imageUrl: user.photoUrl,
+                                radius: 45.r,
+                                fallbackIcon: Icons.person,
+                                backgroundColor: Colors.white.withValues(
+                                  alpha: 0.2,
+                                ),
+                                iconColor: Colors.white,
                               ),
-                              iconColor: Colors.white,
                             ),
                             if (isUploading)
                               Positioned.fill(
@@ -375,7 +526,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               bottom: 0,
                               right: 0,
                               child: InkWell(
-                                onTap: isUploading ? null : _pickAndUploadPhoto,
+                                onTap: isUploading
+                                    ? null
+                                    : () => _showPhotoOptionsSheet(user),
                                 child: Container(
                                   padding: EdgeInsets.all(6.w),
                                   decoration: BoxDecoration(
@@ -387,7 +540,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     ),
                                   ),
                                   child: Icon(
-                                    Icons.camera_alt,
+                                    user.photoUrl != null &&
+                                            user.photoUrl!.isNotEmpty
+                                        ? Icons.edit
+                                        : Icons.camera_alt,
                                     size: 16.sp,
                                     color: Colors.black87,
                                   ),
