@@ -1,41 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import '../services/hive_storage_service.dart';
 
-const String _themeBoxName = 'settingsBox';
-const String _themeKey = 'themeMode';
 
 class ThemeNotifier extends Notifier<ThemeMode> {
   @override
   ThemeMode build() {
-    _loadThemeMode();
-    return ThemeMode.system;
-  }
-
-  Future<void> _loadThemeMode() async {
     try {
-      final box = await Hive.openBox(_themeBoxName);
-      final savedTheme = box.get(_themeKey, defaultValue: 'system') as String;
-      if (savedTheme == 'light') {
-        state = ThemeMode.light;
-      } else if (savedTheme == 'dark') {
-        state = ThemeMode.dark;
-      } else {
-        state = ThemeMode.system;
-      }
-    } catch (_) {
-      state = ThemeMode.system;
-    }
+      final savedTheme = HiveStorageService.getThemeMode();
+      if (savedTheme == 'light') return ThemeMode.light;
+      if (savedTheme == 'dark') return ThemeMode.dark;
+    } catch (_) {}
+    return ThemeMode.system;
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {
     state = mode;
     try {
-      final box = await Hive.openBox(_themeBoxName);
       String value = 'system';
       if (mode == ThemeMode.light) value = 'light';
       if (mode == ThemeMode.dark) value = 'dark';
-      await box.put(_themeKey, value);
+      await HiveStorageService.setThemeMode(value);
     } catch (_) {}
   }
 
