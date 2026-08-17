@@ -1,162 +1,97 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'app_colors.dart';
 
+/// App theme built with FlexColorScheme v8.
+///
+/// Usage in [MaterialApp]:
+/// ```dart
+/// MaterialApp(
+///   theme: AppTheme.lightTheme,
+///   darkTheme: AppTheme.darkTheme,
+/// );
+/// ```
 class AppTheme {
   AppTheme._();
 
+  static const _subThemes = FlexSubThemesData(
+    interactionEffects: true,
+    tintedDisabledControls: true,
+    useM2StyleDividerInM3: true,
+    // Input decoration
+    inputDecoratorIsFilled: true,
+    inputDecoratorBorderType: FlexInputBorderType.outline,
+    inputDecoratorRadius: 10,
+    inputDecoratorContentPadding: EdgeInsets.symmetric(
+      horizontal: 16,
+      vertical: 14,
+    ),
+    // Buttons
+    elevatedButtonRadius: 10,
+    outlinedButtonRadius: 10,
+    textButtonRadius: 10,
+    // Cards
+    cardRadius: 12,
+    // Navigation
+    alignedDropdown: true,
+    navigationBarLabelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+    navigationRailUseIndicator: true,
+  );
+
   static ThemeData get lightTheme {
-    final baseTheme = ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.light,
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.primary,
-        secondary: AppColors.accent,
-        surface: AppColors.surfaceLight,
-        error: AppColors.rejected,
-        onPrimary: AppColors.textInverse,
-        onSecondary: AppColors.textPrimaryLight,
-        onSurface: AppColors.textPrimaryLight,
-      ),
-      scaffoldBackgroundColor: AppColors.backgroundLight,
-      textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.surfaceLight,
-        foregroundColor: AppColors.textPrimaryLight,
-        elevation: 0,
-        centerTitle: false,
-      ),
-      cardTheme: const CardThemeData(
-        color: AppColors.cardLight,
-        elevation: 1,
-        margin: EdgeInsets.zero,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          foregroundColor: AppColors.textInverse,
-          minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    final base = FlexThemeData.light(
+      scheme: FlexScheme.greenM3,
+      subThemesData: _subThemes,
+      fontFamily: GoogleFonts.inter().fontFamily,
+      visualDensity: FlexColorScheme.comfortablePlatformDensity,
+      cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
+    );
+
+    // Apply button minimum height (not supported in FlexSubThemesData)
+    return ResponsiveTheme.fromTheme(
+      base.copyWith(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: (base.elevatedButtonTheme.style ?? const ButtonStyle())
+              .copyWith(
+                minimumSize: const WidgetStatePropertyAll(Size.fromHeight(50)),
+              ),
         ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.primary),
-          minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.surfaceLight,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.borderLight),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.rejected),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: (base.outlinedButtonTheme.style ?? const ButtonStyle())
+              .copyWith(
+                minimumSize: const WidgetStatePropertyAll(Size.fromHeight(50)),
+              ),
         ),
       ),
     );
-
-    return ResponsiveTheme.fromTheme(baseTheme);
   }
 
   static ThemeData get darkTheme {
-    final baseTheme = ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryLight,
-        secondary: AppColors.accent,
-        surface: AppColors.surfaceDark,
-        error: AppColors.rejected,
-        onPrimary: AppColors.textInverse,
-        onSecondary: AppColors.textPrimaryDark,
-        onSurface: AppColors.textPrimaryDark,
-      ),
-      scaffoldBackgroundColor: AppColors.backgroundDark,
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
-      appBarTheme: const AppBarTheme(
-        backgroundColor: AppColors.surfaceDark,
-        foregroundColor: AppColors.textPrimaryDark,
-        elevation: 0,
-        centerTitle: false,
-      ),
-      cardTheme: const CardThemeData(
-        color: AppColors.cardDark,
-        elevation: 1,
-        margin: EdgeInsets.zero,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryLight,
-          foregroundColor: AppColors.textInverse,
-          minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    final base = FlexThemeData.dark(
+      scheme: FlexScheme.greenM3,
+      subThemesData: _subThemes.copyWith(blendOnColors: true),
+      fontFamily: GoogleFonts.inter().fontFamily,
+      visualDensity: FlexColorScheme.comfortablePlatformDensity,
+      cupertinoOverrideTheme: const CupertinoThemeData(applyThemeToAll: true),
+    );
+
+    return ResponsiveTheme.fromTheme(
+      base.copyWith(
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: (base.elevatedButtonTheme.style ?? const ButtonStyle())
+              .copyWith(
+                minimumSize: const WidgetStatePropertyAll(Size.fromHeight(50)),
+              ),
         ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: AppColors.primaryLight,
-          side: const BorderSide(color: AppColors.primaryLight),
-          minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: AppColors.surfaceDark,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.borderDark),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.borderDark),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.primaryLight, width: 2),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: AppColors.rejected),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: (base.outlinedButtonTheme.style ?? const ButtonStyle())
+              .copyWith(
+                minimumSize: const WidgetStatePropertyAll(Size.fromHeight(50)),
+              ),
         ),
       ),
     );
-
-    return ResponsiveTheme.fromTheme(baseTheme);
   }
 }
