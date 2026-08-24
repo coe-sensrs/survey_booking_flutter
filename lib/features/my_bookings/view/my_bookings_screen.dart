@@ -7,7 +7,8 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/appointment_status.dart';
 import '../../../core/constants/survey_type.dart';
 import '../../../core/models/appointment.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/routing/app_router.dart';
+
 import '../../../core/widgets/empty_state.dart';
 import '../providers/selected_appointment_provider.dart';
 import '../viewmodel/my_bookings_viewmodel.dart';
@@ -68,12 +69,16 @@ class MyBookingsScreen extends ConsumerWidget {
                     },
                     selectedColor:
                         Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.primaryDarkAccent.withValues(alpha: 0.3)
-                        : AppColors.primary.withValues(alpha: 0.2),
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer.withValues(alpha: 0.3)
+                        : Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.2),
                     checkmarkColor:
                         Theme.of(context).brightness == Brightness.dark
-                        ? AppColors.textInverse
-                        : AppColors.primary,
+                        ? Theme.of(context).colorScheme.onPrimary
+                        : Theme.of(context).colorScheme.primary,
                   ),
                 );
               }).toList(),
@@ -146,7 +151,7 @@ class MyBookingsScreen extends ConsumerWidget {
         contentPadding: EdgeInsets.all(16.w),
         onTap: () {
           ref.read(selectedAppointmentIdProvider.notifier).select(item.id);
-          context.push('/appointment-detail/${item.id}');
+          context.go(AppRoutes.appointmentDetailTab);
         },
         title: Row(
           children: [
