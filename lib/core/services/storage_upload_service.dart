@@ -9,15 +9,51 @@ class StorageUploadService {
   StorageUploadService({FirebaseStorage? storage})
     : _storage = storage ?? FirebaseStorage.instance;
 
+  String _getContentType(String fileNameOrExt) {
+    final ext = fileNameOrExt.contains('.')
+        ? fileNameOrExt.split('.').last.toLowerCase()
+        : fileNameOrExt.toLowerCase();
+    switch (ext) {
+      case 'pdf':
+        return 'application/pdf';
+      case 'jpg':
+      case 'jpeg':
+        return 'image/jpeg';
+      case 'png':
+        return 'image/png';
+      case 'webp':
+        return 'image/webp';
+      case 'kml':
+        return 'application/vnd.google-earth.kml+xml';
+      case 'kmz':
+        return 'application/vnd.google-earth.kmz';
+      default:
+        return 'application/octet-stream';
+    }
+  }
+
   Future<String> uploadPermissionDocument({
     required String appointmentId,
     required String filePath,
     required String fileName,
+    void Function(double progress)? onProgress,
   }) async {
     final destination =
         'appointments/$appointmentId/permissionDocuments/${DateTime.now().millisecondsSinceEpoch}_$fileName';
     final ref = _storage.ref().child(destination);
-    await ref.putFile(File(filePath));
+    final metadata = SettableMetadata(
+      contentType: _getContentType(fileName),
+      customMetadata: {'originalFileName': fileName},
+    );
+    final uploadTask = ref.putFile(File(filePath), metadata);
+    if (onProgress != null) {
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        if (snapshot.totalBytes > 0) {
+          onProgress(snapshot.bytesTransferred / snapshot.totalBytes);
+        }
+      });
+    }
+    await uploadTask;
     return destination;
   }
 
@@ -25,11 +61,24 @@ class StorageUploadService {
     required String appointmentId,
     required String filePath,
     required String fileName,
+    void Function(double progress)? onProgress,
   }) async {
     final destination =
         'appointments/$appointmentId/kml/${DateTime.now().millisecondsSinceEpoch}_$fileName';
     final ref = _storage.ref().child(destination);
-    await ref.putFile(File(filePath));
+    final metadata = SettableMetadata(
+      contentType: _getContentType(fileName),
+      customMetadata: {'originalFileName': fileName},
+    );
+    final uploadTask = ref.putFile(File(filePath), metadata);
+    if (onProgress != null) {
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        if (snapshot.totalBytes > 0) {
+          onProgress(snapshot.bytesTransferred / snapshot.totalBytes);
+        }
+      });
+    }
+    await uploadTask;
     return destination;
   }
 
