@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:survey_desk/core/routing/app_router.dart';
 import 'package:survey_desk/core/utils/app_snackbar.dart';
 import 'package:survey_desk/core/utils/sanitizing_text_input_formatter.dart';
 import 'package:survey_desk/core/utils/validators.dart';
@@ -38,6 +39,9 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Listen for auth state changes so we can navigate immediately on success
+    // and show an error snackbar on failure — both without relying solely on
+    // the router redirect (which has an async Firestore round-trip).
     ref.listen(authViewModelProvider, (previous, next) {
       if (next is AsyncError) {
         AppSnackbar.showError(
@@ -45,6 +49,17 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
           title: 'Login Failed',
           message: next.error.toString(),
         );
+        return;
+      }
+
+      // Navigate to the correct role-based shell as soon as we have a confirmed staff user.
+      if (next is AsyncData) {
+        final user = next.value;
+        if (user != null && user.isAdmin) {
+          context.go(AppRoutes.adminDashboard);
+        } else if (user != null && user.isCommittee) {
+          context.go(AppRoutes.committeeDashboard);
+        }
       }
     });
 
@@ -54,7 +69,6 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin / Committee'),
-        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: BackButton(onPressed: () => context.go('/login')),
       ),
@@ -69,9 +83,13 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
+                  Text(
                     'Admin Portal',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
