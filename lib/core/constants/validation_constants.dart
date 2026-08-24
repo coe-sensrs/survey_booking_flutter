@@ -15,7 +15,7 @@ class ValidationConstants {
   static const int maxClarificationReplyLength = 500;
 
   static const int maxPermissionDocsCount = 5;
-  static const int minPermissionDocsCount = 1;
+  static const int minPermissionDocsCount = 0;
   static const int maxFileSizeBytes = 5 * 1024 * 1024; // 5MB
 
   static const int maxUnresolvedBookingsPerApplicant = 3;
