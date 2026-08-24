@@ -5,6 +5,8 @@ import 'package:survey_desk/core/errors/failures.dart';
 import 'package:survey_desk/core/models/app_user.dart';
 import 'package:survey_desk/core/repositories/user_repository.dart';
 import 'package:survey_desk/core/providers/core_providers.dart';
+import 'package:survey_desk/core/services/hive_storage_service.dart';
+import 'package:survey_desk/core/utils/app_snackbar.dart';
 
 /// Thrown when a user attempts to log in before verifying their email.
 /// Contains the [email] so the UI can pass it to the verification screen.
@@ -28,15 +30,34 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
     _firebaseAuth = auth.FirebaseAuth.instance;
     _userRepository = ref.watch(userRepositoryProvider);
 
-    // Listen to auth state changes
+    // Listen to user changes (fires on token refresh, profile updates, sign-out).
     final completer = Completer<AppUser?>();
-    _firebaseAuth.authStateChanges().listen((user) async {
+    _firebaseAuth.userChanges().listen((user) async {
       if (user == null) {
+        ref.read(crashReportingServiceProvider).setCustomKey('role', 'none');
+        ref.read(crashReportingServiceProvider).setCustomKey('user_id', 'none');
         state = const AsyncData(null);
         if (!completer.isCompleted) completer.complete(null);
       } else {
         try {
           final appUser = await _userRepository.getUserById(user.uid);
+
+          if (appUser != null && appUser.active == false) {
+            await _forceSignOut(
+              'Your account has been deactivated. Please contact your administrator.',
+            );
+            return;
+          }
+
+          if (appUser != null) {
+            ref
+                .read(crashReportingServiceProvider)
+                .setCustomKey('role', appUser.role);
+            ref
+                .read(crashReportingServiceProvider)
+                .setCustomKey('user_id', appUser.uid);
+          }
+
           state = AsyncData(appUser);
           if (!completer.isCompleted) completer.complete(appUser);
         } catch (e) {
@@ -178,8 +199,9 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
   /// Called from [EmailVerificationScreen] after signup or a failed login.
   Future<void> sendVerificationEmailToCurrentUser() async {
     final user = _firebaseAuth.currentUser;
-    if (user == null)
+    if (user == null) {
       throw const AuthFailure('No active session. Please log in again.');
+    }
     try {
       await user.sendEmailVerification();
     } on auth.FirebaseAuthException catch (e) {
@@ -192,9 +214,51 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
     }
   }
 
+  /// Validates the current Firebase session is still active.
+  ///
+  /// Call on app resume (`AppLifecycleState.resumed`) to detect externally
+  /// revoked sessions (e.g. password reset on another device, admin suspension).
+  /// If the session is invalid, signs out locally and shows a global alert.
+  Future<void> validateCurrentSession() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return;
+
+    try {
+      await user.reload();
+      // After reload, if Firebase SDK cleared the user the stream handles it.
+
+      // Proactively check if the user was deactivated in Firestore by an admin
+      final appUser = await _userRepository.getUserById(user.uid);
+      if (appUser != null && appUser.active == false) {
+        await _forceSignOut(
+          'Your account has been deactivated. Please contact your administrator.',
+        );
+        return;
+      }
+    } on auth.FirebaseAuthException catch (e) {
+      // user-disabled, user-token-expired, user-not-found
+      await _forceSignOut(
+        e.code == 'user-disabled'
+            ? 'Your account has been disabled. Contact support.'
+            : 'Your session has expired. Please sign in again.',
+      );
+    } catch (_) {
+      // Network errors are silently ignored — we'll retry on next resume.
+    }
+  }
+
   Future<void> logout() async {
     await _firebaseAuth.signOut();
+    await HiveStorageService.clearUserData();
     state = const AsyncData(null);
+  }
+
+  /// Signs out, clears local data, and shows a global warning snackbar.
+  Future<void> _forceSignOut(String message) async {
+    await _firebaseAuth.signOut();
+    await HiveStorageService.clearUserData();
+    state = const AsyncData(null);
+    AppSnackbar.showGlobalWarning(title: 'Session Ended', message: message);
   }
 
   Failure _handleAuthException(dynamic e) {

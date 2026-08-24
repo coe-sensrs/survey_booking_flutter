@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -23,8 +24,16 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  /// Seconds remaining before the user can request another password reset.
+  int _resetCooldownSeconds = 0;
+  Timer? _cooldownTimer;
+
+  /// True while the reset email request is in-flight.
+  bool _isSendingReset = false;
+
   @override
   void dispose() {
+    _cooldownTimer?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -45,6 +54,62 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
       }
     }
   }
+
+  Future<void> _onForgotPassword() async {
+    final email = _emailController.text.trim();
+
+    // Validate email format before sending.
+    final emailError = Validators.validateEmail(email);
+    if (email.isEmpty || emailError != null) {
+      AppSnackbar.showWarning(
+        context,
+        title: 'Email Required',
+        message: emailError ?? 'Please enter a valid email address first.',
+      );
+      return;
+    }
+
+    setState(() => _isSendingReset = true);
+
+    try {
+      await ref.read(authViewModelProvider.notifier).resetPassword(email);
+      if (mounted) {
+        AppSnackbar.showSuccess(
+          context,
+          title: 'Password Reset',
+          message: 'Password reset email sent (if account exists).',
+        );
+        _startCooldown();
+      }
+    } catch (e) {
+      if (mounted) {
+        AppSnackbar.showError(
+          context,
+          title: 'Reset Failed',
+          message: e.toString(),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSendingReset = false);
+    }
+  }
+
+  void _startCooldown() {
+    setState(() => _resetCooldownSeconds = 60);
+    _cooldownTimer?.cancel();
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _resetCooldownSeconds--;
+        if (_resetCooldownSeconds <= 0) timer.cancel();
+      });
+    });
+  }
+
+  bool get _isCooldownActive => _resetCooldownSeconds > 0;
 
   @override
   Widget build(BuildContext context) {
@@ -108,26 +173,20 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {
-                        if (_emailController.text.isNotEmpty) {
-                          ref
-                              .read(authViewModelProvider.notifier)
-                              .resetPassword(_emailController.text);
-                          AppSnackbar.showSuccess(
-                            context,
-                            title: 'Password Reset',
-                            message:
-                                'Password reset email sent (if account exists).',
-                          );
-                        } else {
-                          AppSnackbar.showWarning(
-                            context,
-                            title: 'Email Required',
-                            message: 'Please enter your email address first.',
-                          );
-                        }
-                      },
-                      child: const Text('Forgot Password?'),
+                      onPressed: (_isCooldownActive || _isSendingReset)
+                          ? null
+                          : _onForgotPassword,
+                      child: _isSendingReset
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : Text(
+                              _isCooldownActive
+                                  ? 'Retry in ${_resetCooldownSeconds}s'
+                                  : 'Forgot Password?',
+                            ),
                     ),
                   ),
                   const SizedBox(height: 24),
