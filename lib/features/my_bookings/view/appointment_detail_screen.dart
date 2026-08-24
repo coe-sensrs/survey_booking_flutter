@@ -7,7 +7,7 @@ import '../../../core/constants/appointment_status.dart';
 import '../../../core/constants/survey_type.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/providers/core_providers.dart';
-import '../../../core/theme/app_colors.dart';
+
 import '../../../core/utils/app_snackbar.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
@@ -117,12 +117,18 @@ class _AppointmentDetailScreenState
                 // Header Status Card
                 Card(
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? AppColors.primaryDarkAccent.withValues(alpha: 0.15)
-                      : AppColors.primary.withValues(alpha: 0.05),
+                      ? Theme.of(
+                          context,
+                        ).colorScheme.primaryContainer.withValues(alpha: 0.15)
+                      : Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.05),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12.r),
                     side: BorderSide(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.2),
                     ),
                   ),
                   child: Padding(
@@ -313,7 +319,11 @@ class _AppointmentDetailScreenState
           children: [
             Row(
               children: [
-                Icon(icon, size: 18.sp, color: AppColors.primary),
+                Icon(
+                  icon,
+                  size: 18.sp,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
                 SizedBox(width: 8.w),
                 Text(
                   title,

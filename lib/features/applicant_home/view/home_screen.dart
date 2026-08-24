@@ -8,20 +8,65 @@ import '../../../core/constants/appointment_status.dart';
 import '../../../core/constants/survey_type.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/models/audit_log_entry.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/routing/app_router.dart';
+
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
+import '../../booking_wizard/viewmodel/booking_wizard_viewmodel.dart';
 import '../../my_bookings/providers/selected_appointment_provider.dart';
 import '../viewmodel/home_viewmodel.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  void _confirmStartFresh(
+    BuildContext context,
+    WidgetRef ref,
+    int currentStep,
+  ) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Start Fresh Survey?'),
+        content: Text(
+          'You have saved progress at Step $currentStep of 9. '
+          'Starting a new survey will discard your existing draft. Do you want to proceed?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Keep Draft'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ref
+                  .read(bookingWizardViewModelProvider.notifier)
+                  .startFreshSurvey();
+              if (context.mounted) {
+                context.push('/booking-wizard');
+              }
+            },
+            child: const Text('Discard & Start Fresh'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authViewModelProvider).value;
     final homeState = ref.watch(homeViewModelProvider);
+    final wizardState = ref.watch(bookingWizardViewModelProvider);
+    final hasDraft = ref
+        .watch(bookingWizardViewModelProvider.notifier)
+        .hasDraft;
 
     return Scaffold(
       appBar: AppBar(
@@ -44,14 +89,19 @@ class HomeScreen extends ConsumerWidget {
                 padding: EdgeInsets.all(20.w),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [AppColors.primary, AppColors.primaryLight],
+                    colors: [
+                      Theme.of(context).colorScheme.primary,
+                      Theme.of(context).colorScheme.primaryContainer,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(16.r),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.2),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.2),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -77,13 +127,104 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                     SizedBox(height: 16.h),
-                    AppButton(
-                      text: 'Start New Survey',
-                      icon: Icons.add_circle_outline,
-                      onPressed: () {
-                        context.push('/booking-wizard');
-                      },
-                    ),
+                    if (hasDraft) ...[
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 10.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.edit_document,
+                              color: Colors.white,
+                              size: 14,
+                            ),
+                            SizedBox(width: 6.w),
+                            Text(
+                              'Draft in progress • Step ${wizardState.currentStep} of 9',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 12.h),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Theme.of(
+                                  context,
+                                ).colorScheme.primary,
+                                minimumSize: Size.fromHeight(46.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                textStyle: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              onPressed: () {
+                                context.push('/booking-wizard');
+                              },
+                              icon: const Icon(Icons.play_arrow_rounded),
+                              label: Text(
+                                'Resume (Step ${wizardState.currentStep})',
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 10.w),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(
+                                color: Colors.white,
+                                width: 1.5,
+                              ),
+                              minimumSize: Size.zero,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 12.h,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              textStyle: TextStyle(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            onPressed: () => _confirmStartFresh(
+                              context,
+                              ref,
+                              wizardState.currentStep,
+                            ),
+                            icon: const Icon(Icons.add, size: 16),
+                            label: const Text('New'),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      AppButton(
+                        text: 'Start New Survey',
+                        icon: Icons.add_circle_outline,
+                        onPressed: () {
+                          context.push('/booking-wizard');
+                        },
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -118,7 +259,7 @@ class HomeScreen extends ConsumerWidget {
                             Icon(
                               Icons.assignment_add,
                               size: 64.sp,
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                             SizedBox(height: 12.h),
                             Text(
@@ -134,7 +275,9 @@ class HomeScreen extends ConsumerWidget {
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 13.sp,
-                                color: Colors.grey[600],
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                           ],
@@ -174,7 +317,7 @@ class HomeScreen extends ConsumerWidget {
                         title: 'Recent Appointment Requests',
                         icon: Icons.history,
                         actionText: 'View All',
-                        onAction: () => context.push('/my-bookings'),
+                        onAction: () => context.go(AppRoutes.myBookings),
                       ),
                       SizedBox(height: 8.h),
                       if (data.recentRequests.isEmpty)
@@ -225,7 +368,7 @@ class HomeScreen extends ConsumerWidget {
                                 const Divider(height: 1),
                             itemBuilder: (context, index) {
                               final activity = data.recentActivity[index];
-                              return _buildActivityTile(activity);
+                              return _buildActivityTile(context, activity);
                             },
                           ),
                         ),
@@ -249,7 +392,7 @@ class HomeScreen extends ConsumerWidget {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 20.sp, color: AppColors.primary),
+        Icon(icon, size: 20.sp, color: Theme.of(context).colorScheme.primary),
         SizedBox(width: 8.w),
         Text(
           title,
@@ -282,7 +425,7 @@ class HomeScreen extends ConsumerWidget {
         contentPadding: EdgeInsets.all(12.w),
         onTap: () {
           ref.read(selectedAppointmentIdProvider.notifier).select(item.id);
-          context.push('/appointment-detail/${item.id}');
+          context.go(AppRoutes.appointmentDetailTab);
         },
         title: Row(
           children: [
@@ -292,7 +435,7 @@ class HomeScreen extends ConsumerWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp),
               ),
             ),
-            _buildStatusBadge(item.status),
+            _buildStatusBadge(context, item.status),
           ],
         ),
         subtitle: Column(
@@ -304,7 +447,9 @@ class HomeScreen extends ConsumerWidget {
                 Icon(
                   Icons.location_on_outlined,
                   size: 14.sp,
-                  color: Colors.grey,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 SizedBox(width: 4.w),
                 Expanded(
@@ -323,7 +468,9 @@ class HomeScreen extends ConsumerWidget {
                 Icon(
                   Icons.calendar_today_outlined,
                   size: 14.sp,
-                  color: Colors.grey,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 SizedBox(width: 4.w),
                 Text('Date: $formattedDate', style: TextStyle(fontSize: 12.sp)),
@@ -335,31 +482,40 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBadge(AppointmentStatus status) {
+  Widget _buildStatusBadge(BuildContext context, AppointmentStatus status) {
     Color bg;
     Color fg;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     switch (status) {
       case AppointmentStatus.approved:
       case AppointmentStatus.taskAssigned:
-        bg = Colors.green.shade100;
-        fg = Colors.green.shade800;
+        bg = isDark
+            ? Colors.green.withValues(alpha: 0.25)
+            : Colors.green.shade100;
+        fg = isDark ? const Color(0xFF81C784) : Colors.green.shade800;
         break;
       case AppointmentStatus.rejected:
-        bg = Colors.red.shade100;
-        fg = Colors.red.shade800;
+        bg = isDark ? Colors.red.withValues(alpha: 0.25) : Colors.red.shade100;
+        fg = isDark ? const Color(0xFFE57373) : Colors.red.shade800;
         break;
       case AppointmentStatus.clarificationRequested:
-        bg = Colors.orange.shade100;
-        fg = Colors.orange.shade800;
+        bg = isDark
+            ? Colors.orange.withValues(alpha: 0.25)
+            : Colors.orange.shade100;
+        fg = isDark ? const Color(0xFFFFB74D) : Colors.orange.shade800;
         break;
       case AppointmentStatus.underReview:
-        bg = Colors.blue.shade100;
-        fg = Colors.blue.shade800;
+        bg = isDark
+            ? Colors.blue.withValues(alpha: 0.25)
+            : Colors.blue.shade100;
+        fg = isDark ? const Color(0xFF64B5F6) : Colors.blue.shade800;
         break;
       case AppointmentStatus.pendingAssignment:
-        bg = Colors.grey.shade200;
-        fg = Colors.grey.shade800;
+        bg = isDark
+            ? Colors.grey.withValues(alpha: 0.25)
+            : Colors.grey.shade200;
+        fg = isDark ? const Color(0xFFBDBDBD) : Colors.grey.shade800;
         break;
     }
 
@@ -380,7 +536,7 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildActivityTile(AuditLogEntry activity) {
+  Widget _buildActivityTile(BuildContext context, AuditLogEntry activity) {
     final formattedTime = DateFormat(
       'dd MMM, hh:mm a',
     ).format(activity.timestamp);
@@ -390,8 +546,14 @@ class HomeScreen extends ConsumerWidget {
       dense: true,
       leading: CircleAvatar(
         radius: 16.r,
-        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-        child: Icon(Icons.history, size: 16.sp, color: AppColors.primary),
+        backgroundColor: Theme.of(
+          context,
+        ).colorScheme.primary.withValues(alpha: 0.1),
+        child: Icon(
+          Icons.history,
+          size: 16.sp,
+          color: Theme.of(context).colorScheme.primary,
+        ),
       ),
       title: Text(
         actionText,
@@ -399,7 +561,10 @@ class HomeScreen extends ConsumerWidget {
       ),
       subtitle: Text(
         'By ${activity.performedByName} • $formattedTime',
-        style: TextStyle(fontSize: 11.sp, color: Colors.grey[600]),
+        style: TextStyle(
+          fontSize: 11.sp,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
       ),
     );
   }
