@@ -64,6 +64,7 @@ class _Step2StateDistrictState extends ConsumerState<Step2StateDistrict> {
   @override
   Widget build(BuildContext context) {
     final wizardState = ref.watch(bookingWizardViewModelProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     if (_isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -81,7 +82,10 @@ class _Step2StateDistrictState extends ConsumerState<Step2StateDistrict> {
           SizedBox(height: 6.h),
           Text(
             'Select the district in Punjab where the survey is required.',
-            style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           SizedBox(height: 20.h),
 
@@ -89,14 +93,9 @@ class _Step2StateDistrictState extends ConsumerState<Step2StateDistrict> {
           TextFormField(
             initialValue: 'Punjab',
             readOnly: true,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'State',
-              prefixIcon: const Icon(Icons.map),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              filled: true,
-              fillColor: Colors.grey[100],
+              prefixIcon: Icon(Icons.map),
             ),
           ),
 
@@ -107,12 +106,9 @@ class _Step2StateDistrictState extends ConsumerState<Step2StateDistrict> {
             initialValue: _districts.contains(wizardState.district)
                 ? wizardState.district
                 : (_districts.isNotEmpty ? _districts.first : null),
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'District *',
-              prefixIcon: const Icon(Icons.location_city),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
+              prefixIcon: Icon(Icons.location_city),
             ),
             items: _districts.map((dist) {
               return DropdownMenuItem<String>(value: dist, child: Text(dist));

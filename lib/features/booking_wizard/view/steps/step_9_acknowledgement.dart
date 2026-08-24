@@ -10,6 +10,8 @@ class Step9Acknowledgement extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Padding(
       padding: EdgeInsets.all(24.w),
       child: Column(
@@ -17,10 +19,12 @@ class Step9Acknowledgement extends ConsumerWidget {
         children: [
           CircleAvatar(
             radius: 40.r,
-            backgroundColor: Colors.green.shade100,
+            backgroundColor: isDark
+                ? Colors.green.withValues(alpha: 0.25)
+                : Colors.green.shade100,
             child: Icon(
               Icons.check_circle,
-              color: Colors.green.shade800,
+              color: isDark ? const Color(0xFF81C784) : Colors.green.shade800,
               size: 50.sp,
             ),
           ),
@@ -34,7 +38,10 @@ class Step9Acknowledgement extends ConsumerWidget {
           Text(
             'Your survey appointment booking has been recorded successfully. '
             'An admin will assign a reviewer shortly.',
-            style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 36.h),

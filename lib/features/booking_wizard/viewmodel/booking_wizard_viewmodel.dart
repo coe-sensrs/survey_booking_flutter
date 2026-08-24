@@ -175,6 +175,12 @@ final bookingWizardViewModelProvider =
 class BookingWizardViewModel extends Notifier<WizardStateData> {
   @override
   WizardStateData build() {
+    ref.listen(authViewModelProvider, (previous, next) {
+      if (next.value == null) {
+        state = const WizardStateData();
+      }
+    });
+
     try {
       final raw = HiveStorageService.getWizardDraft();
       if (raw != null && raw.isNotEmpty) {
@@ -237,12 +243,17 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
   }
 
   /// Final Submission (Step 8 -> 9)
-  Future<String> submitBooking() async {
+  Future<String> submitBooking({
+    void Function(String stage, double progress)? onProgress,
+  }) async {
     final user = ref.read(authViewModelProvider).value;
     if (user == null) throw Exception('Applicant not logged in');
 
     final uploadService = ref.read(storageUploadServiceProvider);
     final appointmentRepo = ref.read(appointmentRepositoryProvider);
+
+    final totalDocs = state.permissionDocs.length;
+    final totalSteps = 1 + totalDocs + 1; // KML + Docs + Firestore
 
     // 1. Upload KML/KMZ File
     if (state.kmlFilePath == null || state.kmlFileName == null) {
@@ -258,10 +269,22 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
     final kmlBytes = await kmlFileObj.readAsBytes();
     final tempId = DateTime.now().millisecondsSinceEpoch.toString();
 
+    onProgress?.call(
+      'Uploading Survey Map (${state.kmlFileName})...',
+      0.05,
+    );
+
     final kmlStoragePath = await uploadService.uploadKmlFile(
       appointmentId: tempId,
       filePath: state.kmlFilePath!,
       fileName: state.kmlFileName!,
+      onProgress: (fileProgress) {
+        final scaled = (fileProgress / totalSteps);
+        onProgress?.call(
+          'Uploading Survey Map (${state.kmlFileName})...',
+          scaled.clamp(0.0, 1.0),
+        );
+      },
     );
 
     final kmlModel = KmlFile(
@@ -272,9 +295,10 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
       uploadedAt: DateTime.now(),
     );
 
-    // 2. Upload Permission Documents
+    // 2. Upload Permission Documents (if any)
     final List<PermissionDocument> uploadedDocs = [];
-    for (final docMap in state.permissionDocs) {
+    for (int i = 0; i < totalDocs; i++) {
+      final docMap = state.permissionDocs[i];
       final path = docMap['path'] as String;
       final fileName = docMap['fileName'] as String;
       final fileType = docMap['fileType'] as String;
@@ -286,10 +310,24 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
       }
       final bytes = await file.readAsBytes();
 
+      final stepBase = (1.0 + i) / totalSteps;
+      final stepWeight = 1.0 / totalSteps;
+      onProgress?.call(
+        'Uploading document ${i + 1} of $totalDocs ($fileName)...',
+        stepBase,
+      );
+
       final storagePath = await uploadService.uploadPermissionDocument(
         appointmentId: tempId,
         filePath: path,
         fileName: fileName,
+        onProgress: (fileProgress) {
+          final scaled = stepBase + (fileProgress * stepWeight);
+          onProgress?.call(
+            'Uploading document ${i + 1} of $totalDocs ($fileName)...',
+            scaled.clamp(0.0, 1.0),
+          );
+        },
       );
 
       uploadedDocs.add(
@@ -304,6 +342,11 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
     }
 
     // 3. Construct Appointment Domain Model
+    onProgress?.call(
+      'Finalizing and creating booking...',
+      (totalSteps - 0.5) / totalSteps,
+    );
+
     final selectedSurveyType = SurveyType.fromCode(
       state.surveyType ?? SurveyType.socioEconomicSurvey.code,
     );
@@ -343,6 +386,8 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
 
     // 4. Save to Firestore via Repository
     final appointmentId = await appointmentRepo.submitAppointment(appointment);
+
+    onProgress?.call('Booking submitted successfully!', 1.0);
 
     // 5. Clear draft after successful creation
     await clearDraft();

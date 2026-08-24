@@ -34,14 +34,15 @@ class _Step4SurveyAreaState extends ConsumerState<Step4SurveyArea> {
 
   Future<void> _pickKmlFile() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['kml', 'kmz'],
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.single;
-        final extension = file.extension?.toLowerCase() ?? 'kml';
+      if (file != null) {
+        final extension = file.name.contains('.')
+            ? file.name.split('.').last.toLowerCase()
+            : 'kml';
 
         if (extension != 'kml' && extension != 'kmz') {
           AppSnackbar.showGlobalError(
@@ -51,6 +52,7 @@ class _Step4SurveyAreaState extends ConsumerState<Step4SurveyArea> {
           return;
         }
 
+        final fileSize = await file.length();
         final wizardState = ref.read(bookingWizardViewModelProvider);
         ref
             .read(bookingWizardViewModelProvider.notifier)
@@ -59,7 +61,7 @@ class _Step4SurveyAreaState extends ConsumerState<Step4SurveyArea> {
                 kmlFilePath: file.path,
                 kmlFileName: file.name,
                 kmlFileType: extension,
-                kmlFileSize: file.size,
+                kmlFileSize: fileSize,
               ),
             );
       }

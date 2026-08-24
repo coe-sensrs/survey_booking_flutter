@@ -4,7 +4,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/constants/survey_type.dart';
-import '../../../core/theme/app_colors.dart';
+
 import '../../../core/utils/app_snackbar.dart';
 import '../viewmodel/booking_wizard_viewmodel.dart';
 import 'steps/step_1_survey_type.dart';
@@ -145,13 +145,7 @@ class BookingWizardScreen extends ConsumerWidget {
         }
         return true;
       case 7:
-        if (state.permissionDocs.isEmpty) {
-          AppSnackbar.showGlobalError(
-            title: 'Validation Error',
-            message: 'Please attach at least 1 permission document.',
-          );
-          return false;
-        }
+        // Permission documents are optional; applicant can proceed with 0 or more files
         return true;
       default:
         return true;
@@ -228,9 +222,11 @@ class BookingWizardScreen extends ConsumerWidget {
             // Linear Progress Bar
             LinearProgressIndicator(
               value: currentStep / 9.0,
-              backgroundColor: Colors.grey[200],
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                AppColors.primary,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
+              valueColor: AlwaysStoppedAnimation<Color>(
+                Theme.of(context).colorScheme.primary,
               ),
             ),
 

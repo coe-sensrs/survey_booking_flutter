@@ -73,7 +73,10 @@ class _Step6LogisticsState extends ConsumerState<Step6Logistics> {
           SizedBox(height: 6.h),
           Text(
             'Provide coordinator, driver, and vehicle details for the survey team.',
-            style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           SizedBox(height: 20.h),
 

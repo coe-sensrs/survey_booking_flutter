@@ -3,61 +3,141 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/constants/validation_constants.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../viewmodel/booking_wizard_viewmodel.dart';
 
 class Step7Permissions extends ConsumerWidget {
   const Step7Permissions({super.key});
 
-  Future<void> _pickDocument(BuildContext context, WidgetRef ref) async {
-    final wizardState = ref.read(bookingWizardViewModelProvider);
+  static const Set<String> _allowedExtensions = {'pdf', 'jpg', 'jpeg', 'png'};
 
-    if (wizardState.permissionDocs.length >= 5) {
+  Future<void> _pickDocuments(BuildContext context, WidgetRef ref) async {
+    final wizardState = ref.read(bookingWizardViewModelProvider);
+    final currentDocs = wizardState.permissionDocs;
+
+    if (currentDocs.length >= ValidationConstants.maxPermissionDocsCount) {
       AppSnackbar.showGlobalError(
-        title: 'Limit Exceeded',
-        message: 'Maximum 5 permission documents allowed.',
+        title: 'Limit Reached',
+        message:
+            'Maximum ${ValidationConstants.maxPermissionDocsCount} permission documents allowed.',
       );
       return;
     }
 
     try {
-      final result = await FilePicker.pickFiles(
+      final List<PlatformFile> pickedFiles = await FilePicker.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+        allowedExtensions: _allowedExtensions.toList(),
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.single;
-        final extension = file.extension?.toLowerCase() ?? 'pdf';
+      if (pickedFiles.isEmpty) return;
 
-        if (file.size > 5 * 1024 * 1024) {
-          AppSnackbar.showGlobalError(
-            title: 'File Too Large',
-            message: 'File size must not exceed 5MB.',
-          );
-          return;
+      final remainingSlots =
+          ValidationConstants.maxPermissionDocsCount - currentDocs.length;
+      final List<Map<String, dynamic>> validNewDocs = [];
+      final List<String> oversizedFiles = [];
+      final List<String> invalidTypeFiles = [];
+      final List<String> duplicateFiles = [];
+
+      for (final file in pickedFiles) {
+        if (file.path == null) continue;
+
+        final fileName = file.name;
+        final extension = fileName.contains('.')
+            ? fileName.split('.').last.toLowerCase()
+            : '';
+
+        // 1. Security & File Type Validation
+        if (!_allowedExtensions.contains(extension)) {
+          invalidTypeFiles.add(fileName);
+          continue;
         }
 
-        final docMap = {
+        // 2. Individual File Size Validation (5MB max)
+        final fileSize = await file.length();
+        if (fileSize <= 0 || fileSize > ValidationConstants.maxFileSizeBytes) {
+          oversizedFiles.add(fileName);
+          continue;
+        }
+
+        // 3. Duplicate check against existing and currently queued docs
+        final isDuplicate =
+            currentDocs.any(
+              (d) => d['fileName'] == fileName && d['sizeBytes'] == fileSize,
+            ) ||
+            validNewDocs.any(
+              (d) => d['fileName'] == fileName && d['sizeBytes'] == fileSize,
+            );
+
+        if (isDuplicate) {
+          duplicateFiles.add(fileName);
+          continue;
+        }
+
+        validNewDocs.add({
           'path': file.path,
-          'fileName': file.name,
+          'fileName': fileName,
           'fileType': extension,
-          'sizeBytes': file.size,
-        };
-
-        final updatedList = List<Map<String, dynamic>>.from(
-          wizardState.permissionDocs,
-        )..add(docMap);
-
-        ref
-            .read(bookingWizardViewModelProvider.notifier)
-            .updateState(wizardState.copyWith(permissionDocs: updatedList));
+          'sizeBytes': fileSize,
+        });
       }
+
+      // 4. Handle edge cases & feedback
+      if (invalidTypeFiles.isNotEmpty) {
+        AppSnackbar.showGlobalError(
+          title: 'Invalid File Format',
+          message:
+              'Skipped unsupported files: ${invalidTypeFiles.join(", ")}. Allowed: PDF, JPG, PNG.',
+        );
+      }
+
+      if (oversizedFiles.isNotEmpty) {
+        AppSnackbar.showGlobalError(
+          title: 'File Too Large',
+          message: 'Skipped files exceeding 5MB: ${oversizedFiles.join(", ")}.',
+        );
+      }
+
+      if (duplicateFiles.isNotEmpty && validNewDocs.isEmpty) {
+        AppSnackbar.showGlobalWarning(
+          title: 'Duplicate Files',
+          message: 'Selected document(s) are already attached.',
+        );
+        return;
+      }
+
+      if (validNewDocs.isEmpty) {
+        return;
+      }
+
+      // 5. Apply capacity clamp
+      final docsToAdd = validNewDocs.take(remainingSlots).toList();
+      final droppedCount = validNewDocs.length - docsToAdd.length;
+
+      if (droppedCount > 0) {
+        AppSnackbar.showGlobalWarning(
+          title: 'Slot Limit Reached',
+          message:
+              'Added ${docsToAdd.length} document(s). $droppedCount file(s) omitted (max 5 allowed).',
+        );
+      } else if (invalidTypeFiles.isEmpty && oversizedFiles.isEmpty) {
+        AppSnackbar.showGlobalSuccess(
+          title: 'Documents Added',
+          message: 'Successfully attached ${docsToAdd.length} document(s).',
+        );
+      }
+
+      final updatedList = List<Map<String, dynamic>>.from(currentDocs)
+        ..addAll(docsToAdd);
+
+      ref
+          .read(bookingWizardViewModelProvider.notifier)
+          .updateState(wizardState.copyWith(permissionDocs: updatedList));
     } catch (e) {
       AppSnackbar.showGlobalError(
         title: 'File Pick Error',
-        message: 'Failed to pick document: $e',
+        message: 'Failed to pick documents: $e',
       );
     }
   }
@@ -77,50 +157,95 @@ class Step7Permissions extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final wizardState = ref.watch(bookingWizardViewModelProvider);
     final docs = wizardState.permissionDocs;
+    final maxDocs = ValidationConstants.maxPermissionDocsCount;
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Permission Documents Upload',
-            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Permission Documents (Optional)',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Text(
+                  '${docs.length} / $maxDocs',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
           ),
           SizedBox(height: 6.h),
           Text(
-            'Upload 1 to 5 permission or consent documents (PDF, JPG, PNG under 5MB).',
-            style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
+            'Upload up to $maxDocs consent/permission documents (PDF, JPG, PNG under 5MB each). You may select multiple files at once, or proceed without uploading.',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           SizedBox(height: 20.h),
 
-          ElevatedButton.icon(
-            onPressed: () => _pickDocument(context, ref),
-            icon: const Icon(Icons.upload_file),
-            label: const Text('Add Permission Document'),
-          ),
+          if (docs.length < maxDocs)
+            ElevatedButton.icon(
+              onPressed: () => _pickDocuments(context, ref),
+              icon: const Icon(Icons.upload_file),
+              label: Text(
+                docs.isEmpty
+                    ? 'Add Permission Documents'
+                    : 'Add More Documents',
+              ),
+            ),
 
           SizedBox(height: 16.h),
 
           if (docs.isEmpty)
             Container(
-              padding: EdgeInsets.all(20.w),
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
-                color: Colors.orange.shade50,
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: Colors.orange.shade200),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber, color: Colors.orange.shade800),
+                  Icon(
+                    Icons.info_outline,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
                   SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
-                      'At least 1 permission document is required to proceed.',
+                      'No documents attached. You can attach documents here or proceed directly to Review & Confirm.',
                       style: TextStyle(
                         fontSize: 13.sp,
-                        color: Colors.orange.shade900,
-                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -135,22 +260,62 @@ class Step7Permissions extends ConsumerWidget {
               separatorBuilder: (context, index) => SizedBox(height: 8.h),
               itemBuilder: (context, index) {
                 final doc = docs[index];
+                final sizeInKb = (doc['sizeBytes'] as int) / 1024;
+                final sizeDisplay = sizeInKb > 1024
+                    ? '${(sizeInKb / 1024).toStringAsFixed(1)} MB'
+                    : '${sizeInKb.toStringAsFixed(1)} KB';
+
                 return Card(
+                  elevation: 0.5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                    side: BorderSide(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outlineVariant.withValues(alpha: 0.4),
+                    ),
+                  ),
                   child: ListTile(
-                    leading: const Icon(
-                      Icons.description,
-                      color: AppColors.primary,
+                    leading: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Icon(
+                        (doc['fileType'] as String).toLowerCase() == 'pdf'
+                            ? Icons.picture_as_pdf
+                            : Icons.image,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 22.sp,
+                      ),
                     ),
                     title: Text(
                       doc['fileName'] as String? ?? 'Document',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     subtitle: Text(
-                      '${(doc['fileType'] as String).toUpperCase()} • ${((doc['sizeBytes'] as int) / 1024).toStringAsFixed(1)} KB',
+                      '${(doc['fileType'] as String).toUpperCase()} • $sizeDisplay',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
                     ),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
+                      icon: Icon(
+                        Icons.delete_outline,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      tooltip: 'Remove Document',
                       onPressed: () => _removeDocument(index, ref),
                     ),
                   ),

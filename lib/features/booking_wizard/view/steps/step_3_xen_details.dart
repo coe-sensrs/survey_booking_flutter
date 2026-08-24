@@ -61,7 +61,10 @@ class _Step3XenDetailsState extends ConsumerState<Step3XenDetails> {
           SizedBox(height: 6.h),
           Text(
             'Provide contact details of the Executive Engineer responsible for the district.',
-            style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           SizedBox(height: 20.h),
 

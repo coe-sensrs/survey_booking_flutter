@@ -17,11 +17,29 @@ class Step8Review extends ConsumerStatefulWidget {
 
 class _Step8ReviewState extends ConsumerState<Step8Review> {
   bool _isSubmitting = false;
+  String _uploadStage = '';
+  double _uploadProgress = 0.0;
 
   Future<void> _onConfirmBooking() async {
-    setState(() => _isSubmitting = true);
+    setState(() {
+      _isSubmitting = true;
+      _uploadStage = 'Preparing submission...';
+      _uploadProgress = 0.0;
+    });
+
     try {
-      await ref.read(bookingWizardViewModelProvider.notifier).submitBooking();
+      await ref
+          .read(bookingWizardViewModelProvider.notifier)
+          .submitBooking(
+            onProgress: (stage, progress) {
+              if (mounted) {
+                setState(() {
+                  _uploadStage = stage;
+                  _uploadProgress = progress;
+                });
+              }
+            },
+          );
       AppSnackbar.showGlobalSuccess(
         title: 'Booking Confirmed',
         message: 'Appointment submitted successfully!',
@@ -63,7 +81,12 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
           SizedBox(height: 6.h),
           Text(
             'Please review all details carefully before submitting your booking.',
-            style: TextStyle(fontSize: 13.sp, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           SizedBox(height: 20.h),
 
@@ -139,13 +162,94 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
           _buildSummarySection(
             title: '7. Permission Documents',
             stepNum: 7,
-            items: ['Attached Documents: ${state.permissionDocs.length} files'],
+            items: [
+              'Attached Documents: ${state.permissionDocs.isEmpty ? "None (Optional)" : "${state.permissionDocs.length} file(s)"}',
+            ],
           ),
+
+          if (_isSubmitting) ...[
+            SizedBox(height: 16.h),
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: Theme.of(
+                  context,
+                ).colorScheme.primaryContainer.withValues(alpha: 0.25),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 14.w,
+                        height: 14.w,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      SizedBox(width: 10.w),
+                      Expanded(
+                        child: Text(
+                          _uploadStage.isNotEmpty
+                              ? _uploadStage
+                              : 'Submitting Booking...',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      Text(
+                        '${(_uploadProgress * 100).toInt()}%',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10.h),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4.r),
+                    child: LinearProgressIndicator(
+                      value: _uploadProgress > 0 ? _uploadProgress : null,
+                      minHeight: 6.h,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Text(
+                    'Please keep this screen open while files are uploading.',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
 
           SizedBox(height: 24.h),
 
           AppButton(
-            text: 'Confirm & Submit Booking',
+            text: _isSubmitting
+                ? 'Uploading & Submitting...'
+                : 'Confirm & Submit Booking',
             isLoading: _isSubmitting,
             onPressed: _onConfirmBooking,
           ),
@@ -194,7 +298,10 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
                 padding: EdgeInsets.only(bottom: 4.h),
                 child: Text(
                   item,
-                  style: TextStyle(fontSize: 13.sp, color: Colors.grey[800]),
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
               ),
             ),
