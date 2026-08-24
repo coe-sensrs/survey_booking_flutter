@@ -1,1 +1,30 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"surveybookingapp","appId":"1:458361446708:android:62d6b42068c28c1e354561","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"surveybookingapp","configurations":{"android":"1:458361446708:android:62d6b42068c28c1e354561","ios":"1:458361446708:ios:0afa346eaff5a4ad354561","web":"1:458361446708:web:253e197c98578349354561"}}}}}}
+{
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "surveybookingapp",
+          "appId": "1:458361446708:android:62d6b42068c28c1e354561",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "surveybookingapp",
+          "configurations": {
+            "android": "1:458361446708:android:62d6b42068c28c1e354561",
+            "ios": "1:458361446708:ios:0afa346eaff5a4ad354561",
+            "web": "1:458361446708:web:253e197c98578349354561"
+          }
+        }
+      }
+    }
+  }
+}
