@@ -7,7 +7,7 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/models/app_user.dart';
-import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_colors.dart' show AppStatusColors;
 import '../../../core/theme/theme_provider.dart';
 import '../../../core/utils/app_snackbar.dart';
 import '../../../core/widgets/app_button.dart';
@@ -26,17 +26,16 @@ class ProfileScreen extends ConsumerStatefulWidget {
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Future<void> _pickAndUploadPhoto() async {
     try {
-      final result = await FilePicker.pickFiles(
+      final file = await FilePicker.pickFile(
         type: FileType.custom,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'webp'],
       );
 
-      if (!mounted || result == null || result.files.isEmpty) return;
+      if (!mounted || file == null || file.path == null) return;
 
-      final file = result.files.single;
-      if (file.path == null) return;
-
-      final extension = file.extension?.toLowerCase();
+      final extension = file.name.contains('.')
+          ? file.name.split('.').last.toLowerCase()
+          : '';
       if (extension != 'jpg' &&
           extension != 'jpeg' &&
           extension != 'png' &&
@@ -51,8 +50,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         return;
       }
 
+      final fileSize = await file.length();
       // Check 5MB size limit
-      if (file.size > 5 * 1024 * 1024) {
+      if (fileSize > 5 * 1024 * 1024) {
         if (mounted) {
           AppSnackbar.showError(
             context,
@@ -64,6 +64,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       }
 
       // 3. Crop image to 1:1 ratio and resize to fixed dimension
+      if (!mounted) return;
       final CroppedFile? croppedFile = await ImageCropper().cropImage(
         sourcePath: file.path!,
         aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
@@ -127,9 +128,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return Material(
-          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          color: Theme.of(ctx).colorScheme.surface,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
           clipBehavior: Clip.antiAlias,
           child: Padding(
@@ -162,12 +162,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     leading: Container(
                       padding: EdgeInsets.all(8.w),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
+                        color: Theme.of(
+                          ctx,
+                        ).colorScheme.primary.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.photo_library_outlined,
-                        color: AppColors.primary,
+                        color: Theme.of(ctx).colorScheme.primary,
                         size: 20.sp,
                       ),
                     ),
@@ -185,18 +187,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     leading: Container(
                       padding: EdgeInsets.all(8.w),
                       decoration: BoxDecoration(
-                        color: AppColors.rejected.withValues(alpha: 0.1),
+                        color: Theme.of(
+                          ctx,
+                        ).colorScheme.error.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.delete_outline,
-                        color: AppColors.rejected,
+                        color: Theme.of(ctx).colorScheme.error,
                         size: 20.sp,
                       ),
                     ),
-                    title: const Text(
+                    title: Text(
                       'Remove Photo',
-                      style: TextStyle(color: AppColors.rejected),
+                      style: TextStyle(color: Theme.of(ctx).colorScheme.error),
                     ),
                     subtitle: const Text('Restore default avatar'),
                     onTap: () {
@@ -228,7 +232,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.rejected,
+              backgroundColor: Theme.of(ctx).colorScheme.error,
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
@@ -275,9 +279,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (bottomSheetContext, setModalState) {
-            final isDark =
-                Theme.of(bottomSheetContext).brightness == Brightness.dark;
-
             return Container(
               padding: EdgeInsets.only(
                 left: 20.w,
@@ -287,7 +288,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     MediaQuery.of(bottomSheetContext).viewInsets.bottom + 24.h,
               ),
               decoration: BoxDecoration(
-                color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+                color: Theme.of(bottomSheetContext).colorScheme.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
               ),
               child: Form(
@@ -410,7 +411,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.rejected,
+              backgroundColor: Theme.of(ctx).colorScheme.error,
               foregroundColor: Colors.white,
             ),
             onPressed: () async {
@@ -444,7 +445,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 48.sp, color: AppColors.rejected),
+              Icon(
+                Icons.error_outline,
+                size: 48.sp,
+                color: Theme.of(context).colorScheme.error,
+              ),
               SizedBox(height: 12.h),
               Text('Failed to load profile: $err'),
               SizedBox(height: 12.h),
@@ -475,14 +480,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     padding: EdgeInsets.all(20.w),
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [AppColors.primary, AppColors.primaryLight],
+                        colors: [
+                          Theme.of(context).colorScheme.primary,
+                          Theme.of(context).colorScheme.primaryContainer,
+                        ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
                       borderRadius: BorderRadius.circular(16.r),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.2),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.2),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -532,7 +542,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                 child: Container(
                                   padding: EdgeInsets.all(6.w),
                                   decoration: BoxDecoration(
-                                    color: AppColors.accent,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.secondary,
                                     shape: BoxShape.circle,
                                     border: Border.all(
                                       color: Colors.white,
@@ -653,7 +665,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             trailing: const Icon(
                               Icons.verified,
                               size: 16,
-                              color: AppColors.approved,
+                              color: AppStatusColors.approved,
                             ),
                           ),
                           SizedBox(height: 12.h),
@@ -682,12 +694,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           leading: Container(
                             padding: EdgeInsets.all(8.w),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primary.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8.r),
                             ),
                             child: Icon(
                               isDark ? Icons.dark_mode : Icons.light_mode,
-                              color: AppColors.primary,
+                              color: Theme.of(context).colorScheme.primary,
                               size: 20.sp,
                             ),
                           ),
@@ -712,18 +726,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                           leading: Container(
                             padding: EdgeInsets.all(8.w),
                             decoration: BoxDecoration(
-                              color: AppColors.rejected.withValues(alpha: 0.1),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.error.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8.r),
                             ),
                             child: Icon(
                               Icons.logout,
-                              color: AppColors.rejected,
+                              color: Theme.of(context).colorScheme.error,
                               size: 20.sp,
                             ),
                           ),
-                          title: const Text(
+                          title: Text(
                             'Sign Out',
-                            style: TextStyle(color: AppColors.rejected),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
                           ),
                           trailing: const Icon(
                             Icons.chevron_right,

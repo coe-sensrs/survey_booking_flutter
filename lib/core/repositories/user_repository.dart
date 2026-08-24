@@ -14,6 +14,7 @@ abstract class UserRepository {
     required String uid,
     required String photoStoragePath,
   });
+  Future<void> deleteProfilePhoto(String uid);
 
   Future<List<AppUser>> getActiveCommitteeMembers();
   Stream<List<AppUser>> watchCommitteeMembers();

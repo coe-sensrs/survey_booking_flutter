@@ -60,6 +60,14 @@ class FirebaseUserRepository implements UserRepository {
   }
 
   @override
+  Future<void> deleteProfilePhoto(String uid) async {
+    await _usersRef.doc(uid).update({
+      'photoUrl': FieldValue.delete(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
   Future<List<AppUser>> getActiveCommitteeMembers() async {
     final snap = await _usersRef
         .where('role', isEqualTo: 'committee')
