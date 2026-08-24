@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../repositories/appointment_repository.dart';
 import '../repositories/user_repository.dart';
 import '../repositories/audit_log_repository.dart';
+import '../models/app_user.dart';
 import '../services/firebase_appointment_repository.dart';
 import '../services/firebase_user_repository.dart';
 import '../services/firebase_audit_log_repository.dart';
@@ -17,6 +18,22 @@ final appointmentRepositoryProvider = Provider<AppointmentRepository>((ref) {
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   return FirebaseUserRepository();
+});
+
+// ==========================================
+// 6. Common Stream/Future Providers
+// ==========================================
+
+/// Stream of all committee members (Admin only)
+final committeeMembersProvider = StreamProvider<List<AppUser>>((ref) {
+  final repo = ref.watch(userRepositoryProvider);
+  return repo.watchCommitteeMembers();
+});
+
+/// Future of active committee members (Admin only, used for assignments)
+final activeCommitteeMembersProvider = FutureProvider<List<AppUser>>((ref) {
+  final repo = ref.watch(userRepositoryProvider);
+  return repo.getActiveCommitteeMembers();
 });
 
 final auditLogRepositoryProvider = Provider<AuditLogRepository>((ref) {
