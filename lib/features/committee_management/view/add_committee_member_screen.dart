@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:survey_desk/core/routing/app_router.dart';
 import 'package:survey_desk/core/utils/app_snackbar.dart';
+import 'package:survey_desk/core/utils/sanitizing_text_input_formatter.dart';
 
 import '../../../core/errors/failures.dart';
 import '../../../core/utils/validators.dart';
@@ -22,6 +24,7 @@ class _AddCommitteeMemberScreenState
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _expertiseController = TextEditingController();
 
   bool _isLoading = false;
@@ -30,6 +33,7 @@ class _AddCommitteeMemberScreenState
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _expertiseController.dispose();
     super.dispose();
   }
@@ -45,6 +49,7 @@ class _AddCommitteeMemberScreenState
           .createCommitteeMember(
             name: _nameController.text.trim(),
             email: _emailController.text.trim(),
+            phone: _phoneController.text.trim(),
             expertiseTag: _expertiseController.text.trim(),
           );
 
@@ -103,9 +108,13 @@ class _AddCommitteeMemberScreenState
                 controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Full Name',
-                  hintText: 'Jane Doe',
+                  hintText: 'Your Name',
                 ),
                 textCapitalization: TextCapitalization.words,
+                inputFormatters: [
+                  SanitizingTextInputFormatter(),
+                  LengthLimitingTextInputFormatter(54),
+                ],
                 validator: (value) =>
                     Validators.validateRequired(value, 'Full name'),
               ),
@@ -114,10 +123,28 @@ class _AddCommitteeMemberScreenState
                 controller: _emailController,
                 decoration: const InputDecoration(
                   labelText: 'Email Address',
-                  hintText: 'jane.doe@sageandstone.org',
+                  hintText: 'Your Email',
                 ),
+                inputFormatters: [
+                  SanitizingTextInputFormatter(),
+                  LengthLimitingTextInputFormatter(54),
+                ],
                 keyboardType: TextInputType.emailAddress,
                 validator: Validators.validateEmail,
+              ),
+              SizedBox(height: 16.h),
+              TextFormField(
+                controller: _phoneController,
+                decoration: const InputDecoration(
+                  labelText: 'Phone Number',
+                  hintText: 'Your Phone Number',
+                ),
+                inputFormatters: [
+                  SanitizingTextInputFormatter(),
+                  LengthLimitingTextInputFormatter(10),
+                ],
+                keyboardType: TextInputType.phone,
+                validator: Validators.validatePhone,
               ),
               SizedBox(height: 32.h),
               Text(
@@ -138,6 +165,10 @@ class _AddCommitteeMemberScreenState
                 ),
                 maxLines: 3,
                 textCapitalization: TextCapitalization.sentences,
+                inputFormatters: [
+                  SanitizingTextInputFormatter(),
+                  LengthLimitingTextInputFormatter(150),
+                ],
                 validator: (value) =>
                     Validators.validateRequired(value, 'Expertise description'),
               ),

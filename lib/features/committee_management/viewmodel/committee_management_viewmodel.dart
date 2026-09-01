@@ -32,10 +32,11 @@ class CommitteeManagementState {
     return list.where((member) {
       final nameMatches = member.fullName.toLowerCase().contains(query);
       final emailMatches = member.email.toLowerCase().contains(query);
+      final phoneMatches = member.phone.toLowerCase().contains(query);
       final tagMatches = (member.expertiseTag ?? '').toLowerCase().contains(
         query,
       );
-      return nameMatches || emailMatches || tagMatches;
+      return nameMatches || emailMatches || phoneMatches || tagMatches;
     }).toList();
   }
 }
@@ -70,8 +71,16 @@ class CommitteeManagementViewModel extends Notifier<CommitteeManagementState> {
   Future<void> createCommitteeMember({
     required String name,
     required String email,
+    required String phone,
     required String expertiseTag,
   }) async {
+    if (name.isEmpty ||
+        email.isEmpty ||
+        phone.isEmpty ||
+        expertiseTag.isEmpty) {
+      throw const ValidationFailure('All fields are required.');
+    }
+
     final authState = ref.read(authViewModelProvider);
     if (authState.value?.isAdmin != true) {
       throw const AuthFailure('Only administrators can add committee members.');
@@ -84,18 +93,40 @@ class CommitteeManagementViewModel extends Notifier<CommitteeManagementState> {
       await callable.call({
         'name': name,
         'email': email,
+        'phone': phone,
         'expertiseTag': expertiseTag,
       });
       // Stream will automatically update the list.
     } on FirebaseFunctionsException catch (e) {
-      if (e.code == 'already-exists') {
-        throw const ValidationFailure(
-          'An account with this email already exists.',
-        );
+      switch (e.code) {
+        case 'already-exists':
+          throw const ValidationFailure(
+            'An account with this email already exists.',
+          );
+        case 'not-found':
+          throw const ServerFailure(
+            'The service could not be found. Please ensure the Cloud Function is deployed.',
+          );
+        case 'permission-denied':
+          throw const AuthFailure(
+            'You do not have permission to perform this action.',
+          );
+        case 'unauthenticated':
+          throw const AuthFailure(
+            'You must be logged in to perform this action.',
+          );
+        case 'invalid-argument':
+          throw const ValidationFailure('Invalid data provided to the server.');
+        case 'unavailable':
+        case 'deadline-exceeded':
+        case 'internal':
+          throw const NetworkFailure();
+        default:
+          throw ServerFailure(
+            e.message ?? 'Failed to create committee member account.',
+            e.code,
+          );
       }
-      throw ServerFailure(
-        e.message ?? 'Failed to create committee member account.',
-      );
     } catch (e) {
       throw ServerFailure('An unexpected error occurred: $e');
     }
