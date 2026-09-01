@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:survey_desk/core/routing/app_router.dart';
@@ -57,8 +58,6 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
         final user = next.value;
         if (user != null && user.isAdmin) {
           context.go(AppRoutes.adminDashboard);
-        } else if (user != null && user.isCommittee) {
-          context.go(AppRoutes.committeeDashboard);
         }
       }
     });
@@ -68,7 +67,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin / Committee'),
+        title: const Text('Admin Login'),
         elevation: 0,
         leading: BackButton(onPressed: () => context.go('/login')),
       ),
@@ -97,7 +96,10 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                     label: 'Email Address',
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    inputFormatters: [SanitizingTextInputFormatter()],
+                    inputFormatters: [
+                      SanitizingTextInputFormatter(),
+                      LengthLimitingTextInputFormatter(54),
+                    ],
                     validator: Validators.validateEmail,
                   ),
                   const SizedBox(height: 16),
@@ -105,7 +107,10 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                     label: 'Password',
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    inputFormatters: [SanitizingTextInputFormatter()],
+                    inputFormatters: [
+                      SanitizingTextInputFormatter(),
+                      LengthLimitingTextInputFormatter(64),
+                    ],
                     validator: (val) =>
                         Validators.validateRequired(val, 'Password'),
                     suffixIcon: IconButton(

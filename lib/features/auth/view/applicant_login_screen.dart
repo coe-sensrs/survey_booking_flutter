@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:survey_desk/core/routing/app_router.dart';
@@ -156,7 +157,10 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
                     label: 'Password',
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    inputFormatters: [SanitizingTextInputFormatter()],
+                    inputFormatters: [
+                      SanitizingTextInputFormatter(),
+                      LengthLimitingTextInputFormatter(64),
+                    ],
                     validator: (val) =>
                         Validators.validateRequired(val, 'Password'),
                     suffixIcon: IconButton(
@@ -202,7 +206,7 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
                   ),
                   TextButton(
                     onPressed: () => context.go(AppRoutes.adminLogin),
-                    child: const Text('Admin / Committee Login'),
+                    child: const Text('Admin Login'),
                   ),
                 ],
               ),

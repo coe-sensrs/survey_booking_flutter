@@ -78,22 +78,22 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
       );
 
       final user = credential.user;
-      if (user != null && !user.emailVerified) {
-        // Keep session alive so verification screen can call user.reload() / resend.
-        // Signal the UI to navigate to the email verification screen.
-        state = const AsyncData(null);
-        throw EmailNotVerifiedException(email);
-      }
-
       if (user != null) {
         final appUser = await _userRepository.getUserById(user.uid);
-        if (appUser == null || !appUser.isApplicant) {
+        if (appUser == null || (!appUser.isApplicant && !appUser.isCommittee)) {
           await _firebaseAuth.signOut();
           state = const AsyncError(
-            AuthFailure('Invalid role for applicant login.'),
+            AuthFailure('Invalid role for this login.'),
             StackTrace.empty,
           );
           return;
+        }
+
+        if (!user.emailVerified) {
+          // Keep session alive so verification screen can call user.reload() / resend.
+          // Signal the UI to navigate to the email verification screen.
+          state = const AsyncData(null);
+          throw EmailNotVerifiedException(email);
         }
       }
     } on EmailNotVerifiedException {
@@ -116,7 +116,7 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
       final user = credential.user;
       if (user != null) {
         final appUser = await _userRepository.getUserById(user.uid);
-        if (appUser == null || (!appUser.isAdmin && !appUser.isCommittee)) {
+        if (appUser == null || !appUser.isAdmin) {
           await _firebaseAuth.signOut();
           state = const AsyncError(
             AuthFailure('Unauthorized access.'),
