@@ -1,9 +1,8 @@
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:survey_desk/core/services/admin_functions_service.dart';
 import '../../../core/errors/failures.dart';
 import '../../../core/models/app_user.dart';
 import '../../../core/providers/core_providers.dart';
-import '../../auth/viewmodel/auth_viewmodel.dart';
 
 class CommitteeManagementState {
   final AsyncValue<List<AppUser>> members;
@@ -81,54 +80,16 @@ class CommitteeManagementViewModel extends Notifier<CommitteeManagementState> {
       throw const ValidationFailure('All fields are required.');
     }
 
-    final authState = ref.read(authViewModelProvider);
-    if (authState.value?.isAdmin != true) {
-      throw const AuthFailure('Only administrators can add committee members.');
-    }
+    final adminService = ref.read(adminFunctionsServiceProvider);
 
-    try {
-      final callable = FirebaseFunctions.instance.httpsCallable(
-        'createCommitteeAccount',
-      );
-      await callable.call({
+    await adminService.callAdminFunction(
+      functionName: 'createCommitteeAccount',
+      data: {
         'name': name,
         'email': email,
         'phone': phone,
         'expertiseTag': expertiseTag,
-      });
-      // Stream will automatically update the list.
-    } on FirebaseFunctionsException catch (e) {
-      switch (e.code) {
-        case 'already-exists':
-          throw const ValidationFailure(
-            'An account with this email already exists.',
-          );
-        case 'not-found':
-          throw const ServerFailure(
-            'The service could not be found. Please ensure the Cloud Function is deployed.',
-          );
-        case 'permission-denied':
-          throw const AuthFailure(
-            'You do not have permission to perform this action.',
-          );
-        case 'unauthenticated':
-          throw const AuthFailure(
-            'You must be logged in to perform this action.',
-          );
-        case 'invalid-argument':
-          throw const ValidationFailure('Invalid data provided to the server.');
-        case 'unavailable':
-        case 'deadline-exceeded':
-        case 'internal':
-          throw const NetworkFailure();
-        default:
-          throw ServerFailure(
-            e.message ?? 'Failed to create committee member account.',
-            e.code,
-          );
-      }
-    } catch (e) {
-      throw ServerFailure('An unexpected error occurred: $e');
-    }
+      },
+    );
   }
 }
