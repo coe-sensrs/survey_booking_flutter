@@ -8,13 +8,14 @@ import 'package:intl/intl.dart';
 
 import '../../../core/models/app_user.dart';
 import '../../../core/theme/app_colors.dart' show AppStatusColors;
-import '../../../core/theme/theme_provider.dart';
+
 import '../../../core/utils/app_snackbar.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/profile_viewmodel.dart';
 import '../../../core/widgets/safe_profile_avatar.dart';
+import '../../../core/widgets/theme_toggle_button.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -594,7 +595,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             borderRadius: BorderRadius.circular(12.r),
                           ),
                           child: Text(
-                            'Applicant',
+                            user.role.isNotEmpty
+                                ? '${user.role[0].toUpperCase()}${user.role.substring(1)}'
+                                : 'User',
                             style: TextStyle(
                               fontSize: 11.sp,
                               color: Colors.white,
@@ -710,16 +713,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             isDark ? 'Dark Theme' : 'Light Theme',
                             style: TextStyle(fontSize: 12.sp),
                           ),
-                          trailing: Switch(
-                            value: isDark,
-                            onChanged: (val) {
-                              ref
-                                  .read(themeProvider.notifier)
-                                  .setThemeMode(
-                                    val ? ThemeMode.dark : ThemeMode.light,
-                                  );
-                            },
-                          ),
+                          trailing: const ThemeToggleButton(),
                         ),
                         const Divider(height: 1),
                         ListTile(
