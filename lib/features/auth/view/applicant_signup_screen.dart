@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:survey_desk/core/routing/app_router.dart';
@@ -95,7 +96,10 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
                   AppTextField(
                     label: 'Full Name',
                     controller: _nameController,
-                    inputFormatters: [SanitizingTextInputFormatter()],
+                    inputFormatters: [
+                      SanitizingTextInputFormatter(),
+                      LengthLimitingTextInputFormatter(54),
+                    ],
                     validator: (val) => Validators.validateRequired(
                       val,
                       'Full Name',
@@ -106,14 +110,20 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
                   AppTextField(
                     label: 'Organization Name (Optional)',
                     controller: _orgController,
-                    inputFormatters: [SanitizingTextInputFormatter()],
+                    inputFormatters: [
+                      SanitizingTextInputFormatter(),
+                      LengthLimitingTextInputFormatter(30),
+                    ],
                   ),
                   const SizedBox(height: 16),
                   AppTextField(
                     label: 'Email Address',
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    inputFormatters: [SanitizingTextInputFormatter()],
+                    inputFormatters: [
+                      SanitizingTextInputFormatter(),
+                      LengthLimitingTextInputFormatter(54),
+                    ],
                     validator: Validators.validateEmail,
                   ),
                   const SizedBox(height: 16),
@@ -121,7 +131,10 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
                     label: 'Phone Number',
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
-                    inputFormatters: [SanitizingTextInputFormatter()],
+                    inputFormatters: [
+                      SanitizingTextInputFormatter(),
+                      LengthLimitingTextInputFormatter(10),
+                    ],
                     validator: Validators.validatePhone,
                   ),
                   const SizedBox(height: 16),
@@ -129,7 +142,10 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
                     label: 'Password',
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    inputFormatters: [SanitizingTextInputFormatter()],
+                    inputFormatters: [
+                      SanitizingTextInputFormatter(),
+                      LengthLimitingTextInputFormatter(64),
+                    ],
                     validator: Validators.validatePassword,
                     suffixIcon: IconButton(
                       icon: Icon(
