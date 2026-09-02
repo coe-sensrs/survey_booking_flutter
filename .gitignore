@@ -15,6 +15,9 @@ serviceAccountKey.json
 node_modules/
 package-lock.json
 
+# Environment variables
+.env
+.env.*
 
 # IntelliJ related
 *.iml
