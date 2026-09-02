@@ -66,8 +66,10 @@ class CommitteeManagementViewModel extends Notifier<CommitteeManagementState> {
   }
 
   /// Creates a new committee member account via Cloud Functions.
+  /// Returns the provisioned credentials map from the backend:
+  ///   { success, uid, email, tempPassword, resetLink, message }
   /// This requires Admin privileges.
-  Future<void> createCommitteeMember({
+  Future<Map<String, dynamic>> createCommitteeMember({
     required String name,
     required String email,
     required String phone,
@@ -82,7 +84,7 @@ class CommitteeManagementViewModel extends Notifier<CommitteeManagementState> {
 
     final adminService = ref.read(adminFunctionsServiceProvider);
 
-    await adminService.callAdminFunction(
+    final result = await adminService.callAdminFunction<Map<String, dynamic>>(
       functionName: 'createCommitteeAccount',
       data: {
         'name': name,
@@ -91,5 +93,8 @@ class CommitteeManagementViewModel extends Notifier<CommitteeManagementState> {
         'expertiseTag': expertiseTag,
       },
     );
+
+    // result is typed as Map<String, dynamic> from the Cloud Function response.
+    return Map<String, dynamic>.from(result as Map);
   }
 }
