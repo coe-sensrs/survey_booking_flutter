@@ -38,6 +38,24 @@ class _AddCommitteeMemberScreenState
     super.dispose();
   }
 
+  void _clearForm() {
+    _nameController.clear();
+    _emailController.clear();
+    _phoneController.clear();
+    _expertiseController.clear();
+    _formKey.currentState?.reset();
+    FocusScope.of(context).unfocus();
+  }
+
+  void _onCancel() {
+    _clearForm();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go(AppRoutes.adminCommitteeManagement);
+    }
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -54,6 +72,7 @@ class _AddCommitteeMemberScreenState
           );
 
       if (mounted) {
+        _clearForm();
         AppSnackbar.showSuccess(
           context,
           title: 'Success',
@@ -177,7 +196,7 @@ class _AddCommitteeMemberScreenState
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _isLoading ? null : () => context.pop(),
+                      onPressed: _isLoading ? null : _onCancel,
                       style: OutlinedButton.styleFrom(
                         padding: EdgeInsets.symmetric(vertical: 16.h),
                       ),
