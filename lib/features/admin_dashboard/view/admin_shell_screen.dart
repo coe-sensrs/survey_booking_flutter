@@ -67,9 +67,9 @@ class AdminShellScreen extends StatelessWidget {
                 label: 'Add Member',
               ),
               NavigationDestination(
-                icon: Icon(Icons.settings_outlined),
-                selectedIcon: Icon(Icons.settings),
-                label: 'Settings',
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person),
+                label: 'Profile',
               ),
             ],
           ),
