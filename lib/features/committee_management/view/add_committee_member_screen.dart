@@ -61,46 +61,115 @@ class _AddCommitteeMemberScreenState
 
     setState(() => _isLoading = true);
 
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final expertise = _expertiseController.text.trim();
+
     try {
-      await ref
+      final credentials = await ref
           .read(committeeManagementViewModelProvider.notifier)
           .createCommitteeMember(
-            name: _nameController.text.trim(),
-            email: _emailController.text.trim(),
-            phone: _phoneController.text.trim(),
-            expertiseTag: _expertiseController.text.trim(),
+            name: name,
+            email: email,
+            phone: phone,
+            expertiseTag: expertise,
           );
 
-      if (mounted) {
-        _clearForm();
-        AppSnackbar.showSuccess(
-          context,
-          title: 'Success',
-          message: 'Committee member added successfully.',
-        );
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go(AppRoutes.adminCommitteeManagement);
-        }
+      if (!mounted) return;
+
+      // Freeze loading state before showing dialog so button doesn't flash
+      setState(() => _isLoading = false);
+
+      final tempPassword =
+          credentials['tempPassword'] as String? ?? '(not available)';
+
+      await _showCredentialsDialog(
+        name: name,
+        email: email,
+        tempPassword: tempPassword,
+      );
+
+      // After dialog is dismissed — clear form and go back
+      if (!mounted) return;
+      _clearForm();
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.go(AppRoutes.adminCommitteeManagement);
       }
     } on Failure catch (e) {
-      if (mounted) {
-        AppSnackbar.showError(context, title: 'Error', message: e.message);
-      }
+      if (!mounted) return;
+      AppSnackbar.showError(context, title: 'Error', message: e.message);
     } catch (e) {
-      if (mounted) {
-        AppSnackbar.showError(
-          context,
-          title: 'Error',
-          message: 'An unexpected error occurred.',
-        );
-      }
+      if (!mounted) return;
+      AppSnackbar.showError(
+        context,
+        title: 'Error',
+        message: 'An unexpected error occurred.',
+      );
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  Future<void> _showCredentialsDialog({
+    required String name,
+    required String email,
+    required String tempPassword,
+  }) {
+    final credentialText =
+        'Name: $name\nEmail: $email\nTemporary Password: $tempPassword';
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // Force admin to acknowledge before leaving
+      builder: (ctx) => AlertDialog(
+        icon: Icon(
+          Icons.verified_user_outlined,
+          color: Theme.of(ctx).colorScheme.primary,
+          size: 40,
+        ),
+        title: const Text('Account Created'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Share these one-time credentials with the new committee member. '
+              'They can change their password after first login.',
+              style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _CredentialRow(label: 'Name', value: name),
+            const SizedBox(height: 8),
+            _CredentialRow(label: 'Email', value: email),
+            const SizedBox(height: 8),
+            _CredentialRow(label: 'Temp Password', value: tempPassword),
+          ],
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: () {
+              Clipboard.setData(ClipboardData(text: credentialText));
+              ScaffoldMessenger.of(ctx).showSnackBar(
+                const SnackBar(content: Text('Credentials copied!')),
+              );
+            },
+            icon: const Icon(Icons.copy_outlined),
+            label: const Text('Copy'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Done'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -228,6 +297,47 @@ class _AddCommitteeMemberScreenState
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// A single labeled credential row used inside the credentials dialog.
+class _CredentialRow extends StatelessWidget {
+  const _CredentialRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: cs.onSurfaceVariant,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 2),
+          SelectableText(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: cs.onSurface,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
