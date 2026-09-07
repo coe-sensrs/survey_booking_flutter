@@ -26,6 +26,14 @@ class RateLimitFailure extends Failure {
   ]);
 }
 
+/// Thrown when the server rejects an auth action due to rate limiting.
+/// [secondsRemaining] carries the lockout duration from the server response
+/// so the UI can display an accurate countdown.
+class AuthRateLimitFailure extends Failure {
+  final int? secondsRemaining;
+  const AuthRateLimitFailure(super.message, {this.secondsRemaining});
+}
+
 class ValidationFailure extends Failure {
   const ValidationFailure(super.message);
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:survey_desk/core/errors/failures.dart';
 import 'package:survey_desk/core/routing/app_router.dart';
 import 'package:survey_desk/core/utils/app_snackbar.dart';
 import 'package:survey_desk/core/widgets/app_button.dart';
@@ -65,11 +66,20 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
   Widget build(BuildContext context) {
     ref.listen(authViewModelProvider, (previous, next) {
       if (next is AsyncError) {
-        AppSnackbar.showError(
-          context,
-          title: 'Signup Failed',
-          message: next.error.toString(),
-        );
+        final error = next.error;
+        if (error is AuthRateLimitFailure) {
+          AppSnackbar.showError(
+            context,
+            title: 'Signup Blocked',
+            message: error.message,
+          );
+        } else {
+          AppSnackbar.showError(
+            context,
+            title: 'Signup Failed',
+            message: next.error.toString(),
+          );
+        }
       }
     });
 

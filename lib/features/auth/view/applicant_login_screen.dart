@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:survey_desk/core/errors/failures.dart';
 import 'package:survey_desk/core/routing/app_router.dart';
 import 'package:survey_desk/core/utils/app_snackbar.dart';
 import 'package:survey_desk/core/widgets/app_button.dart';
@@ -25,6 +26,10 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
+  /// Seconds remaining in the server-enforced login lockout.
+  int _loginLockoutSeconds = 0;
+  Timer? _lockoutTimer;
+
   /// Seconds remaining before the user can request another password reset.
   int _resetCooldownSeconds = 0;
   Timer? _cooldownTimer;
@@ -34,6 +39,7 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
 
   @override
   void dispose() {
+    _lockoutTimer?.cancel();
     _cooldownTimer?.cancel();
     _emailController.dispose();
     _passwordController.dispose();
@@ -110,17 +116,44 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
     });
   }
 
+  void _startLoginLockout(int seconds) {
+    setState(() => _loginLockoutSeconds = seconds);
+    _lockoutTimer?.cancel();
+    _lockoutTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _loginLockoutSeconds--;
+        if (_loginLockoutSeconds <= 0) timer.cancel();
+      });
+    });
+  }
+
   bool get _isCooldownActive => _resetCooldownSeconds > 0;
+  bool get _isLoginLocked => _loginLockoutSeconds > 0;
 
   @override
   Widget build(BuildContext context) {
     ref.listen(authViewModelProvider, (previous, next) {
       if (next is AsyncError) {
-        AppSnackbar.showError(
-          context,
-          title: 'Login Failed',
-          message: next.error.toString(),
-        );
+        final error = next.error;
+        if (error is AuthRateLimitFailure) {
+          final secs = error.secondsRemaining;
+          if (secs != null && secs > 0) _startLoginLockout(secs);
+          AppSnackbar.showError(
+            context,
+            title: 'Account Locked',
+            message: error.message,
+          );
+        } else {
+          AppSnackbar.showError(
+            context,
+            title: 'Login Failed',
+            message: next.error.toString(),
+          );
+        }
       }
     });
 
@@ -195,9 +228,11 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
                   ),
                   const SizedBox(height: 24),
                   AppButton(
-                    text: 'Login',
+                    text: _isLoginLocked
+                        ? 'Locked (${_loginLockoutSeconds}s)'
+                        : 'Login',
                     isLoading: isLoading,
-                    onPressed: _submit,
+                    onPressed: (_isLoginLocked || isLoading) ? null : _submit,
                   ),
                   const SizedBox(height: 24),
                   TextButton(
