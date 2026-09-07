@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:firebase_analytics/firebase_analytics.dart';
 import '../../features/auth/view/applicant_login_screen.dart';
 import '../../features/auth/view/applicant_signup_screen.dart';
 import '../../features/auth/view/admin_login_screen.dart';
@@ -153,6 +153,7 @@ final _authNotifier = AsyncAuthNotifier();
 final GoRouter appRouter = GoRouter(
   initialLocation: AppRoutes.login,
   refreshListenable: _authNotifier,
+  observers: [FirebaseAnalyticsObserver(analytics: FirebaseAnalytics.instance)],
   routes: [
     // -------------------------------------------------------------------------
     // Auth Routes
@@ -312,9 +313,7 @@ final GoRouter appRouter = GoRouter(
                   if (didPop) return;
                   context.go(AppRoutes.adminDashboard);
                 },
-                child: const Scaffold(
-                  body: Center(child: Text('Admin Settings Placeholder')),
-                ),
+                child: const ProfileScreen(),
               ),
             ),
           ],

@@ -218,6 +218,7 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
   Future<void> startFreshSurvey() async {
     await clearDraft();
     state = const WizardStateData(currentStep: 1);
+    ref.read(analyticsServiceProvider).logBookingWizardStarted();
   }
 
   void updateState(WizardStateData newState) {
@@ -227,6 +228,9 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
 
   void setStep(int step) {
     state = state.copyWith(currentStep: step);
+    ref
+        .read(crashReportingServiceProvider)
+        .setCustomKey('current_wizard_step', 'step_$step');
     _saveDraft();
   }
 
@@ -249,149 +253,174 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
     final user = ref.read(authViewModelProvider).value;
     if (user == null) throw Exception('Applicant not logged in');
 
-    final uploadService = ref.read(storageUploadServiceProvider);
-    final appointmentRepo = ref.read(appointmentRepositoryProvider);
+    ref
+        .read(crashReportingServiceProvider)
+        .log('Applicant submitted booking attempt');
 
-    final totalDocs = state.permissionDocs.length;
-    final totalSteps = 1 + totalDocs + 1; // KML + Docs + Firestore
+    try {
+      final uploadService = ref.read(storageUploadServiceProvider);
+      final appointmentRepo = ref.read(appointmentRepositoryProvider);
+      final performanceService = ref.read(performanceServiceProvider);
 
-    // 1. Upload KML/KMZ File
-    if (state.kmlFilePath == null || state.kmlFileName == null) {
-      throw Exception('KML/KMZ file is required');
-    }
+      final totalDocs = state.permissionDocs.length;
+      final totalSteps = 1 + totalDocs + 1; // KML + Docs + Firestore
 
-    final kmlFileObj = File(state.kmlFilePath!);
-    if (!kmlFileObj.existsSync()) {
-      throw Exception(
-        'The selected KML/KMZ file (${state.kmlFileName}) is no longer accessible on this device. Please go back to Step 4 and re-select the file.',
-      );
-    }
-    final kmlBytes = await kmlFileObj.readAsBytes();
-    final tempId = DateTime.now().millisecondsSinceEpoch.toString();
+      // 1. Upload KML/KMZ File
+      if (state.kmlFilePath == null || state.kmlFileName == null) {
+        throw Exception('KML/KMZ file is required');
+      }
 
-    onProgress?.call(
-      'Uploading Survey Map (${state.kmlFileName})...',
-      0.05,
-    );
-
-    final kmlStoragePath = await uploadService.uploadKmlFile(
-      appointmentId: tempId,
-      filePath: state.kmlFilePath!,
-      fileName: state.kmlFileName!,
-      onProgress: (fileProgress) {
-        final scaled = (fileProgress / totalSteps);
-        onProgress?.call(
-          'Uploading Survey Map (${state.kmlFileName})...',
-          scaled.clamp(0.0, 1.0),
-        );
-      },
-    );
-
-    final kmlModel = KmlFile(
-      storagePath: kmlStoragePath,
-      originalFileName: state.kmlFileName!,
-      fileType: state.kmlFileType ?? 'kml',
-      sizeBytes: state.kmlFileSize ?? kmlBytes.length,
-      uploadedAt: DateTime.now(),
-    );
-
-    // 2. Upload Permission Documents (if any)
-    final List<PermissionDocument> uploadedDocs = [];
-    for (int i = 0; i < totalDocs; i++) {
-      final docMap = state.permissionDocs[i];
-      final path = docMap['path'] as String;
-      final fileName = docMap['fileName'] as String;
-      final fileType = docMap['fileType'] as String;
-      final file = File(path);
-      if (!file.existsSync()) {
+      final kmlFileObj = File(state.kmlFilePath!);
+      if (!kmlFileObj.existsSync()) {
         throw Exception(
-          'Permission document "$fileName" is no longer accessible on this device. Please go back to Step 7 and re-attach the document.',
+          'The selected KML/KMZ file (${state.kmlFileName}) is no longer accessible on this device. Please go back to Step 4 and re-select the file.',
         );
       }
-      final bytes = await file.readAsBytes();
+      final kmlBytes = await kmlFileObj.readAsBytes();
+      final tempId = DateTime.now().millisecondsSinceEpoch.toString();
 
-      final stepBase = (1.0 + i) / totalSteps;
-      final stepWeight = 1.0 / totalSteps;
-      onProgress?.call(
-        'Uploading document ${i + 1} of $totalDocs ($fileName)...',
-        stepBase,
-      );
+      onProgress?.call('Uploading Survey Map (${state.kmlFileName})...', 0.05);
 
-      final storagePath = await uploadService.uploadPermissionDocument(
-        appointmentId: tempId,
-        filePath: path,
-        fileName: fileName,
-        onProgress: (fileProgress) {
-          final scaled = stepBase + (fileProgress * stepWeight);
-          onProgress?.call(
-            'Uploading document ${i + 1} of $totalDocs ($fileName)...',
-            scaled.clamp(0.0, 1.0),
-          );
-        },
-      );
-
-      uploadedDocs.add(
-        PermissionDocument(
-          storagePath: storagePath,
-          originalFileName: fileName,
-          fileType: fileType,
-          sizeBytes: bytes.length,
-          uploadedAt: DateTime.now(),
+      final kmlStoragePath = await performanceService.traceAction(
+        'kml_upload_trace',
+        () => uploadService.uploadKmlFile(
+          appointmentId: tempId,
+          filePath: state.kmlFilePath!,
+          fileName: state.kmlFileName!,
+          onProgress: (fileProgress) {
+            final scaled = (fileProgress / totalSteps);
+            onProgress?.call(
+              'Uploading Survey Map (${state.kmlFileName})...',
+              scaled.clamp(0.0, 1.0),
+            );
+          },
         ),
+        metrics: {'size_bytes': kmlBytes.length},
       );
+
+      final kmlModel = KmlFile(
+        storagePath: kmlStoragePath,
+        originalFileName: state.kmlFileName!,
+        fileType: state.kmlFileType ?? 'kml',
+        sizeBytes: state.kmlFileSize ?? kmlBytes.length,
+        uploadedAt: DateTime.now(),
+      );
+
+      // 2. Upload Permission Documents (if any)
+      final List<PermissionDocument> uploadedDocs = [];
+      for (int i = 0; i < totalDocs; i++) {
+        final docMap = state.permissionDocs[i];
+        final path = docMap['path'] as String;
+        final fileName = docMap['fileName'] as String;
+        final fileType = docMap['fileType'] as String;
+        final file = File(path);
+        if (!file.existsSync()) {
+          throw Exception(
+            'Permission document "$fileName" is no longer accessible on this device. Please go back to Step 7 and re-attach the document.',
+          );
+        }
+        final bytes = await file.readAsBytes();
+
+        final stepBase = (1.0 + i) / totalSteps;
+        final stepWeight = 1.0 / totalSteps;
+        onProgress?.call(
+          'Uploading document ${i + 1} of $totalDocs ($fileName)...',
+          stepBase,
+        );
+
+        final storagePath = await uploadService.uploadPermissionDocument(
+          appointmentId: tempId,
+          filePath: path,
+          fileName: fileName,
+          onProgress: (fileProgress) {
+            final scaled = stepBase + (fileProgress * stepWeight);
+            onProgress?.call(
+              'Uploading document ${i + 1} of $totalDocs ($fileName)...',
+              scaled.clamp(0.0, 1.0),
+            );
+          },
+        );
+
+        uploadedDocs.add(
+          PermissionDocument(
+            storagePath: storagePath,
+            originalFileName: fileName,
+            fileType: fileType,
+            sizeBytes: bytes.length,
+            uploadedAt: DateTime.now(),
+          ),
+        );
+      }
+
+      // 3. Construct Appointment Domain Model
+      onProgress?.call(
+        'Finalizing and creating booking...',
+        (totalSteps - 0.5) / totalSteps,
+      );
+
+      final selectedSurveyType = SurveyType.fromCode(
+        state.surveyType ?? SurveyType.socioEconomicSurvey.code,
+      );
+
+      final appointment = Appointment(
+        id: '',
+        applicantId: user.uid,
+        applicantName: user.fullName,
+        applicantOrgName: user.orgName,
+        applicantEmail: user.email,
+        surveyType: selectedSurveyType,
+        customSurveyName: state.customSurveyName,
+        state: state.stateName,
+        district: state.district ?? 'Amritsar',
+        xenDetails: XenDetails(
+          name: state.xenName ?? '',
+          mobile: state.xenMobile ?? '',
+          email: state.xenEmail ?? '',
+        ),
+        areaName: state.areaName ?? '',
+        kmlFile: kmlModel,
+        preferredDate:
+            state.startDate ?? DateTime.now().add(const Duration(days: 1)),
+        logistics: Logistics(
+          coordinatorName: state.coordinatorName ?? '',
+          coordinatorDesignation: state.coordinatorDesignation ?? '',
+          driverName: state.driverName ?? '',
+          driverMobile: state.driverMobile ?? '',
+          vehicleNumber: state.vehicleNumber ?? '',
+          vehicleModel: state.vehicleModel ?? '',
+        ),
+        permissionDocuments: uploadedDocs,
+        status: AppointmentStatus.pendingAssignment,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      // 4. Save to Firestore via Repository
+      final appointmentId = await performanceService.traceAction(
+        'submit_booking_trace',
+        () => appointmentRepo.submitAppointment(appointment),
+        attributes: {'survey_type': selectedSurveyType.code},
+        metrics: {'permission_docs_count': uploadedDocs.length},
+      );
+
+      onProgress?.call('Booking submitted successfully!', 1.0);
+
+      // 5. Clear draft after successful creation
+      await clearDraft();
+
+      await ref
+          .read(analyticsServiceProvider)
+          .logBookingSubmitted(
+            surveyType: selectedSurveyType.code,
+            hasDocs: uploadedDocs.isNotEmpty,
+          );
+
+      return appointmentId;
+    } catch (e, st) {
+      ref
+          .read(crashReportingServiceProvider)
+          .recordError(e, st, reason: 'submitBooking failed', fatal: false);
+      rethrow;
     }
-
-    // 3. Construct Appointment Domain Model
-    onProgress?.call(
-      'Finalizing and creating booking...',
-      (totalSteps - 0.5) / totalSteps,
-    );
-
-    final selectedSurveyType = SurveyType.fromCode(
-      state.surveyType ?? SurveyType.socioEconomicSurvey.code,
-    );
-
-    final appointment = Appointment(
-      id: '',
-      applicantId: user.uid,
-      applicantName: user.fullName,
-      applicantOrgName: user.orgName,
-      applicantEmail: user.email,
-      surveyType: selectedSurveyType,
-      customSurveyName: state.customSurveyName,
-      state: state.stateName,
-      district: state.district ?? 'Amritsar',
-      xenDetails: XenDetails(
-        name: state.xenName ?? '',
-        mobile: state.xenMobile ?? '',
-        email: state.xenEmail ?? '',
-      ),
-      areaName: state.areaName ?? '',
-      kmlFile: kmlModel,
-      preferredDate:
-          state.startDate ?? DateTime.now().add(const Duration(days: 1)),
-      logistics: Logistics(
-        coordinatorName: state.coordinatorName ?? '',
-        coordinatorDesignation: state.coordinatorDesignation ?? '',
-        driverName: state.driverName ?? '',
-        driverMobile: state.driverMobile ?? '',
-        vehicleNumber: state.vehicleNumber ?? '',
-        vehicleModel: state.vehicleModel ?? '',
-      ),
-      permissionDocuments: uploadedDocs,
-      status: AppointmentStatus.pendingAssignment,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    // 4. Save to Firestore via Repository
-    final appointmentId = await appointmentRepo.submitAppointment(appointment);
-
-    onProgress?.call('Booking submitted successfully!', 1.0);
-
-    // 5. Clear draft after successful creation
-    await clearDraft();
-
-    return appointmentId;
   }
 }

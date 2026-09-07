@@ -56,9 +56,15 @@ class CommitteeReviewDetailController {
       await ref
           .read(appointmentRepositoryProvider)
           .reviewAppointment(appointmentId: appointment.id, action: 'approve');
+      await ref
+          .read(analyticsServiceProvider)
+          .logReviewActionTaken(action: 'approve');
     } on AuthFailure {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      ref
+          .read(crashReportingServiceProvider)
+          .recordError(e, st, reason: 'approve failed', fatal: false);
       throw ServerFailure('Failed to approve appointment: $e');
     }
   }
@@ -81,11 +87,17 @@ class CommitteeReviewDetailController {
             action: 'reject',
             reasonOrNote: reason.trim(),
           );
+      await ref
+          .read(analyticsServiceProvider)
+          .logReviewActionTaken(action: 'reject');
     } on AuthFailure {
       rethrow;
     } on ValidationFailure {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      ref
+          .read(crashReportingServiceProvider)
+          .recordError(e, st, reason: 'reject failed', fatal: false);
       throw ServerFailure('Failed to reject appointment: $e');
     }
   }
@@ -124,11 +136,22 @@ class CommitteeReviewDetailController {
             action: 'clarify',
             reasonOrNote: note.trim(),
           );
+      await ref
+          .read(analyticsServiceProvider)
+          .logReviewActionTaken(action: 'clarify');
     } on AuthFailure {
       rethrow;
     } on ValidationFailure {
       rethrow;
-    } catch (e) {
+    } catch (e, st) {
+      ref
+          .read(crashReportingServiceProvider)
+          .recordError(
+            e,
+            st,
+            reason: 'requestClarification failed',
+            fatal: false,
+          );
       throw ServerFailure('Failed to request clarification: $e');
     }
   }

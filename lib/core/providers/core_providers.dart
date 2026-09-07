@@ -10,6 +10,7 @@ import '../services/storage_upload_service.dart';
 import '../services/file_open_service.dart';
 import '../services/crash_reporting_service.dart';
 import '../services/analytics_service.dart';
+import '../services/performance_service.dart';
 
 // Repositories
 final appointmentRepositoryProvider = Provider<AppointmentRepository>((ref) {
@@ -55,4 +56,8 @@ final crashReportingServiceProvider = Provider<CrashReportingService>((ref) {
 
 final analyticsServiceProvider = Provider<AnalyticsService>((ref) {
   return FirebaseAnalyticsService();
+});
+
+final performanceServiceProvider = Provider<PerformanceService>((ref) {
+  return FirebasePerformanceService();
 });

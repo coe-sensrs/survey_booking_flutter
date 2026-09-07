@@ -5,6 +5,7 @@ import 'package:survey_desk/core/errors/failures.dart';
 import 'package:survey_desk/core/models/app_user.dart';
 import 'package:survey_desk/core/repositories/user_repository.dart';
 import 'package:survey_desk/core/providers/core_providers.dart';
+import 'package:survey_desk/core/services/auth_functions_service.dart';
 import 'package:survey_desk/core/services/hive_storage_service.dart';
 import 'package:survey_desk/core/utils/app_snackbar.dart';
 
@@ -36,6 +37,11 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
       if (user == null) {
         ref.read(crashReportingServiceProvider).setCustomKey('role', 'none');
         ref.read(crashReportingServiceProvider).setCustomKey('user_id', 'none');
+        ref.read(crashReportingServiceProvider).setUserIdentifier('');
+        ref.read(analyticsServiceProvider).setUserId(null);
+        ref
+            .read(analyticsServiceProvider)
+            .setUserProperty(name: 'role', value: 'none');
         state = const AsyncData(null);
         if (!completer.isCompleted) completer.complete(null);
       } else {
@@ -56,6 +62,13 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
             ref
                 .read(crashReportingServiceProvider)
                 .setCustomKey('user_id', appUser.uid);
+            ref
+                .read(crashReportingServiceProvider)
+                .setUserIdentifier(appUser.uid);
+            ref.read(analyticsServiceProvider).setUserId(appUser.uid);
+            ref
+                .read(analyticsServiceProvider)
+                .setUserProperty(name: 'role', value: appUser.role);
           }
 
           state = AsyncData(appUser);
@@ -72,63 +85,71 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
   Future<void> loginApplicant(String email, String password) async {
     state = const AsyncLoading();
     try {
-      final credential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email.trim(),
+      final authService = ref.read(authFunctionsServiceProvider);
+      final result = await authService.authenticateUser(
+        email: email,
         password: password,
+        requiredRole: 'applicant',
       );
 
-      final user = credential.user;
-      if (user != null) {
-        final appUser = await _userRepository.getUserById(user.uid);
-        if (appUser == null || (!appUser.isApplicant && !appUser.isCommittee)) {
-          await _firebaseAuth.signOut();
-          state = const AsyncError(
-            AuthFailure('Invalid role for this login.'),
-            StackTrace.empty,
-          );
-          return;
-        }
+      // Sign in with the server-issued custom token to establish a Firebase session.
+      await _firebaseAuth.signInWithCustomToken(result.customToken);
+      await ref.read(analyticsServiceProvider).logLogin(loginMethod: 'email');
 
-        if (!user.emailVerified) {
-          // Keep session alive so verification screen can call user.reload() / resend.
-          // Signal the UI to navigate to the email verification screen.
-          state = const AsyncData(null);
-          throw EmailNotVerifiedException(email);
-        }
+      if (!result.emailVerified) {
+        // Override stream state — keep null so the auth guard does not redirect to home.
+        // The verification screen will call user.reload() to poll for confirmation.
+        state = const AsyncData(null);
+        throw EmailNotVerifiedException(email.trim());
       }
+      // userChanges() stream will fire and update state to AsyncData(appUser).
     } on EmailNotVerifiedException {
       rethrow;
-    } on auth.FirebaseAuthException catch (e) {
-      state = AsyncError(_handleAuthException(e), StackTrace.current);
     } catch (e) {
-      state = AsyncError(const ServerFailure(), StackTrace.current);
+      if (e is Failure) {
+        state = AsyncError(e, StackTrace.current);
+      } else {
+        ref
+            .read(crashReportingServiceProvider)
+            .recordError(
+              e,
+              StackTrace.current,
+              reason: 'loginApplicant failed',
+              fatal: false,
+            );
+        state = AsyncError(const ServerFailure(), StackTrace.current);
+      }
     }
   }
 
   Future<void> loginAdmin(String email, String password) async {
     state = const AsyncLoading();
     try {
-      final credential = await _firebaseAuth.signInWithEmailAndPassword(
-        email: email.trim(),
+      final authService = ref.read(authFunctionsServiceProvider);
+      final result = await authService.authenticateUser(
+        email: email,
         password: password,
+        requiredRole: 'admin',
       );
 
-      final user = credential.user;
-      if (user != null) {
-        final appUser = await _userRepository.getUserById(user.uid);
-        if (appUser == null || !appUser.isAdmin) {
-          await _firebaseAuth.signOut();
-          state = const AsyncError(
-            AuthFailure('Unauthorized access.'),
-            StackTrace.empty,
-          );
-          return;
-        }
-      }
-    } on auth.FirebaseAuthException catch (e) {
-      state = AsyncError(_handleAuthException(e), StackTrace.current);
+      // Sign in with the server-issued custom token to establish a Firebase session.
+      await _firebaseAuth.signInWithCustomToken(result.customToken);
+      await ref.read(analyticsServiceProvider).logLogin(loginMethod: 'email');
+      // userChanges() stream will fire and update state to AsyncData(appUser).
     } catch (e) {
-      state = AsyncError(const ServerFailure(), StackTrace.current);
+      if (e is Failure) {
+        state = AsyncError(e, StackTrace.current);
+      } else {
+        ref
+            .read(crashReportingServiceProvider)
+            .recordError(
+              e,
+              StackTrace.current,
+              reason: 'loginAdmin failed',
+              fatal: false,
+            );
+        state = AsyncError(const ServerFailure(), StackTrace.current);
+      }
     }
   }
 
@@ -141,58 +162,50 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
   }) async {
     state = const AsyncLoading();
     try {
-      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email.trim(),
+      final authService = ref.read(authFunctionsServiceProvider);
+      final result = await authService.registerApplicant(
+        fullName: fullName,
+        email: email,
+        phone: phone,
         password: password,
+        orgName: orgName,
       );
 
-      final user = credential.user;
-      if (user != null) {
-        await user.sendEmailVerification();
+      // Sign in with the server-issued custom token to establish a Firebase session.
+      await _firebaseAuth.signInWithCustomToken(result.customToken);
+      await ref.read(analyticsServiceProvider).logSignUp(signUpMethod: 'email');
 
-        final newAppUser = AppUser(
-          uid: user.uid,
-          role: 'applicant',
-          fullName: fullName.trim(),
-          email: email.trim(),
-          phone: phone.trim(),
-          orgName: orgName?.trim(),
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
+      // Trigger Firebase-branded verification email via the client SDK
+      // (requires an active session, which we just established above).
+      await _firebaseAuth.currentUser?.sendEmailVerification();
 
-        try {
-          await _userRepository.createUser(newAppUser);
-        } catch (_) {
-          // Firestore write failed — delete the Auth user to prevent an orphaned account
-          // that would otherwise block re-registration with the same email.
-          await user.delete();
-          state = AsyncError(
-            const ServerFailure('Account creation failed. Please try again.'),
-            StackTrace.current,
-          );
-          return;
-        }
-
-        // Keep session alive so the verification screen can call user.reload().
-        state = const AsyncData(null);
-        throw EmailNotVerifiedException(email.trim());
-      }
+      // Override stream state — keep null so auth guard does not redirect to home.
+      state = const AsyncData(null);
+      throw EmailNotVerifiedException(result.email);
     } on EmailNotVerifiedException {
       rethrow;
-    } on auth.FirebaseAuthException catch (e) {
-      state = AsyncError(_handleAuthException(e), StackTrace.current);
     } catch (e) {
-      state = AsyncError(const ServerFailure(), StackTrace.current);
+      if (e is Failure) {
+        state = AsyncError(e, StackTrace.current);
+      } else {
+        ref
+            .read(crashReportingServiceProvider)
+            .recordError(
+              e,
+              StackTrace.current,
+              reason: 'signupApplicant failed',
+              fatal: false,
+            );
+        state = AsyncError(const ServerFailure(), StackTrace.current);
+      }
     }
   }
 
   Future<void> resetPassword(String email) async {
-    try {
-      await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
-    } on auth.FirebaseAuthException catch (e) {
-      throw _handleAuthException(e);
-    }
+    final authService = ref.read(authFunctionsServiceProvider);
+    // Throws [AuthRateLimitFailure] if rate limit is exceeded;
+    // throws [AuthFailure] / [ServerFailure] on other errors.
+    await authService.requestPasswordReset(email.trim());
   }
 
   /// Sends a verification email using the currently signed-in Firebase session.

@@ -5,6 +5,19 @@ abstract class AnalyticsService {
   Future<void> logLogin({String? loginMethod});
   Future<void> logSignUp({required String signUpMethod});
   Future<void> setCurrentScreen(String screenName);
+
+  Future<void> setUserId(String? userId);
+  Future<void> setUserProperty({required String name, required String? value});
+
+  // Domain specific events
+  Future<void> logBookingWizardStarted();
+  Future<void> logBookingSubmitted({
+    required String surveyType,
+    required bool hasDocs,
+  });
+  Future<void> logReviewActionTaken({required String action});
+
+  FirebaseAnalyticsObserver get navigationObserver;
 }
 
 class FirebaseAnalyticsService implements AnalyticsService {
@@ -32,4 +45,45 @@ class FirebaseAnalyticsService implements AnalyticsService {
   Future<void> setCurrentScreen(String screenName) async {
     await _analytics.logScreenView(screenName: screenName);
   }
+
+  @override
+  Future<void> setUserId(String? userId) async {
+    await _analytics.setUserId(id: userId);
+  }
+
+  @override
+  Future<void> setUserProperty({
+    required String name,
+    required String? value,
+  }) async {
+    await _analytics.setUserProperty(name: name, value: value);
+  }
+
+  @override
+  Future<void> logBookingWizardStarted() async {
+    await _analytics.logEvent(name: 'booking_wizard_started');
+  }
+
+  @override
+  Future<void> logBookingSubmitted({
+    required String surveyType,
+    required bool hasDocs,
+  }) async {
+    await _analytics.logEvent(
+      name: 'booking_submitted',
+      parameters: {'survey_type': surveyType, 'has_docs': hasDocs.toString()},
+    );
+  }
+
+  @override
+  Future<void> logReviewActionTaken({required String action}) async {
+    await _analytics.logEvent(
+      name: 'review_action_taken',
+      parameters: {'action': action},
+    );
+  }
+
+  @override
+  FirebaseAnalyticsObserver get navigationObserver =>
+      FirebaseAnalyticsObserver(analytics: _analytics);
 }
