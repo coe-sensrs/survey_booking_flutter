@@ -10,15 +10,15 @@
  */
 
 import * as crypto from "crypto";
-import * as admin from "firebase-admin";
+import { db, Timestamp } from "./admin";
 
 // ============================================================
 // Types
 // ============================================================
 
 export interface RateLimitResult {
-  blocked: boolean;
-  secondsRemaining: number;
+    blocked: boolean;
+    secondsRemaining: number;
 }
 
 // ============================================================
@@ -26,23 +26,23 @@ export interface RateLimitResult {
 // ============================================================
 
 interface LoginPolicy {
-  /** Maximum consecutive failures allowed within the window before lockout. */
-  maxFailures: number;
-  /** Duration of the sliding failure-tracking window (ms). */
-  windowMs: number;
-  /** Duration of the first lockout after hitting maxFailures (ms). */
-  lockoutMs: number;
-  /** Duration of lockout for repeat offenders (ms). */
-  repeatLockoutMs: number;
+    /** Maximum consecutive failures allowed within the window before lockout. */
+    maxFailures: number;
+    /** Duration of the sliding failure-tracking window (ms). */
+    windowMs: number;
+    /** Duration of the first lockout after hitting maxFailures (ms). */
+    lockoutMs: number;
+    /** Duration of lockout for repeat offenders (ms). */
+    repeatLockoutMs: number;
 }
 
 interface RequestPolicy {
-  /** Maximum total requests allowed in the window. */
-  maxRequests: number;
-  /** Window duration (ms). */
-  windowMs: number;
-  /** Block duration after exceeding maxRequests (ms). */
-  blockMs: number;
+    /** Maximum total requests allowed in the window. */
+    maxRequests: number;
+    /** Window duration (ms). */
+    windowMs: number;
+    /** Block duration after exceeding maxRequests (ms). */
+    blockMs: number;
 }
 
 const LOGIN_POLICIES: Record<string, LoginPolicy> = {
@@ -94,12 +94,6 @@ function docId(action: string, hash: string): string {
     return `${action}_${hash}`;
 }
 
-/** Lazy Firestore accessor called at invocation time, not module-load time,
- * to avoid initialization-order issues with admin.initializeApp(). */
-function firestoreDb(): FirebaseFirestore.Firestore {
-    return admin.firestore();
-}
-
 // ============================================================
 // Login rate limiting (failure-based)
 // ============================================================
@@ -112,17 +106,16 @@ export async function checkLoginBlocked(
     identifierHash: string,
     action: string,
 ): Promise<RateLimitResult> {
-    const db = firestoreDb();
     const docRef = db
         .collection("auth_rate_limits")
         .doc(docId(action, identifierHash));
     const doc = await docRef.get();
 
-    if (!doc.exists) return {blocked: false, secondsRemaining: 0};
+    if (!doc.exists) return { blocked: false, secondsRemaining: 0 };
 
     const data = doc.data()!;
     const nowMs = Date.now();
-    const blockedUntil = data.blockedUntil as admin.firestore.Timestamp | null;
+    const blockedUntil = data.blockedUntil as Timestamp | null;
 
     if (blockedUntil && blockedUntil.toMillis() > nowMs) {
         return {
@@ -131,7 +124,7 @@ export async function checkLoginBlocked(
         };
     }
 
-    return {blocked: false, secondsRemaining: 0};
+    return { blocked: false, secondsRemaining: 0 };
 }
 
 /**
@@ -147,11 +140,10 @@ export async function recordLoginFailure(
     const policy = LOGIN_POLICIES[action];
     if (!policy) throw new Error(`Unknown login action: ${action}`);
 
-    const db = firestoreDb();
     const docRef = db
         .collection("auth_rate_limits")
         .doc(docId(action, identifierHash));
-    const now = admin.firestore.Timestamp.now();
+    const now = Timestamp.now();
     const nowMs = Date.now();
 
     let blocked = false;
@@ -174,9 +166,9 @@ export async function recordLoginFailure(
         }
 
         const data = doc.data()!;
-        const firstFailureAt = data.firstFailureAt as admin.firestore.Timestamp;
+        const firstFailureAt = data.firstFailureAt as Timestamp;
         const windowExpired =
-      firstFailureAt.toMillis() + policy.windowMs < nowMs;
+            firstFailureAt.toMillis() + policy.windowMs < nowMs;
 
         if (windowExpired) {
             // Sliding window expired - reset counters, treat as first failure.
@@ -202,7 +194,7 @@ export async function recordLoginFailure(
             tx.update(docRef, {
                 failureCount: newCount,
                 lastActivityAt: now,
-                blockedUntil: admin.firestore.Timestamp.fromMillis(blockedUntilMs),
+                blockedUntil: Timestamp.fromMillis(blockedUntilMs),
                 lockoutCount: (data.lockoutCount as number) + 1,
             });
         } else {
@@ -213,7 +205,7 @@ export async function recordLoginFailure(
         }
     });
 
-    return {blocked, secondsRemaining};
+    return { blocked, secondsRemaining };
 }
 
 /**
@@ -224,7 +216,6 @@ export async function resetLoginFailures(
     identifierHash: string,
     action: string,
 ): Promise<void> {
-    const db = firestoreDb();
     const docRef = db
         .collection("auth_rate_limits")
         .doc(docId(action, identifierHash));
@@ -233,9 +224,9 @@ export async function resetLoginFailures(
             {
                 failureCount: 0,
                 blockedUntil: null,
-                lastActivityAt: admin.firestore.Timestamp.now(),
+                lastActivityAt: Timestamp.now(),
             },
-            {merge: true},
+            { merge: true },
         );
     } catch {
         console.warn(
@@ -264,11 +255,10 @@ export async function checkAndIncrementRequests(
     const policy = REQUEST_POLICIES[action];
     if (!policy) throw new Error(`Unknown request action: ${action}`);
 
-    const db = firestoreDb();
     const docRef = db
         .collection("auth_rate_limits")
         .doc(docId(action, identifierHash));
-    const now = admin.firestore.Timestamp.now();
+    const now = Timestamp.now();
     const nowMs = Date.now();
 
     let blocked = false;
@@ -291,7 +281,7 @@ export async function checkAndIncrementRequests(
         }
 
         const data = doc.data()!;
-        const blockedUntil = data.blockedUntil as admin.firestore.Timestamp | null;
+        const blockedUntil = data.blockedUntil as Timestamp | null;
 
         // Check active block first - do not increment when already blocked.
         if (blockedUntil && blockedUntil.toMillis() > nowMs) {
@@ -300,7 +290,7 @@ export async function checkAndIncrementRequests(
             return;
         }
 
-        const windowStart = data.windowStart as admin.firestore.Timestamp;
+        const windowStart = data.windowStart as Timestamp;
         const windowExpired = windowStart.toMillis() + policy.windowMs < nowMs;
 
         if (windowExpired) {
@@ -324,7 +314,7 @@ export async function checkAndIncrementRequests(
             tx.update(docRef, {
                 requestCount: newCount,
                 lastActivityAt: now,
-                blockedUntil: admin.firestore.Timestamp.fromMillis(blockedUntilMs),
+                blockedUntil: Timestamp.fromMillis(blockedUntilMs),
             });
         } else {
             tx.update(docRef, {
@@ -334,5 +324,5 @@ export async function checkAndIncrementRequests(
         }
     });
 
-    return {blocked, secondsRemaining};
+    return { blocked, secondsRemaining };
 }
