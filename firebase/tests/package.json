@@ -1,0 +1,18 @@
+{
+  "name": "survey-desk-firebase-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Firestore/Storage rules and Cloud Functions authorization tests for Survey Desk",
+  "scripts": {
+    "test": "jest --forceExit",
+    "test:firestore": "jest --forceExit firestore/",
+    "test:storage": "jest --forceExit storage/",
+    "test:functions": "jest --forceExit functions/",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase-admin": "^13.0.0",
+    "jest": "^29.7.0"
+  }
+}
