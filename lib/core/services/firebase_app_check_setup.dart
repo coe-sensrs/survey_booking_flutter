@@ -3,8 +3,16 @@ import 'package:flutter/foundation.dart';
 
 const kWebRecaptchaSiteKey = 'put-default-web-sitekey';
 
+/// Inject a custom App Check debug token via --dart-define:
+///   `flutter run --dart-define=APP_CHECK_DEBUG_TOKEN=your-uuid-token`
+///
+/// Leave unset to let the SDK generate a token automatically (debug builds only).
+/// Never set a value in release builds — the const defaults to empty string.
+const _debugToken = String.fromEnvironment('APP_CHECK_DEBUG_TOKEN');
+
 class FirebaseAppCheckSetup {
   static String? _token;
+
   static Future<void> initialize() async {
     // Fetch immediately; catch Integrity API errors gracefully
     FirebaseAppCheck.instance
@@ -26,20 +34,27 @@ class FirebaseAppCheckSetup {
         debugPrint('AppCheck onTokenChange error: $error');
       },
     );
-    // App Check in audit mode for now, as requested.
-    // In audit mode, we initialize App Check but we don't enforce it in the Firebase console yet.
-    // We use PlayIntegrity on Android.
+
+    // App Check in audit mode for now.
+    // In audit mode we initialize App Check but do not enforce it in the
+    // Firebase console yet. We use PlayIntegrity on Android (release).
     try {
       await FirebaseAppCheck.instance.activate(
         providerAndroid: kDebugMode
-            ? const AndroidDebugProvider()
+            ? (_debugToken.isNotEmpty
+                  ? AndroidDebugProvider(debugToken: _debugToken)
+                  : const AndroidDebugProvider())
             : const AndroidPlayIntegrityProvider(),
         providerApple: kDebugMode
-            ? const AppleDebugProvider()
+            ? (_debugToken.isNotEmpty
+                  ? AppleDebugProvider(debugToken: _debugToken)
+                  : const AppleDebugProvider())
             : const AppleDeviceCheckProvider(),
         // Replace with your actual reCAPTCHA site key
         providerWeb: kDebugMode
-            ? WebDebugProvider()
+            ? (_debugToken.isNotEmpty
+                  ? WebDebugProvider(debugToken: _debugToken)
+                  : WebDebugProvider())
             : ReCaptchaV3Provider(kWebRecaptchaSiteKey),
       );
     } catch (e) {
