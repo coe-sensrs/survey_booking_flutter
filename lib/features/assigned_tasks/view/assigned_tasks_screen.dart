@@ -16,40 +16,44 @@ class AssignedTasksScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final tasksAsync = ref.watch(assignedTasksStreamProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'My Assigned Tasks',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
+    return SafeArea(
+      child: Scaffold(
+        resizeToAvoidBottomInset: true,
+        appBar: AppBar(
+          title: Text(
+            'My Assigned Tasks',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
+          ),
+          centerTitle: false,
         ),
-        centerTitle: false,
-      ),
-      body: tasksAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => _ErrorRetryView(
-          onRetry: () => ref.invalidate(assignedTasksStreamProvider),
-        ),
-        data: (tasks) {
-          if (tasks.isEmpty) return _EmptyTasksView();
+        body: tasksAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => _ErrorRetryView(
+            onRetry: () => ref.invalidate(assignedTasksStreamProvider),
+          ),
+          data: (tasks) {
+            if (tasks.isEmpty) return _EmptyTasksView();
 
-          return RefreshIndicator(
-            onRefresh: () async => ref.invalidate(assignedTasksStreamProvider),
-            child: ListView.separated(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              itemCount: tasks.length,
-              separatorBuilder: (_, _) => SizedBox(height: 10.h),
-              itemBuilder: (_, index) => _TaskCard(
-                appointment: tasks[index],
-                onTap: () => context.push(
-                  AppRoutes.committeeTaskDetail.replaceAll(
-                    ':id',
-                    tasks[index].id,
+            return RefreshIndicator(
+              onRefresh: () async =>
+                  ref.invalidate(assignedTasksStreamProvider),
+              child: ListView.separated(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                itemCount: tasks.length,
+                separatorBuilder: (_, _) => SizedBox(height: 10.h),
+                itemBuilder: (_, index) => _TaskCard(
+                  appointment: tasks[index],
+                  onTap: () => context.push(
+                    AppRoutes.committeeTaskDetail.replaceAll(
+                      ':id',
+                      tasks[index].id,
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

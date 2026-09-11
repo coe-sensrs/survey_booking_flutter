@@ -161,89 +161,98 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
     final isLoading = authState.isLoading;
 
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Applicant Login',
-                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  AppTextField(
-                    label: 'Email Address',
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    inputFormatters: [SanitizingTextInputFormatter()],
-                    validator: Validators.validateEmail,
-                  ),
-                  const SizedBox(height: 16),
-                  AppTextField(
-                    label: 'Password',
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    inputFormatters: [
-                      SanitizingTextInputFormatter(),
-                      LengthLimitingTextInputFormatter(64),
-                    ],
-                    validator: (val) =>
-                        Validators.validateRequired(val, 'Password'),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Applicant Login',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
                       ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: (_isCooldownActive || _isSendingReset)
-                          ? null
-                          : _onForgotPassword,
-                      child: _isSendingReset
-                          ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text(
-                              _isCooldownActive
-                                  ? 'Retry in ${_resetCooldownSeconds}s'
-                                  : 'Forgot Password?',
-                            ),
+                    const SizedBox(height: 32),
+                    AppTextField(
+                      label: 'Email Address',
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      inputFormatters: [SanitizingTextInputFormatter()],
+                      validator: Validators.validateEmail,
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  AppButton(
-                    text: _isLoginLocked
-                        ? 'Locked (${_loginLockoutSeconds}s)'
-                        : 'Login',
-                    isLoading: isLoading,
-                    onPressed: (_isLoginLocked || isLoading) ? null : _submit,
-                  ),
-                  const SizedBox(height: 24),
-                  TextButton(
-                    onPressed: () => context.go(AppRoutes.signup),
-                    child: const Text("Don't have an account? Sign up"),
-                  ),
-                  TextButton(
-                    onPressed: () => context.go(AppRoutes.adminLogin),
-                    child: const Text('Admin Login'),
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      label: 'Password',
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      inputFormatters: [
+                        SanitizingTextInputFormatter(),
+                        LengthLimitingTextInputFormatter(64),
+                      ],
+                      validator: (val) =>
+                          Validators.validateRequired(val, 'Password'),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: (_isCooldownActive || _isSendingReset)
+                            ? null
+                            : _onForgotPassword,
+                        child: _isSendingReset
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : Text(
+                                _isCooldownActive
+                                    ? 'Retry in ${_resetCooldownSeconds}s'
+                                    : 'Forgot Password?',
+                              ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    AppButton(
+                      text: _isLoginLocked
+                          ? 'Locked (${_loginLockoutSeconds}s)'
+                          : 'Login',
+                      isLoading: isLoading,
+                      onPressed: (_isLoginLocked || isLoading) ? null : _submit,
+                    ),
+                    const SizedBox(height: 24),
+                    TextButton(
+                      onPressed: () => context.go(AppRoutes.signup),
+                      child: const Text("Don't have an account? Sign up"),
+                    ),
+                    TextButton(
+                      onPressed: () => context.go(AppRoutes.adminLogin),
+                      child: const Text('Admin Login'),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

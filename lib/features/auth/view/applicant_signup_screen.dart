@@ -87,93 +87,97 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
     final isLoading = authState.isLoading;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Sign Up'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: BackButton(onPressed: () => context.go(AppRoutes.login)),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  AppTextField(
-                    label: 'Full Name',
-                    controller: _nameController,
-                    inputFormatters: [
-                      SanitizingTextInputFormatter(),
-                      LengthLimitingTextInputFormatter(54),
-                    ],
-                    validator: (val) => Validators.validateRequired(
-                      val,
-                      'Full Name',
-                      maxLength: 100,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  AppTextField(
-                    label: 'Organization Name (Optional)',
-                    controller: _orgController,
-                    inputFormatters: [
-                      SanitizingTextInputFormatter(),
-                      LengthLimitingTextInputFormatter(30),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  AppTextField(
-                    label: 'Email Address',
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    inputFormatters: [
-                      SanitizingTextInputFormatter(),
-                      LengthLimitingTextInputFormatter(54),
-                    ],
-                    validator: Validators.validateEmail,
-                  ),
-                  const SizedBox(height: 16),
-                  AppTextField(
-                    label: 'Phone Number',
-                    controller: _phoneController,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      SanitizingTextInputFormatter(),
-                      LengthLimitingTextInputFormatter(10),
-                    ],
-                    validator: Validators.validatePhone,
-                  ),
-                  const SizedBox(height: 16),
-                  AppTextField(
-                    label: 'Password',
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    inputFormatters: [
-                      SanitizingTextInputFormatter(),
-                      LengthLimitingTextInputFormatter(64),
-                    ],
-                    validator: Validators.validatePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AppTextField(
+                      label: 'Full Name',
+                      controller: _nameController,
+                      inputFormatters: [
+                        SanitizingTextInputFormatter(),
+                        LengthLimitingTextInputFormatter(54),
+                      ],
+                      validator: (val) => Validators.validateRequired(
+                        val,
+                        'Full Name',
+                        maxLength: 100,
                       ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  AppButton(
-                    text: 'Sign Up',
-                    isLoading: isLoading,
-                    onPressed: _submit,
-                  ),
-                ],
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      label: 'Organization Name (Optional)',
+                      controller: _orgController,
+                      inputFormatters: [
+                        SanitizingTextInputFormatter(),
+                        LengthLimitingTextInputFormatter(30),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      label: 'Email Address',
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      inputFormatters: [
+                        SanitizingTextInputFormatter(),
+                        LengthLimitingTextInputFormatter(54),
+                      ],
+                      validator: Validators.validateEmail,
+                    ),
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      label: 'Phone Number',
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        SanitizingTextInputFormatter(),
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                      validator: Validators.validatePhone,
+                    ),
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      label: 'Password',
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      inputFormatters: [
+                        SanitizingTextInputFormatter(),
+                        LengthLimitingTextInputFormatter(64),
+                      ],
+                      validator: Validators.validatePassword,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    AppButton(
+                      text: 'Sign Up',
+                      isLoading: isLoading,
+                      onPressed: _submit,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

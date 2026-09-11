@@ -101,72 +101,76 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
     final isLoading = authState.isLoading;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: const Text('Admin Login'),
         elevation: 0,
         leading: BackButton(onPressed: () => context.go('/login')),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 400),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Admin Portal',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-                  AppTextField(
-                    label: 'Email Address',
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    inputFormatters: [
-                      SanitizingTextInputFormatter(),
-                      LengthLimitingTextInputFormatter(54),
-                    ],
-                    validator: Validators.validateEmail,
-                  ),
-                  const SizedBox(height: 16),
-                  AppTextField(
-                    label: 'Password',
-                    controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    inputFormatters: [
-                      SanitizingTextInputFormatter(),
-                      LengthLimitingTextInputFormatter(64),
-                    ],
-                    validator: (val) =>
-                        Validators.validateRequired(val, 'Password'),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      'Admin Portal',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
+                      textAlign: TextAlign.center,
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  AppButton(
-                    text: _isLoginLocked
-                        ? 'Locked (${_loginLockoutSeconds}s)'
-                        : 'Login',
-                    isLoading: isLoading,
-                    onPressed: (_isLoginLocked || isLoading) ? null : _submit,
-                  ),
-                ],
+                    const SizedBox(height: 32),
+                    AppTextField(
+                      label: 'Email Address',
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      inputFormatters: [
+                        SanitizingTextInputFormatter(),
+                        LengthLimitingTextInputFormatter(54),
+                      ],
+                      validator: Validators.validateEmail,
+                    ),
+                    const SizedBox(height: 16),
+                    AppTextField(
+                      label: 'Password',
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      inputFormatters: [
+                        SanitizingTextInputFormatter(),
+                        LengthLimitingTextInputFormatter(64),
+                      ],
+                      validator: (val) =>
+                          Validators.validateRequired(val, 'Password'),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                        ),
+                        onPressed: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    AppButton(
+                      text: _isLoginLocked
+                          ? 'Locked (${_loginLockoutSeconds}s)'
+                          : 'Login',
+                      isLoading: isLoading,
+                      onPressed: (_isLoginLocked || isLoading) ? null : _submit,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
