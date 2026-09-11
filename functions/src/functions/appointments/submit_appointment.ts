@@ -1,5 +1,5 @@
 import {onCall, HttpsError} from "firebase-functions/v2/https";
-import {db, FieldValue, Timestamp} from "../../lib/admin";
+import {db, auth, FieldValue, Timestamp} from "../../lib/admin";
 
 interface XenDetailsData {
     name: string;
@@ -73,14 +73,33 @@ export const submitAppointment = onCall(
         }
 
         const uid = request.auth.uid;
-        const role = request.auth.token.role as string | undefined;
-        const emailVerified = request.auth.token.email_verified as boolean | undefined;
+        let role = request.auth.token.role as string | undefined;
+        let emailVerified = request.auth.token.email_verified as boolean | undefined;
+
+        if (!role) {
+            const userDoc = await db.collection("users").doc(uid).get();
+            if (userDoc.exists) {
+                role = userDoc.data()?.role as string | undefined;
+                if (role) {
+                    try {
+                        await auth.setCustomUserClaims(uid, {role});
+                    } catch {/* ignore claims sync errors */}
+                }
+            }
+        }
 
         if (role !== "applicant") {
             throw new HttpsError(
                 "permission-denied",
                 "Only applicants can submit survey booking requests.",
             );
+        }
+
+        if (emailVerified === undefined) {
+            try {
+                const authUser = await auth.getUser(uid);
+                emailVerified = authUser.emailVerified;
+            } catch {/* ignore */}
         }
 
         if (!emailVerified) {

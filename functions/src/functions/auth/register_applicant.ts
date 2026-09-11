@@ -1,5 +1,5 @@
-import { onCall, HttpsError } from "firebase-functions/v2/https";
-import { db, auth, FieldValue } from "../../lib/admin";
+import {onCall, HttpsError} from "firebase-functions/v2/https";
+import {db, auth, FieldValue} from "../../lib/admin";
 import {
     hashIdentifier,
     checkAndIncrementRequests,
@@ -52,7 +52,7 @@ export const registerApplicant = onCall(
             throw new HttpsError(
                 "resource-exhausted",
                 `Too many signup attempts. Please try again in ${limitResult.secondsRemaining} seconds.`,
-                { secondsRemaining: limitResult.secondsRemaining },
+                {secondsRemaining: limitResult.secondsRemaining},
             );
         }
 
@@ -67,7 +67,7 @@ export const registerApplicant = onCall(
             });
             newUid = userRecord.uid;
 
-            await auth.setCustomUserClaims(newUid, { role: "applicant" });
+            await auth.setCustomUserClaims(newUid, {role: "applicant"});
 
             await db.collection("users").doc(newUid).set({
                 uid: newUid,
@@ -84,13 +84,13 @@ export const registerApplicant = onCall(
 
             // Mint custom token so client can sign in and trigger sendEmailVerification().
             const customToken = await auth.createCustomToken(newUid);
-            return { success: true, customToken, email };
+            return {success: true, customToken, email};
         } catch (error: unknown) {
             if (newUid) {
                 try {
                     const userDoc = await db.collection("users").doc(newUid).get();
                     if (!userDoc.exists) await auth.deleteUser(newUid);
-                } catch {/* ignore cleanup errors */ }
+                } catch {/* ignore cleanup errors */}
             }
 
             if (error instanceof HttpsError) throw error;

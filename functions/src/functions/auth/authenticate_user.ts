@@ -112,8 +112,9 @@ export const authenticateUser = onCall(
             emailVerified = authUser.emailVerified;
         }
 
-        // 7. Mint custom token and reset failure counter.
-        const customToken = await auth.createCustomToken(uid);
+        // 7. Ensure custom claims are set on Auth record, mint custom token with role, and reset failure counter.
+        await auth.setCustomUserClaims(uid, {role: userRole});
+        const customToken = await auth.createCustomToken(uid, {role: userRole});
         await resetLoginFailures(hash, action);
 
         return {customToken, role: userRole, emailVerified};

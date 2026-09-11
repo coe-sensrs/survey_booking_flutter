@@ -10,7 +10,7 @@
  */
 
 import * as crypto from "crypto";
-import { db, Timestamp } from "./admin";
+import {db, Timestamp} from "./admin";
 
 // ============================================================
 // Types
@@ -111,7 +111,7 @@ export async function checkLoginBlocked(
         .doc(docId(action, identifierHash));
     const doc = await docRef.get();
 
-    if (!doc.exists) return { blocked: false, secondsRemaining: 0 };
+    if (!doc.exists) return {blocked: false, secondsRemaining: 0};
 
     const data = doc.data()!;
     const nowMs = Date.now();
@@ -124,7 +124,7 @@ export async function checkLoginBlocked(
         };
     }
 
-    return { blocked: false, secondsRemaining: 0 };
+    return {blocked: false, secondsRemaining: 0};
 }
 
 /**
@@ -205,7 +205,7 @@ export async function recordLoginFailure(
         }
     });
 
-    return { blocked, secondsRemaining };
+    return {blocked, secondsRemaining};
 }
 
 /**
@@ -226,7 +226,7 @@ export async function resetLoginFailures(
                 blockedUntil: null,
                 lastActivityAt: Timestamp.now(),
             },
-            { merge: true },
+            {merge: true},
         );
     } catch {
         console.warn(
@@ -324,5 +324,5 @@ export async function checkAndIncrementRequests(
         }
     });
 
-    return { blocked, secondsRemaining };
+    return {blocked, secondsRemaining};
 }
