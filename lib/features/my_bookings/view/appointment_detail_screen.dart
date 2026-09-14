@@ -5,12 +5,11 @@ import 'package:intl/intl.dart';
 
 import '../../../core/constants/appointment_status.dart';
 import '../../../core/constants/survey_type.dart';
-import '../../../core/models/appointment.dart';
-import '../../../core/providers/core_providers.dart';
 
 import '../../../core/utils/app_snackbar.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
+import '../../../core/widgets/appointment_status_badge.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../viewmodel/my_bookings_viewmodel.dart';
 
@@ -79,7 +78,9 @@ class _AppointmentDetailScreenState
 
   @override
   Widget build(BuildContext context) {
-    final repo = ref.watch(appointmentRepositoryProvider);
+    final appointmentAsync = ref.watch(
+      applicantAppointmentDetailStreamProvider(widget.appointmentId),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -89,14 +90,15 @@ class _AppointmentDetailScreenState
         ),
         automaticallyImplyLeading: widget.showBackButton,
       ),
-      body: FutureBuilder<Appointment?>(
-        future: repo.getAppointmentById(widget.appointmentId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+      body: appointmentAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) => const EmptyStateWidget(
+          title: 'Appointment Not Found',
+          message: 'Could not load details for this appointment.',
+          icon: Icons.search_off,
+        ),
+        data: (appointment) {
+          if (appointment == null) {
             return const EmptyStateWidget(
               title: 'Appointment Not Found',
               message: 'Could not load details for this appointment.',
@@ -104,7 +106,6 @@ class _AppointmentDetailScreenState
             );
           }
 
-          final appointment = snapshot.data!;
           final surveyTitle = appointment.surveyType == SurveyType.other
               ? (appointment.customSurveyName ?? 'Other Survey')
               : appointment.surveyType.label;
@@ -147,7 +148,7 @@ class _AppointmentDetailScreenState
                                 ),
                               ),
                             ),
-                            _buildStatusBadge(context, appointment.status),
+                            AppointmentStatusBadge(status: appointment.status),
                           ],
                         ),
                         SizedBox(height: 8.h),
@@ -395,60 +396,6 @@ class _AppointmentDetailScreenState
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(BuildContext context, AppointmentStatus status) {
-    Color bg;
-    Color fg;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    switch (status) {
-      case AppointmentStatus.approved:
-      case AppointmentStatus.taskAssigned:
-        bg = isDark
-            ? Colors.green.withValues(alpha: 0.25)
-            : Colors.green.shade100;
-        fg = isDark ? const Color(0xFF81C784) : Colors.green.shade800;
-        break;
-      case AppointmentStatus.rejected:
-        bg = isDark ? Colors.red.withValues(alpha: 0.25) : Colors.red.shade100;
-        fg = isDark ? const Color(0xFFE57373) : Colors.red.shade800;
-        break;
-      case AppointmentStatus.clarificationRequested:
-        bg = isDark
-            ? Colors.orange.withValues(alpha: 0.25)
-            : Colors.orange.shade100;
-        fg = isDark ? const Color(0xFFFFB74D) : Colors.orange.shade800;
-        break;
-      case AppointmentStatus.underReview:
-        bg = isDark
-            ? Colors.blue.withValues(alpha: 0.25)
-            : Colors.blue.shade100;
-        fg = isDark ? const Color(0xFF64B5F6) : Colors.blue.shade800;
-        break;
-      case AppointmentStatus.pendingAssignment:
-        bg = isDark
-            ? Colors.grey.withValues(alpha: 0.25)
-            : Colors.grey.shade200;
-        fg = isDark ? const Color(0xFFBDBDBD) : Colors.grey.shade800;
-        break;
-    }
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Text(
-        status.label,
-        style: TextStyle(
-          color: fg,
-          fontSize: 11.sp,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
