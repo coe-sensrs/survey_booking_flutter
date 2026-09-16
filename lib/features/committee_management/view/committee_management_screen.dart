@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/models/app_user.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../view/manage_committee_member_sheet.dart';
 import '../viewmodel/committee_management_viewmodel.dart';
 
 class CommitteeManagementScreen extends ConsumerWidget {
@@ -98,13 +99,13 @@ class CommitteeManagementScreen extends ConsumerWidget {
   }
 }
 
-class _CommitteeMemberCard extends StatelessWidget {
+class _CommitteeMemberCard extends ConsumerWidget {
   final AppUser member;
 
   const _CommitteeMemberCard({required this.member});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -201,7 +202,9 @@ class _CommitteeMemberCard extends StatelessWidget {
                 children: [
                   OutlinedButton(
                     onPressed: () {
-                      // Out of scope for Phase 4: View profile
+                      final path = AppRoutes.adminCommitteeMemberProfile
+                          .replaceFirst(':id', member.uid);
+                      context.push(path);
                     },
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(
@@ -218,7 +221,14 @@ class _CommitteeMemberCard extends StatelessWidget {
                   SizedBox(width: 8.w),
                   FilledButton.tonal(
                     onPressed: () {
-                      // Out of scope for Phase 4: Manage
+                      showModalBottomSheet<void>(
+                        context: context,
+                        isScrollControlled: true,
+                        useSafeArea: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) =>
+                            ManageCommitteeMemberSheet(member: member),
+                      );
                     },
                     style: FilledButton.styleFrom(
                       padding: EdgeInsets.symmetric(
