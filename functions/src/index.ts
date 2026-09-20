@@ -12,3 +12,4 @@ export {
     setConfirmedDate,
     assignFieldworkTask,
 } from "./functions/appointments/admin_appointment_mutations";
+export {updateCommitteeMember} from "./functions/admin/update_committee_member";
