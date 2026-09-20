@@ -4,6 +4,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/errors/failures.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../viewmodel/admin_appointment_detail_viewmodel.dart';
 
@@ -67,132 +68,132 @@ class _SetConfirmedDateSheetState extends ConsumerState<SetConfirmedDateSheet> {
           .read(adminAppointmentDetailControllerProvider)
           .setConfirmedDate(widget.appointmentId, _selectedDate!);
 
-      if (mounted) {
-        AppSnackbar.showSuccess(
-          context,
-          title: 'Success',
-          message: 'Confirmed date updated successfully.',
-        );
-        context.pop();
-      }
+      // Pop first so the snackbar renders on the parent Scaffold.
+      if (mounted && context.canPop()) context.pop();
+
+      AppSnackbar.showGlobalSuccess(
+        title: 'Date Confirmed',
+        message: 'Survey date has been confirmed successfully.',
+      );
     } catch (e) {
-      if (mounted) {
-        AppSnackbar.showError(context, title: 'Error', message: e.toString());
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
+      // Always dismiss so the error snackbar is fully visible.
+      if (mounted && context.canPop()) context.pop();
+
+      final message = e is Failure ? e.message : e.toString();
+      AppSnackbar.showGlobalError(title: 'Update Failed', message: message);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(24.w),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Set Confirmed Date',
-            style: TextStyle(
-              fontSize: 20.sp,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'This date will override the applicant\'s preferred date.',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          SizedBox(height: 32.h),
-
-          InkWell(
-            onTap: () => _selectDate(context),
-            borderRadius: BorderRadius.circular(12.r),
-            child: Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-                borderRadius: BorderRadius.circular(12.r),
+    return PopScope(
+      canPop: !_isSubmitting,
+      child: Container(
+        padding: EdgeInsets.all(24.w),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Set Confirmed Date',
+              style: TextStyle(
+                fontSize: 20.sp,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.calendar_month,
-                    color: Theme.of(context).colorScheme.primary,
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'This date will override the applicant\'s preferred date.',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: 32.h),
+
+            InkWell(
+              onTap: () => _selectDate(context),
+              borderRadius: BorderRadius.circular(12.r),
+              child: Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
                   ),
-                  SizedBox(width: 16.w),
-                  Expanded(
-                    child: Text(
-                      _selectedDate != null
-                          ? DateFormat(
-                              'EEEE, MMM dd, yyyy',
-                            ).format(_selectedDate!)
-                          : 'Select a date',
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: _selectedDate != null
-                            ? FontWeight.bold
-                            : FontWeight.normal,
-                        color: _selectedDate != null
-                            ? Theme.of(context).colorScheme.onSurface
-                            : Theme.of(context).colorScheme.onSurfaceVariant,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_month,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    SizedBox(width: 16.w),
+                    Expanded(
+                      child: Text(
+                        _selectedDate != null
+                            ? DateFormat(
+                                'EEEE, MMM dd, yyyy',
+                              ).format(_selectedDate!)
+                            : 'Select a date',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: _selectedDate != null
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                          color: _selectedDate != null
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
 
-          SizedBox(height: 40.h),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: _isSubmitting ? null : () => context.pop(),
-                  style: OutlinedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
+            SizedBox(height: 40.h),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _isSubmitting ? null : () => context.pop(),
+                    style: OutlinedButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                    ),
+                    child: const Text('Cancel'),
                   ),
-                  child: const Text('Cancel'),
                 ),
-              ),
-              SizedBox(width: 16.w),
-              Expanded(
-                child: FilledButton(
-                  onPressed: (_isSubmitting || _selectedDate == null)
-                      ? null
-                      : _submit,
-                  style: FilledButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
+                SizedBox(width: 16.w),
+                Expanded(
+                  child: FilledButton(
+                    onPressed: (_isSubmitting || _selectedDate == null)
+                        ? null
+                        : _submit,
+                    style: FilledButton.styleFrom(
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
+                    ),
+                    child: _isSubmitting
+                        ? SizedBox(
+                            width: 20.w,
+                            height: 20.w,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('Confirm Date'),
                   ),
-                  child: _isSubmitting
-                      ? SizedBox(
-                          width: 20.w,
-                          height: 20.w,
-                          child: const CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('Confirm Date'),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
