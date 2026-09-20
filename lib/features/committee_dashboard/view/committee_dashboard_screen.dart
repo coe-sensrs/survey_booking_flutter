@@ -36,10 +36,6 @@ class CommitteeDashboardScreen extends ConsumerWidget {
 
         // --- Data state ---
         data: (appointments) {
-          if (appointments.isEmpty) {
-            return _EmptyReviewsView();
-          }
-
           // Segment appointments: active (pending action) vs. resolved
           final active = appointments
               .where(
@@ -60,40 +56,61 @@ class CommitteeDashboardScreen extends ConsumerWidget {
             // Pull-to-refresh invalidates the stream provider
             onRefresh: () async =>
                 ref.invalidate(committeeDashboardStreamProvider),
-            child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              children: [
-                if (active.isNotEmpty) ...[
-                  _SectionHeader(
-                    title: 'Awaiting Your Action (${active.length})',
-                  ),
-                  SizedBox(height: 8.h),
-                  ...active.map(
-                    (a) => _AppointmentCard(
-                      appointment: a,
-                      onTap: () => context.push(
-                        AppRoutes.committeeReviewDetail.replaceAll(':id', a.id),
+            child: (active.isEmpty && resolved.isEmpty)
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: [
+                      SizedBox(
+                        // Use a fixed proportion of height to center the empty state vertically
+                        height: MediaQuery.of(context).size.height * 0.7,
+                        child: _EmptyReviewsView(),
                       ),
+                    ],
+                  )
+                : ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
                     ),
+                    children: [
+                      if (active.isNotEmpty) ...[
+                        _SectionHeader(
+                          title: 'Awaiting Your Action (${active.length})',
+                        ),
+                        SizedBox(height: 8.h),
+                        ...active.map(
+                          (a) => _AppointmentCard(
+                            appointment: a,
+                            onTap: () => context.push(
+                              AppRoutes.committeeReviewDetail.replaceAll(
+                                ':id',
+                                a.id,
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 20.h),
+                      ],
+                      if (resolved.isNotEmpty) ...[
+                        _SectionHeader(title: 'Resolved (${resolved.length})'),
+                        SizedBox(height: 8.h),
+                        ...resolved.map(
+                          (a) => _AppointmentCard(
+                            appointment: a,
+                            onTap: () => context.push(
+                              AppRoutes.committeeReviewDetail.replaceAll(
+                                ':id',
+                                a.id,
+                              ),
+                            ),
+                            muted: true,
+                          ),
+                        ),
+                      ],
+                      SizedBox(height: 24.h),
+                    ],
                   ),
-                  SizedBox(height: 20.h),
-                ],
-                if (resolved.isNotEmpty) ...[
-                  _SectionHeader(title: 'Resolved (${resolved.length})'),
-                  SizedBox(height: 8.h),
-                  ...resolved.map(
-                    (a) => _AppointmentCard(
-                      appointment: a,
-                      onTap: () => context.push(
-                        AppRoutes.committeeReviewDetail.replaceAll(':id', a.id),
-                      ),
-                      muted: true,
-                    ),
-                  ),
-                ],
-                SizedBox(height: 24.h),
-              ],
-            ),
           );
         },
       ),
