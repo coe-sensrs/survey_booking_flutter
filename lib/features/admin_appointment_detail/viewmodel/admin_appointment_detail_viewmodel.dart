@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/failures.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/providers/core_providers.dart';
+import '../../../core/services/admin_functions_service.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 
 final adminAppointmentDetailStreamProvider =
@@ -25,6 +26,9 @@ class AdminAppointmentDetailController {
     }
   }
 
+  /// Routes through [AdminFunctionsService] which force-refreshes the ID token
+  /// before every call, translates [FirebaseFunctionsException] error codes into
+  /// clean [Failure] objects, and preserves [Failure] subclasses on rethrow.
   Future<void> assignReviewer(
     String appointmentId,
     String reviewerId,
@@ -32,8 +36,18 @@ class AdminAppointmentDetailController {
   ) async {
     _checkAdminRights();
     try {
-      final repo = ref.read(appointmentRepositoryProvider);
-      await repo.assignReviewer(appointmentId, reviewerId, reviewerName);
+      await ref
+          .read(adminFunctionsServiceProvider)
+          .callAdminFunction<void>(
+            functionName: 'assignReviewer',
+            data: {
+              'appointmentId': appointmentId,
+              'reviewerId': reviewerId,
+              'reviewerName': reviewerName,
+            },
+          );
+    } on Failure {
+      rethrow;
     } catch (e) {
       throw ServerFailure('Failed to assign reviewer: $e');
     }
@@ -42,8 +56,17 @@ class AdminAppointmentDetailController {
   Future<void> setConfirmedDate(String appointmentId, DateTime date) async {
     _checkAdminRights();
     try {
-      final repo = ref.read(appointmentRepositoryProvider);
-      await repo.setConfirmedDate(appointmentId, date);
+      await ref
+          .read(adminFunctionsServiceProvider)
+          .callAdminFunction<void>(
+            functionName: 'setConfirmedDate',
+            data: {
+              'appointmentId': appointmentId,
+              'confirmedDate': date.toIso8601String(),
+            },
+          );
+    } on Failure {
+      rethrow;
     } catch (e) {
       throw ServerFailure('Failed to set confirmed date: $e');
     }
@@ -56,10 +79,20 @@ class AdminAppointmentDetailController {
   ) async {
     _checkAdminRights();
     try {
-      final repo = ref.read(appointmentRepositoryProvider);
-      await repo.assignFieldworkTask(appointmentId, memberId, memberName);
+      await ref
+          .read(adminFunctionsServiceProvider)
+          .callAdminFunction<void>(
+            functionName: 'assignFieldworkTask',
+            data: {
+              'appointmentId': appointmentId,
+              'memberId': memberId,
+              'memberName': memberName,
+            },
+          );
+    } on Failure {
+      rethrow;
     } catch (e) {
-      throw ServerFailure('Failed to assign task: $e');
+      throw ServerFailure('Failed to assign fieldwork task: $e');
     }
   }
 }
