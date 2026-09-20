@@ -15,6 +15,7 @@ import '../../features/admin_dashboard/view/admin_shell_screen.dart';
 import '../../features/admin_dashboard/view/admin_dashboard_screen.dart';
 import '../../features/committee_management/view/committee_management_screen.dart';
 import '../../features/committee_management/view/add_committee_member_screen.dart';
+import '../../features/committee_management/view/committee_member_profile_screen.dart';
 import '../../features/admin_appointment_detail/view/admin_appointment_detail_screen.dart';
 import '../../features/applicant_home/view/home_screen.dart';
 import '../../features/my_bookings/view/my_bookings_screen.dart';
@@ -132,6 +133,10 @@ class AppRoutes {
   static const String adminCommitteeManagement = '/admin-committees';
   static const String adminAddMember = '/admin-add-member';
   static const String adminSettings = '/admin-settings';
+
+  // Admin pushed full-screen routes — Committee member profile
+  static const String adminCommitteeMemberProfile =
+      '/admin-committee-profile/:id';
 
   static const String adminAppointmentDetail = '/admin-appointment/:id';
 
@@ -329,6 +334,13 @@ final GoRouter appRouter = GoRouter(
         return AdminAppointmentDetailScreen(appointmentId: id);
       },
     ),
+    GoRoute(
+      path: AppRoutes.adminCommitteeMemberProfile,
+      builder: (context, state) {
+        final id = state.pathParameters['id'] ?? '';
+        return CommitteeMemberProfileScreen(memberId: id);
+      },
+    ),
 
     // -------------------------------------------------------------------------
     // Stateful Shell Route for Committee Member Bottom Navigation
@@ -442,7 +454,8 @@ final GoRouter appRouter = GoRouter(
         loc == AppRoutes.adminCommitteeManagement ||
         loc == AppRoutes.adminAddMember ||
         loc == AppRoutes.adminSettings ||
-        loc.startsWith('/admin-appointment');
+        loc.startsWith('/admin-appointment') ||
+        loc.startsWith('/admin-committee-profile');
 
     // All committee-only routes
     final isCommitteeRoute =
