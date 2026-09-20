@@ -1,16 +1,39 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import '../models/appointment.dart';
 import '../repositories/appointment_repository.dart';
 import '../constants/appointment_status.dart';
 
 class FirebaseAppointmentRepository implements AppointmentRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseFunctions _functions;
 
-  FirebaseAppointmentRepository({FirebaseFirestore? firestore})
-    : _firestore = firestore ?? FirebaseFirestore.instance;
+  FirebaseAppointmentRepository({
+    FirebaseFirestore? firestore,
+    FirebaseFunctions? functions,
+  }) : _firestore = firestore ?? FirebaseFirestore.instance,
+       _functions = functions ?? FirebaseFunctions.instance;
 
   CollectionReference<Map<String, dynamic>> get _appointmentsRef =>
       _firestore.collection('appointments');
+
+  /// Force-refreshes the Firebase ID token before any Cloud Function call.
+  /// Prevents stale cached tokens from triggering `unauthenticated` errors,
+  /// mirroring the pattern used in [AdminFunctionsService].
+  /// Failures (e.g. App Check / network issues) are logged and swallowed so
+  /// the CF call still proceeds with the best available cached token.
+  Future<void> _refreshToken() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    try {
+      await user.getIdToken(true);
+    } catch (e) {
+      // App Check or network failure during refresh — proceed with cached token.
+      debugPrint('[FirebaseAppointmentRepository] getIdToken(true) failed: $e');
+    }
+  }
 
   @override
   Future<Appointment?> getAppointmentById(String id) async {
@@ -135,8 +158,26 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
 
   @override
   Future<String> submitAppointment(Appointment appointment) async {
-    final docRef = await _appointmentsRef.add(appointment.toMap());
-    return docRef.id;
+    await _refreshToken();
+    final callable = _functions.httpsCallable('submitAppointment');
+    final result = await callable.call<Map<String, dynamic>>({
+      'applicantName': appointment.applicantName,
+      'applicantOrgName': appointment.applicantOrgName,
+      'applicantEmail': appointment.applicantEmail,
+      'surveyType': appointment.surveyType.code,
+      'customSurveyName': appointment.customSurveyName,
+      'state': appointment.state,
+      'district': appointment.district,
+      'xenDetails': appointment.xenDetails.toMap(),
+      'areaName': appointment.areaName,
+      'kmlFile': appointment.kmlFile.toMap(),
+      'preferredDate': appointment.preferredDate.toIso8601String(),
+      'logistics': appointment.logistics.toMap(),
+      'permissionDocuments': appointment.permissionDocuments
+          .map((d) => d.toMap())
+          .toList(),
+    });
+    return result.data['appointmentId'] as String;
   }
 
   @override
@@ -145,11 +186,11 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
     String reviewerId,
     String reviewerName,
   ) async {
-    await _appointmentsRef.doc(appointmentId).update({
-      'assignedReviewerId': reviewerId,
-      'assignedReviewerName': reviewerName,
-      'status': AppointmentStatus.underReview.code,
-      'updatedAt': FieldValue.serverTimestamp(),
+    final callable = _functions.httpsCallable('assignReviewer');
+    await callable.call(<String, dynamic>{
+      'appointmentId': appointmentId,
+      'reviewerId': reviewerId,
+      'reviewerName': reviewerName,
     });
   }
 
@@ -158,9 +199,10 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
     String appointmentId,
     DateTime confirmedDate,
   ) async {
-    await _appointmentsRef.doc(appointmentId).update({
-      'confirmedDate': Timestamp.fromDate(confirmedDate),
-      'updatedAt': FieldValue.serverTimestamp(),
+    final callable = _functions.httpsCallable('setConfirmedDate');
+    await callable.call(<String, dynamic>{
+      'appointmentId': appointmentId,
+      'confirmedDate': confirmedDate.toIso8601String(),
     });
   }
 
@@ -170,23 +212,13 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
     required String action,
     String? reasonOrNote,
   }) async {
-    String newStatus = AppointmentStatus.underReview.code;
-    final updates = <String, dynamic>{
-      'updatedAt': FieldValue.serverTimestamp(),
-    };
-
-    if (action == 'approve') {
-      newStatus = AppointmentStatus.approved.code;
-    } else if (action == 'reject') {
-      newStatus = AppointmentStatus.rejected.code;
-      updates['rejectionReason'] = reasonOrNote;
-    } else if (action == 'clarify') {
-      newStatus = AppointmentStatus.clarificationRequested.code;
-      updates['clarificationNote'] = reasonOrNote;
-    }
-
-    updates['status'] = newStatus;
-    await _appointmentsRef.doc(appointmentId).update(updates);
+    await _refreshToken();
+    final callable = _functions.httpsCallable('reviewAppointment');
+    await callable.call(<String, dynamic>{
+      'appointmentId': appointmentId,
+      'action': action,
+      'reasonOrNote': reasonOrNote ?? '',
+    });
   }
 
   @override
@@ -194,10 +226,11 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
     String appointmentId,
     String replyText,
   ) async {
-    await _appointmentsRef.doc(appointmentId).update({
-      'clarificationReply': replyText,
-      'status': AppointmentStatus.underReview.code,
-      'updatedAt': FieldValue.serverTimestamp(),
+    await _refreshToken();
+    final callable = _functions.httpsCallable('submitClarificationReply');
+    await callable.call(<String, dynamic>{
+      'appointmentId': appointmentId,
+      'replyText': replyText,
     });
   }
 
@@ -207,11 +240,12 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
     String memberId,
     String memberName,
   ) async {
-    await _appointmentsRef.doc(appointmentId).update({
-      'assignedTaskMemberId': memberId,
-      'assignedTaskMemberName': memberName,
-      'status': AppointmentStatus.taskAssigned.code,
-      'updatedAt': FieldValue.serverTimestamp(),
+    await _refreshToken();
+    final callable = _functions.httpsCallable('assignFieldworkTask');
+    await callable.call(<String, dynamic>{
+      'appointmentId': appointmentId,
+      'memberId': memberId,
+      'memberName': memberName,
     });
   }
 }
