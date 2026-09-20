@@ -55,7 +55,12 @@ class AdminFunctionsService {
           throw ValidationFailure(e.message ?? 'Record already exists.');
         case 'not-found':
           throw const ServerFailure(
-            'Service not found. Please ensure the Cloud Function is deployed.',
+            'Record not found. It may have been deleted or never existed.',
+          );
+        case 'failed-precondition':
+          throw ValidationFailure(
+            e.message ??
+                'This action cannot be performed in the current state.',
           );
         case 'permission-denied':
           throw const AuthFailure(
@@ -63,7 +68,7 @@ class AdminFunctionsService {
           );
         case 'unauthenticated':
           throw const AuthFailure(
-            'You must be logged in to perform this action.',
+            'Your session has expired. Please log out and log in again.',
           );
         case 'invalid-argument':
           throw ValidationFailure(
