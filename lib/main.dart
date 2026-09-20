@@ -12,9 +12,13 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/routing/app_router.dart';
 import 'core/services/firebase_app_check_setup.dart';
+import 'core/firebase/firebase_emulator.dart';
 import 'core/services/hive_storage_service.dart';
 import 'core/utils/app_snackbar.dart';
+import 'core/providers/core_providers.dart';
 import 'features/auth/viewmodel/auth_viewmodel.dart';
+import 'features/notifications/view/notification_handler.dart';
+import 'features/notifications/view/notification_overlay.dart';
 
 void main() async {
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
@@ -25,7 +29,13 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  await FirebaseAppCheckSetup.initialize();
+  // Emulator mode: connect to local emulator suite and skip App Check.
+  // Production mode (default): initialize App Check normally.
+  if (FirebaseEmulator.kUseFirebaseEmulator) {
+    await FirebaseEmulator.connect();
+  } else {
+    await FirebaseAppCheckSetup.initialize();
+  }
 
   // Set crashlytics collection enabled only in release mode
   await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(
@@ -40,6 +50,17 @@ void main() async {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
+
+  // Initialize FCM — request permission and wire up message handlers.
+  // Must run after Firebase.initializeApp() and before runApp().
+  // Errors here are non-fatal: the app is usable without push notifications.
+  try {
+    final notificationService = getNotificationServiceForInit();
+    await notificationService.initialize();
+    await notificationService.requestPermission();
+  } catch (e) {
+    debugPrint('FCM non-fatal startup error: $e');
+  }
 
   runApp(const ProviderScope(child: SurveyDeskApp()));
 
@@ -87,14 +108,19 @@ class _SurveyDeskAppState extends ConsumerState<SurveyDeskApp> {
       splitScreenMode: true,
       autoRebuild: false,
       builder: (context, child) {
-        return MaterialApp.router(
-          scaffoldMessengerKey: AppSnackbar.scaffoldMessengerKey,
-          title: 'Survey Desk',
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeMode,
-          routerConfig: appRouter,
-          debugShowCheckedModeBanner: false,
+        return NotificationHandler(
+          child: MaterialApp.router(
+            scaffoldMessengerKey: AppSnackbar.scaffoldMessengerKey,
+            title: 'Survey Desk',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            routerConfig: appRouter,
+            debugShowCheckedModeBanner: false,
+            builder: (context, routerChild) => NotificationOverlayWrapper(
+              child: routerChild ?? const SizedBox.shrink(),
+            ),
+          ),
         );
       },
     );

@@ -25,6 +25,7 @@ final authViewModelProvider = AsyncNotifierProvider<AuthViewModel, AppUser?>(
 class AuthViewModel extends AsyncNotifier<AppUser?> {
   late auth.FirebaseAuth _firebaseAuth;
   late UserRepository _userRepository;
+  String? _previousUid; // tracks previous user for FCM token migration
 
   @override
   FutureOr<AppUser?> build() async {
@@ -35,6 +36,12 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
     final completer = Completer<AppUser?>();
     _firebaseAuth.userChanges().listen((user) async {
       if (user == null) {
+        // On sign-out, unregister the FCM token from the previous user.
+        if (_previousUid != null) {
+          final notifService = ref.read(notificationServiceProvider);
+          await notifService.unregisterToken(_previousUid!);
+          _previousUid = null;
+        }
         ref.read(crashReportingServiceProvider).setCustomKey('role', 'none');
         ref.read(crashReportingServiceProvider).setCustomKey('user_id', 'none');
         ref.read(crashReportingServiceProvider).setUserIdentifier('');
@@ -54,6 +61,14 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
             );
             return;
           }
+
+          // FCM token lifecycle: migrate token from previous user if account switched.
+          final notifService = ref.read(notificationServiceProvider);
+          if (_previousUid != null && _previousUid != user.uid) {
+            await notifService.unregisterToken(_previousUid!);
+          }
+          await notifService.registerToken(user.uid);
+          _previousUid = user.uid;
 
           if (appUser != null) {
             ref
@@ -261,6 +276,13 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
   }
 
   Future<void> logout() async {
+    final currentUid = _firebaseAuth.currentUser?.uid;
+    if (currentUid != null) {
+      try {
+        await ref.read(notificationServiceProvider).unregisterToken(currentUid);
+      } catch (_) {}
+      _previousUid = null;
+    }
     await _firebaseAuth.signOut();
     await HiveStorageService.clearUserData();
     state = const AsyncData(null);
@@ -268,6 +290,13 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
 
   /// Signs out, clears local data, and shows a global warning snackbar.
   Future<void> _forceSignOut(String message) async {
+    final currentUid = _firebaseAuth.currentUser?.uid;
+    if (currentUid != null) {
+      try {
+        await ref.read(notificationServiceProvider).unregisterToken(currentUid);
+      } catch (_) {}
+      _previousUid = null;
+    }
     await _firebaseAuth.signOut();
     await HiveStorageService.clearUserData();
     state = const AsyncData(null);

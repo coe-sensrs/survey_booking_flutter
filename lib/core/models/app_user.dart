@@ -10,6 +10,7 @@ class AppUser {
   final String? expertiseTag;
   final bool? active;
   final String? photoUrl;
+  final List<String> fcmTokens;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -23,6 +24,7 @@ class AppUser {
     this.expertiseTag,
     this.active,
     this.photoUrl,
+    this.fcmTokens = const [],
     required this.createdAt,
     required this.updatedAt,
   });
@@ -42,13 +44,17 @@ class AppUser {
       expertiseTag: map['expertiseTag'] as String?,
       active: map['active'] as bool?,
       photoUrl: map['photoUrl'] as String?,
+      fcmTokens: (map['fcmTokens'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (map['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
   }
 
   Map<String, dynamic> toMap() {
-    return {
+    final data = <String, dynamic>{
       'role': role,
       'fullName': fullName,
       'orgName': orgName,
@@ -60,5 +66,9 @@ class AppUser {
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
+    if (fcmTokens.isNotEmpty) {
+      data['fcmTokens'] = fcmTokens;
+    }
+    return data;
   }
 }
