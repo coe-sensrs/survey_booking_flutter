@@ -1,5 +1,7 @@
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import {db, auth, FieldValue, Timestamp} from "../../lib/admin";
+import {sendAppointmentNotification} from "../notifications/send_push_notification";
+import {NotificationType} from "../notifications/notification_types";
 
 interface XenDetailsData {
     name: string;
@@ -198,6 +200,13 @@ export const submitAppointment = onCall(
                 note: "Application submitted by applicant.",
             });
         });
+
+        // ── 4. Notify admins (fire-and-forget — must not block or throw) ────
+        await sendAppointmentNotification(
+            NotificationType.BOOKING_CREATED,
+            {}, // booking_created recipients are resolved via admin role query
+            appointmentRef.id,
+        );
 
         return {appointmentId: appointmentRef.id};
     },

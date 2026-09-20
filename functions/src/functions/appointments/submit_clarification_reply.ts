@@ -1,5 +1,7 @@
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import {db, auth, FieldValue} from "../../lib/admin";
+import {sendAppointmentNotification} from "../notifications/send_push_notification";
+import {NotificationType} from "../notifications/notification_types";
 
 interface SubmitClarificationReplyData {
     appointmentId: string;
@@ -64,7 +66,10 @@ export const submitClarificationReply = onCall(
             throw new HttpsError("invalid-argument", "Reply must be under 500 characters.");
         }
 
-        // ── 3. Firestore transaction ──────────────────────────────────────────
+        // Capture fields needed post-transaction for notification.
+        let assignedReviewerId: string | undefined;
+
+        // ── 3. Firestore transaction ─────────────────────────────────────────────
         const appointmentRef = db.collection("appointments").doc(data.appointmentId);
 
         await db.runTransaction(async (txn) => {
@@ -75,6 +80,7 @@ export const submitClarificationReply = onCall(
             }
 
             const appt = snap.data()!;
+            assignedReviewerId = appt.assignedReviewerId as string | undefined;
 
             // ── 3a. Ownership check ──────────────────────────────────────────
             if (appt.applicantId !== uid) {
@@ -119,6 +125,13 @@ export const submitClarificationReply = onCall(
                 note: data.replyText.trim(),
             });
         });
+
+        // ── 4. Notify the assigned reviewer (fire-and-forget) ─────────────────
+        await sendAppointmentNotification(
+            NotificationType.CLARIFICATION_REPLY,
+            {assignedReviewerId},
+            data.appointmentId,
+        );
 
         return {success: true};
     },

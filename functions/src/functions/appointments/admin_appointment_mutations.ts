@@ -1,26 +1,55 @@
 import {onCall, HttpsError} from "firebase-functions/v2/https";
-import {db, FieldValue, Timestamp} from "../../lib/admin";
+import {auth, db, FieldValue, Timestamp} from "../../lib/admin";
+import {sendAppointmentNotification} from "../notifications/send_push_notification";
+import {NotificationType} from "../notifications/notification_types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Shared admin guard utility
+// Shared admin guard — mirrors createCommitteeAccount's fault-tolerant approach.
+// 1. Rejects unauthenticated callers immediately.
+// 2. Checks for account deactivation in Firestore.
+// 3. Accepts token role == "admin". Falls back to Firestore document role check
+//    when the custom claim hasn't propagated yet, then backfills the claim.
 // ─────────────────────────────────────────────────────────────────────────────
-function requireAdmin(request: {auth?: {uid: string; token: Record<string, unknown>} | null}) {
+async function requireAdmin(
+    request: {auth?: {uid: string; token: Record<string, unknown>} | null},
+): Promise<void> {
     if (!request.auth) {
         throw new HttpsError("unauthenticated", "You must be signed in to perform this action.");
     }
-    const role = request.auth.token.role as string | undefined;
-    if (role !== "admin") {
-        throw new HttpsError("permission-denied", "Only administrators can perform this action.");
+
+    const callerUid = request.auth.uid;
+
+    // Deactivation check via Firestore
+    const callerDoc = await db.collection("users").doc(callerUid).get();
+    if (callerDoc.exists && (callerDoc.data()?.active === false || callerDoc.data()?.isActive === false)) {
+        throw new HttpsError("permission-denied", "Your account has been deactivated. Contact your administrator.");
     }
+
+    // Primary: check token custom claim
+    const tokenRole = request.auth.token.role as string | undefined;
+    if (tokenRole === "admin") return;
+
+    // Fallback: check Firestore document role (handles stale/missing custom claims)
+    if (callerDoc.exists) {
+        const docRole = callerDoc.data()?.role as string | undefined;
+        if (docRole === "admin") {
+            // Backfill the custom claim so the next request won't need this fallback
+            await auth.setCustomUserClaims(callerUid, {role: "admin"});
+            return;
+        }
+    }
+
+    throw new HttpsError("permission-denied", "Only administrators can perform this action.");
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // assignReviewer — routes an appointment to a committee member for review
 // ─────────────────────────────────────────────────────────────────────────────
+
 export const assignReviewer = onCall(
     {region: "us-central1", cors: true, invoker: "public", enforceAppCheck: false},
     async (request) => {
-        requireAdmin(request);
+        await requireAdmin(request);
 
         const {appointmentId, reviewerId, reviewerName} = request.data as {
             appointmentId: string;
@@ -67,6 +96,13 @@ export const assignReviewer = onCall(
             });
         });
 
+        // ── Notify the assigned reviewer (fire-and-forget) ──────────────────────
+        await sendAppointmentNotification(
+            NotificationType.REVIEWER_ASSIGNED,
+            {assignedReviewerId: reviewerId},
+            appointmentId,
+        );
+
         return {success: true};
     },
 );
@@ -74,10 +110,11 @@ export const assignReviewer = onCall(
 // ─────────────────────────────────────────────────────────────────────────────
 // setConfirmedDate — admin sets / updates the confirmed survey date
 // ─────────────────────────────────────────────────────────────────────────────
+
 export const setConfirmedDate = onCall(
     {region: "us-central1", cors: true, invoker: "public", enforceAppCheck: false},
     async (request) => {
-        requireAdmin(request);
+        await requireAdmin(request);
 
         const {appointmentId, confirmedDate} = request.data as {
             appointmentId: string;
@@ -126,10 +163,11 @@ export const setConfirmedDate = onCall(
 // ─────────────────────────────────────────────────────────────────────────────
 // assignFieldworkTask — admin assigns the post-approval fieldwork task
 // ─────────────────────────────────────────────────────────────────────────────
+
 export const assignFieldworkTask = onCall(
     {region: "us-central1", cors: true, invoker: "public", enforceAppCheck: false},
     async (request) => {
-        requireAdmin(request);
+        await requireAdmin(request);
 
         const {appointmentId, memberId, memberName} = request.data as {
             appointmentId: string;
@@ -145,12 +183,15 @@ export const assignFieldworkTask = onCall(
         const uid = request.auth!.uid;
         const now = FieldValue.serverTimestamp();
 
+        let taskApplicantId: string | undefined;
+
         await db.runTransaction(async (txn) => {
             const snap = await txn.get(appointmentRef);
             if (!snap.exists) {
                 throw new HttpsError("not-found", "Appointment not found.");
             }
             const appt = snap.data()!;
+            taskApplicantId = appt.applicantId as string | undefined;
             if (appt.status !== "approved") {
                 throw new HttpsError(
                     "failed-precondition",
@@ -175,6 +216,13 @@ export const assignFieldworkTask = onCall(
                 note: `Fieldwork task assigned to: ${memberName}`,
             });
         });
+
+        // ── Notify applicant and the assigned task member (fire-and-forget) ──────
+        await sendAppointmentNotification(
+            NotificationType.TASK_ASSIGNED,
+            {applicantId: taskApplicantId, assignedTaskMemberId: memberId},
+            appointmentId,
+        );
 
         return {success: true};
     },

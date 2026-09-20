@@ -1,5 +1,7 @@
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import {db, FieldValue} from "../../lib/admin";
+import {sendAppointmentNotification} from "../notifications/send_push_notification";
+import {NotificationType, NotificationTypeValue} from "../notifications/notification_types";
 
 interface ReviewAppointmentData {
     appointmentId: string;
@@ -76,6 +78,10 @@ export const reviewAppointment = onCall(
             }
         }
 
+        // Snapshot of fields needed for post-transaction notification.
+        let applicantId: string | undefined;
+        let notificationType: NotificationTypeValue;
+
         // ── 3. Run inside a Firestore transaction ────────────────────────────
         const appointmentRef = db.collection("appointments").doc(data.appointmentId);
 
@@ -91,6 +97,7 @@ export const reviewAppointment = onCall(
             }
 
             const appt = appointmentSnap.data()!;
+            applicantId = appt.applicantId as string | undefined;
 
             // ── 3b. Status pre-condition: must be under_review ───────────────
             if (appt.status !== "under_review") {
@@ -123,7 +130,20 @@ export const reviewAppointment = onCall(
                 }
             }
 
-            // ── 3e. Build the status update ──────────────────────────────────
+            // ── 3e. Read quota doc (MUST occur before ANY writes) ───────────
+            let rateLimitRef: FirebaseFirestore.DocumentReference | null = null;
+            let currentCount = 0;
+            if (data.action === "approve" || data.action === "reject") {
+                const applicantId = appt.applicantId as string;
+                if (applicantId) {
+                    rateLimitRef = db.collection("rateLimits").doc(applicantId);
+                    const rateLimitSnap = await txn.get(rateLimitRef);
+                    currentCount = rateLimitSnap.exists ?
+                        ((rateLimitSnap.data()?.pendingCount as number) ?? 0) : 0;
+                }
+            }
+
+            // ── 3f. Build the status update ──────────────────────────────────
             const now = FieldValue.serverTimestamp();
             const updates: Record<string, unknown> = {
                 updatedAt: now,
@@ -148,22 +168,15 @@ export const reviewAppointment = onCall(
             }
             updates["status"] = newStatus;
 
+            // ── 3g. Execute all writes ───────────────────────────────────────
             txn.update(appointmentRef, updates);
 
-            // ── 3f. Quota restoration for approve / reject ───────────────────
-            if (data.action === "approve" || data.action === "reject") {
-                const applicantId = appt.applicantId as string;
-                if (applicantId) {
-                    const rateLimitRef = db.collection("rateLimits").doc(applicantId);
-                    const rateLimitSnap = await txn.get(rateLimitRef);
-                    const currentCount = rateLimitSnap.exists ?
-                        ((rateLimitSnap.data()?.pendingCount as number) ?? 0) : 0;
-                    const newCount = Math.max(0, currentCount - 1);
-                    txn.set(rateLimitRef, {pendingCount: newCount}, {merge: true});
-                }
+            if (rateLimitRef) {
+                const newCount = Math.max(0, currentCount - 1);
+                txn.set(rateLimitRef, {pendingCount: newCount}, {merge: true});
             }
 
-            // ── 3g. Immutable audit log entry ────────────────────────────────
+            // Immutable audit log entry
             const auditRef = appointmentRef.collection("auditLog").doc();
             txn.set(auditRef, {
                 action: auditAction,
@@ -171,9 +184,25 @@ export const reviewAppointment = onCall(
                 performedByRole: role,
                 applicantId: appt.applicantId,
                 timestamp: now,
-                note: data.reasonOrNote?.trim() ?? null,
+                note: data.reasonOrNote?.trim() ? data.reasonOrNote.trim() : null,
             });
         });
+
+        // ── 4. Determine notification type from the action ───────────────────────
+        if (data.action === "approve") {
+            notificationType = NotificationType.APPROVED;
+        } else if (data.action === "reject") {
+            notificationType = NotificationType.REJECTED;
+        } else {
+            notificationType = NotificationType.CLARIFICATION_REQUESTED;
+        }
+
+        // Notify applicant (fire-and-forget — must not throw or roll back).
+        await sendAppointmentNotification(
+            notificationType!,
+            {applicantId},
+            data.appointmentId,
+        );
 
         return {success: true};
     },
