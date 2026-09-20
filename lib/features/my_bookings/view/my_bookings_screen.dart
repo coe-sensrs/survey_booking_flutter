@@ -2,15 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../core/constants/appointment_status.dart';
-import '../../../core/constants/survey_type.dart';
-import '../../../core/models/appointment.dart';
-import '../../../core/routing/app_router.dart';
 
+import '../../../core/widgets/appointment_booking_card.dart';
 import '../../../core/widgets/empty_state.dart';
-import '../providers/selected_appointment_provider.dart';
 import '../viewmodel/my_bookings_viewmodel.dart';
 
 class MyBookingsScreen extends ConsumerWidget {
@@ -119,7 +115,7 @@ class MyBookingsScreen extends ConsumerWidget {
                         SizedBox(height: 12.h),
                     itemBuilder: (context, index) {
                       final item = appointments[index];
-                      return _buildBookingCard(context, ref, item);
+                      return AppointmentBookingCard(item: item);
                     },
                   );
                 },
@@ -127,127 +123,6 @@ class MyBookingsScreen extends ConsumerWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBookingCard(
-    BuildContext context,
-    WidgetRef ref,
-    Appointment item,
-  ) {
-    final title = item.surveyType == SurveyType.other
-        ? (item.customSurveyName ?? 'Other Survey')
-        : item.surveyType.label;
-
-    final formattedDate = item.confirmedDate != null
-        ? DateFormat('dd MMM yyyy').format(item.confirmedDate!)
-        : DateFormat('dd MMM yyyy').format(item.preferredDate);
-
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-      child: ListTile(
-        contentPadding: EdgeInsets.all(16.w),
-        onTap: () {
-          ref.read(selectedAppointmentIdProvider.notifier).select(item.id);
-          context.go(AppRoutes.appointmentDetailTab);
-        },
-        title: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
-              ),
-            ),
-            _buildStatusBadge(context, item.status),
-          ],
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 8.h),
-            Text(
-              'Area: ${item.areaName}',
-              style: TextStyle(fontWeight: FontWeight.w500, fontSize: 13.sp),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              'Location: ${item.district}, ${item.state}',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              'Date: $formattedDate',
-              style: TextStyle(
-                fontSize: 12.sp,
-                color: Theme.of(
-                  context,
-                ).colorScheme.onSurface.withValues(alpha: 0.6),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(BuildContext context, AppointmentStatus status) {
-    Color bg;
-    Color fg;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    switch (status) {
-      case AppointmentStatus.approved:
-      case AppointmentStatus.taskAssigned:
-        bg = isDark
-            ? Colors.green.withValues(alpha: 0.25)
-            : Colors.green.shade100;
-        fg = isDark ? const Color(0xFF81C784) : Colors.green.shade800;
-        break;
-      case AppointmentStatus.rejected:
-        bg = isDark ? Colors.red.withValues(alpha: 0.25) : Colors.red.shade100;
-        fg = isDark ? const Color(0xFFE57373) : Colors.red.shade800;
-        break;
-      case AppointmentStatus.clarificationRequested:
-        bg = isDark
-            ? Colors.orange.withValues(alpha: 0.25)
-            : Colors.orange.shade100;
-        fg = isDark ? const Color(0xFFFFB74D) : Colors.orange.shade800;
-        break;
-      case AppointmentStatus.underReview:
-        bg = isDark
-            ? Colors.blue.withValues(alpha: 0.25)
-            : Colors.blue.shade100;
-        fg = isDark ? const Color(0xFF64B5F6) : Colors.blue.shade800;
-        break;
-      case AppointmentStatus.pendingAssignment:
-        bg = isDark
-            ? Colors.grey.withValues(alpha: 0.25)
-            : Colors.grey.shade200;
-        fg = isDark ? const Color(0xFFBDBDBD) : Colors.grey.shade800;
-        break;
-    }
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: Text(
-        status.label,
-        style: TextStyle(
-          color: fg,
-          fontSize: 11.sp,
-          fontWeight: FontWeight.bold,
-        ),
       ),
     );
   }

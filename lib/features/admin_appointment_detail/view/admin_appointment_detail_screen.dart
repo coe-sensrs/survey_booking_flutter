@@ -6,6 +6,7 @@ import 'package:survey_desk/features/admin_appointment_detail/viewmodel/admin_ap
 
 import '../../../core/constants/appointment_status.dart';
 import '../../../core/models/appointment.dart';
+import '../../../core/widgets/survey_document_tiles.dart';
 import 'widgets/assign_reviewer_sheet.dart';
 import 'widgets/assign_task_sheet.dart';
 import 'widgets/set_confirmed_date_sheet.dart';
@@ -87,6 +88,71 @@ class AdminAppointmentDetailScreen extends ConsumerWidget {
                       ),
                   ]),
                 ],
+                SizedBox(height: 32.h),
+
+                // --- Survey Boundary File ---
+                _buildSectionTitle(context, 'Survey Boundary File'),
+                KmlFileTile(
+                  storagePath: appointment.kmlFile.storagePath,
+                  originalFileName: appointment.kmlFile.originalFileName,
+                  fileType: appointment.kmlFile.fileType,
+                  sizeBytes: appointment.kmlFile.sizeBytes,
+                ),
+                SizedBox(height: 24.h),
+
+                // --- Permission Documents ---
+                _buildSectionTitle(
+                  context,
+                  'Permission Documents (${appointment.permissionDocuments.length})',
+                ),
+                if (appointment.permissionDocuments.isEmpty)
+                  Container(
+                    padding: EdgeInsets.all(14.w),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
+                    child: Text(
+                      'No permission documents uploaded.',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
+                    child: Column(
+                      children: appointment.permissionDocuments
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                            final doc = entry.value;
+                            final isLast =
+                                entry.key ==
+                                appointment.permissionDocuments.length - 1;
+                            return SurveyDocumentTile(
+                              storagePath: doc.storagePath,
+                              originalFileName: doc.originalFileName,
+                              fileType: doc.fileType,
+                              sizeBytes: doc.sizeBytes,
+                              isLast: isLast,
+                            );
+                          })
+                          .toList(),
+                    ),
+                  ),
+
                 SizedBox(height: 32.h),
                 _buildAdminActions(context, appointment),
                 SizedBox(height: 40.h),

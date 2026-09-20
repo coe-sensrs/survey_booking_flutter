@@ -7,8 +7,6 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/appointment_status.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/widgets/empty_state.dart';
-import '../../../core/widgets/theme_toggle_button.dart';
-import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../viewmodel/admin_dashboard_viewmodel.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -25,13 +23,10 @@ class AdminDashboardScreen extends ConsumerWidget {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
         ),
         actions: [
-          const ThemeToggleButton(),
           IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () {
-              ref.read(authViewModelProvider.notifier).logout();
-            },
-            tooltip: 'Logout',
+            icon: Icon(Icons.settings),
+            onPressed: () {},
+            tooltip: 'Settings',
           ),
         ],
       ),

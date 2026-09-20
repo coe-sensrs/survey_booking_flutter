@@ -11,6 +11,7 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/appointment_status_badge.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/survey_document_tiles.dart';
 import '../viewmodel/my_bookings_viewmodel.dart';
 
 class AppointmentDetailScreen extends ConsumerStatefulWidget {
@@ -246,14 +247,19 @@ class _AppointmentDetailScreenState
                 SizedBox(height: 16.h),
 
                 // KML File Section
-                _buildDetailSection(
+                _buildDetailSectionHeader(
                   title: 'Survey Area Map File (KML/KMZ)',
                   icon: Icons.map,
-                  items: [
-                    'File Name: ${appointment.kmlFile.originalFileName}',
-                    'File Type: ${appointment.kmlFile.fileType.toUpperCase()}',
-                    'File Size: ${(appointment.kmlFile.sizeBytes / 1024).toStringAsFixed(1)} KB',
-                  ],
+                ),
+                SizedBox(height: 8.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 0),
+                  child: KmlFileTile(
+                    storagePath: appointment.kmlFile.storagePath,
+                    originalFileName: appointment.kmlFile.originalFileName,
+                    fileType: appointment.kmlFile.fileType,
+                    sizeBytes: appointment.kmlFile.sizeBytes,
+                  ),
                 ),
 
                 SizedBox(height: 16.h),
@@ -285,23 +291,73 @@ class _AppointmentDetailScreenState
                 SizedBox(height: 16.h),
 
                 // Permission Documents
-                _buildDetailSection(
+                _buildDetailSectionHeader(
                   title:
                       'Permission Documents (${appointment.permissionDocuments.length})',
                   icon: Icons.folder,
-                  items: appointment.permissionDocuments
-                      .map(
-                        (doc) =>
-                            '• ${doc.originalFileName} (${doc.fileType.toUpperCase()})',
-                      )
-                      .toList(),
                 ),
+                SizedBox(height: 8.h),
+                if (appointment.permissionDocuments.isEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                    child: Text(
+                      'No permission documents uploaded.',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  )
+                else
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Column(
+                      children: appointment.permissionDocuments
+                          .asMap()
+                          .entries
+                          .map((entry) {
+                            final doc = entry.value;
+                            final isLast =
+                                entry.key ==
+                                appointment.permissionDocuments.length - 1;
+                            return SurveyDocumentTile(
+                              storagePath: doc.storagePath,
+                              originalFileName: doc.originalFileName,
+                              fileType: doc.fileType,
+                              sizeBytes: doc.sizeBytes,
+                              isLast: isLast,
+                            );
+                          })
+                          .toList(),
+                    ),
+                  ),
 
                 SizedBox(height: 24.h),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildDetailSectionHeader({
+    required String title,
+    required IconData icon,
+  }) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 2.h, left: 4.w),
+      child: Row(
+        children: [
+          Icon(icon, size: 18.sp, color: Theme.of(context).colorScheme.primary),
+          SizedBox(width: 8.w),
+          Text(
+            title,
+            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }

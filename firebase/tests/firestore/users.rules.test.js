@@ -178,6 +178,59 @@ describe('Firestore rules: users/{uid}', () => {
     }));
   });
 
+  test('user can register and update own fcmTokens with valid array (<= 10 items)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('users').doc(APPLICANT_A.uid).set({
+        fullName: 'Test', email: 'a@test.com', phone: '1234567890', role: 'applicant',
+        createdAt: new Date(), updatedAt: new Date(),
+      });
+    });
+    const db = testEnv.authenticatedContext(APPLICANT_A.uid, authToken(APPLICANT_A).token).firestore();
+    await assertSucceeds(db.collection('users').doc(APPLICANT_A.uid).update({
+      fcmTokens: ['token_device_1', 'token_device_2'],
+    }));
+  });
+
+  test('user cannot set fcmTokens to non-list value (type safety)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('users').doc(APPLICANT_A.uid).set({
+        fullName: 'Test', email: 'a@test.com', phone: '1234567890', role: 'applicant',
+        createdAt: new Date(), updatedAt: new Date(),
+      });
+    });
+    const db = testEnv.authenticatedContext(APPLICANT_A.uid, authToken(APPLICANT_A).token).firestore();
+    await assertFails(db.collection('users').doc(APPLICANT_A.uid).update({
+      fcmTokens: 'invalid_non_array_string',
+    }));
+  });
+
+  test('user cannot exceed 10 fcmTokens (resource exhaustion protection)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('users').doc(APPLICANT_A.uid).set({
+        fullName: 'Test', email: 'a@test.com', phone: '1234567890', role: 'applicant',
+        createdAt: new Date(), updatedAt: new Date(),
+      });
+    });
+    const db = testEnv.authenticatedContext(APPLICANT_A.uid, authToken(APPLICANT_A).token).firestore();
+    const elevenTokens = Array.from({length: 11}, (_, i) => `token_${i}`);
+    await assertFails(db.collection('users').doc(APPLICANT_A.uid).update({
+      fcmTokens: elevenTokens,
+    }));
+  });
+
+  test('user cannot update another user fcmTokens', async () => {
+    await testEnv.withSecurityRulesDisabled(async (ctx) => {
+      await ctx.firestore().collection('users').doc(APPLICANT_B.uid).set({
+        fullName: 'Other', email: 'b@test.com', phone: '1234567890', role: 'applicant',
+        createdAt: new Date(), updatedAt: new Date(),
+      });
+    });
+    const db = testEnv.authenticatedContext(APPLICANT_A.uid, authToken(APPLICANT_A).token).firestore();
+    await assertFails(db.collection('users').doc(APPLICANT_B.uid).update({
+      fcmTokens: ['hacker_token'],
+    }));
+  });
+
   // -- Admin write -----------------------------------------------------------
   test('admin can write any user document', async () => {
     const db = testEnv.authenticatedContext(ADMIN.uid, authToken(ADMIN).token).firestore();

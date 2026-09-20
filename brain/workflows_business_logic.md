@@ -48,7 +48,7 @@ sequenceDiagram
     autonumber
     actor Comm as Committee Reviewer
     actor App as Applicant
-    participant CF as Cloud Functions
+    participant CF as Cloud Functions / Repository
     participant FS as Firestore Document
 
     Comm->>CF: reviewAppointment(action: "clarify", note: "Need clearance PDF")
@@ -66,6 +66,12 @@ sequenceDiagram
     Comm->>CF: reviewAppointment(action: "clarify", note: "Still invalid")
     CF-->>Comm: ERROR: Clarification already requested once. Must Approve or Reject.
 ```
+
+#### Client-Side State Synchronization & Cache Invalidation (`ref.invalidate`)
+
+When the applicant submits `submitClarificationReply`, Firestore updates the appointment status from `clarification_requested` to `under_review`.
+Because `HomeScreen` uses `HomeViewModel` (which loads recent requests via a one-shot `Future`), navigating back to `HomeScreen` without cache invalidation would cause the home screen to display stale cached data with the old `clarification_requested` badge.
+To prevent this desynchronization, `MyBookingsViewModel.submitClarificationReply` invokes `ref.invalidate(homeViewModelProvider)` immediately upon a successful repository call. This forces `HomeViewModel` to re-fetch the latest appointment statuses, ensuring the Home dashboard and My Bookings tab stay strictly synchronized with `under_review` badges.
 
 ---
 
@@ -89,4 +95,138 @@ graph TD
 
 Admins can set or modify the `confirmedDate` independently of the applicant's original `preferredDate`.
 - `preferredDate`: Set during wizard Step 5 (applicant request).
-- `confirmedDate`: Set post-approval via `setConfirmedDate` Cloud Function. Displayed prominently in the Applicant's "Upcoming Scheduled Surveys" list.
+- `confirmedDate`: Set post-approval via `setConfirmedDate` Cloud Function. Displayed prominently in the Applicant's "Upcoming Scheduled Surveys" list and the Committee's "My Assigned Tasks" queue.
+
+---
+
+### D. Booking Wizard Draft Lifecycle & App-Kill Resilience
+
+```mermaid
+stateDiagram-v2
+    [*] --> Empty: App Launch (No draft in Hive)
+    Empty --> DraftActive: User enters Step 1 / fields
+    DraftActive --> DraftActive: Save JSON to Hive on every step/field change
+    DraftActive --> AppKilled: User quits / OS kills app
+    AppKilled --> DraftRestored: App reopens (build() loads synchronously)
+    DraftRestored --> HomeScreen: HomeScreen shows 'Resume (Step X)' + 'New'
+    HomeScreen --> DraftActive: 'Resume' clicks -> enters wizard at Step X
+    HomeScreen --> Empty: 'Start Fresh' clicks -> clears draft, resets to Step 1
+    DraftActive --> Submitted: Step 8 'Confirm & Submit' (Uploads files, creates Firestore doc)
+    Submitted --> Empty: clearWizardDraft() called
+```
+
+---
+
+### E. Admin Reviewer Assignment Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as System Administrator
+    participant UI as Admin Appointment Detail / AssignReviewerSheet
+    participant VM as AdminAppointmentDetailController
+    participant Repo as AppointmentRepository / Cloud Function
+    participant FS as Firestore Document
+    actor Comm as Committee Reviewer
+
+    Admin->>UI: Selects Active Committee Member via RadioGroup
+    Admin->>UI: Clicks 'Confirm Assignment'
+    UI->>VM: assignReviewer(appointmentId, reviewerId, reviewerName)
+    VM->>Repo: assignReviewer(...)
+    Repo->>FS: Update status = 'under_review', assignedReviewerId = uid, assignedReviewerName = name
+    FS-->>Comm: Firestore listener triggers Committee Dashboard queue update
+    FS-->>UI: Real-time stream updates UI to Under Review
+```
+
+---
+
+### F. Post-Approval Fieldwork Task Assignment Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as System Administrator
+    participant UI as Admin Appointment Detail / AssignTaskSheet
+    participant VM as AdminAppointmentDetailController
+    participant Repo as AppointmentRepository / Cloud Function
+    participant FS as Firestore Document
+    actor Field as Fieldwork Committee Member
+
+    Admin->>UI: Selects Active Member for Fieldwork via RadioGroup
+    Admin->>UI: Clicks 'Confirm Task'
+    UI->>VM: assignFieldworkTask(appointmentId, memberId, memberName)
+    VM->>Repo: assignFieldworkTask(...)
+    Repo->>FS: Update status = 'task_assigned', assignedTaskMemberId = uid, assignedTaskMemberName = name
+    FS-->>Field: Real-time update to Committee Member Assigned Tasks Queue
+```
+
+---
+
+### G. Committee Review Decision & Fieldwork Task Lifecycle (Phase 5)
+
+> **CRITICAL SECURITY ARCHITECTURE**:  
+> Direct client-side updates to `/appointments/{id}` are strictly rejected by `firestore.rules` (`allow update: if false;`). All review decisions MUST flow through the 2nd Gen HTTPS Callable Cloud Function `reviewAppointment` via `FirebaseAppointmentRepository`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Comm as Committee Member
+    participant CD as CommitteeDashboardScreen
+    participant RD as CommitteeReviewDetailScreen
+    participant VM as CommitteeReviewDetailController
+    participant Repo as FirebaseAppointmentRepository
+    participant CF as Cloud Function (reviewAppointment)
+    participant FS as Firestore (Admin SDK)
+
+    Comm->>CD: Opens 'Reviews' Tab (committeeDashboardStreamProvider)
+    CD-->>Comm: Shows 'Awaiting Your Action' vs 'Resolved' lists
+    Comm->>RD: Taps appointment card (/committee-review/:id)
+    RD-->>Comm: Renders location, XEN, schedule, logistics, permission docs
+    
+    alt Approve Decision
+        Comm->>RD: Taps 'Approve'
+        RD-->>Comm: Presents confirmation dialog (_showApproveDialog)
+        Comm->>RD: Confirms 'Approve'
+        RD->>VM: approve(appointment) [Shows inline button spinner]
+        VM->>Repo: updateAppointmentStatus(appointment, approved)
+        Repo->>CF: httpsCallable('reviewAppointment')({ action: 'approve' })
+        Note over CF,FS: Atomic Firestore Transaction
+        CF->>FS: Update status = 'approved', updatedAt = now
+        CF->>FS: Decrement rateLimits/{applicantId}.pendingCount by 1
+        CF->>FS: Append immutable /appointments/{id}/auditLog entry
+        CF-->>Repo: { success: true, newStatus: 'approved' }
+        Repo-->>VM: Success
+        VM->>VM: ref.invalidate(committeeDashboardStreamProvider)
+        VM-->>RD: Show AppSnackbar success
+        FS-->>CD: Real-time stream updates list; moves to 'Resolved'
+    else Request Clarification
+        Comm->>RD: Taps 'Request Clarification'
+        RD-->>Comm: Shows _TextInputSheet (max 500 chars)
+        Comm->>RD: Submits clarification note
+        RD->>VM: requestClarification(appointment, note) [Shows inline spinner]
+        VM->>Repo: updateAppointmentStatus(appointment, clarification_requested, note)
+        Repo->>CF: httpsCallable('reviewAppointment')({ action: 'clarify', note })
+        CF->>FS: Update status = 'clarification_requested', clarificationNote = note
+        CF->>FS: Append auditLog entry
+        CF-->>Repo: { success: true }
+        Repo-->>VM: Success
+        VM->>VM: ref.invalidate(committeeDashboardStreamProvider)
+        FS-->>RD: Re-renders showing clarification thread awaiting reply
+    else Reject Decision
+        Comm->>RD: Taps 'Reject'
+        RD-->>Comm: Shows _TextInputSheet (mandatory reason, max 500 chars)
+        Comm->>RD: Submits rejection reason
+        RD->>VM: reject(appointment, reason) [Shows inline spinner]
+        VM->>Repo: updateAppointmentStatus(appointment, rejected, reason)
+        Repo->>CF: httpsCallable('reviewAppointment')({ action: 'reject', reason })
+        Note over CF,FS: Atomic Firestore Transaction
+        CF->>FS: Update status = 'rejected', rejectionReason = reason
+        CF->>FS: Decrement rateLimits/{applicantId}.pendingCount by 1
+        CF->>FS: Append immutable auditLog entry
+        CF-->>Repo: { success: true }
+        Repo-->>VM: Success
+        VM->>VM: ref.invalidate(committeeDashboardStreamProvider)
+        VM-->>RD: Show AppSnackbar success
+        FS-->>CD: Real-time stream updates list; moves to 'Resolved'
+    end
+```

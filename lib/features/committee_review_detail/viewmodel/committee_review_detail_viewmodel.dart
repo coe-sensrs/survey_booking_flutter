@@ -1,8 +1,10 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/errors/failures.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/providers/core_providers.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
+import '../../committee_dashboard/viewmodel/committee_dashboard_viewmodel.dart';
 
 // ---------------------------------------------------------------------------
 // Live stream of a single appointment (autoDispose = cancels on screen close)
@@ -41,13 +43,30 @@ class CommitteeReviewDetailController {
         'You are not the assigned reviewer for this appointment.',
       );
     }
+  }
 
-    // Clarification guard: committee cannot request clarification twice.
-    // The PRD states: "cannot request clarification a second time."
-    // A clarificationReply already present means the applicant has replied,
-    // so clarification is allowed (reviewer must Approve or Reject now).
-    // If clarificationNote is set but no reply yet → block re-clarify.
-    // UI should hide the Clarify button in this case — this is a server-side guard.
+  // --------------------------------------------------------------------------
+  // Translate FirebaseFunctionsException → domain Failure for clean UI errors.
+  // --------------------------------------------------------------------------
+  Never _translateFunctionError(FirebaseFunctionsException e, String context) {
+    switch (e.code) {
+      case 'permission-denied':
+        throw AuthFailure(e.message ?? 'Permission denied.');
+      case 'unauthenticated':
+        throw const AuthFailure(
+          'Your session has expired. Please log in again.',
+        );
+      case 'failed-precondition':
+        throw ValidationFailure(
+          e.message ?? 'Action not allowed in current state.',
+        );
+      case 'invalid-argument':
+        throw ValidationFailure(e.message ?? 'Invalid data provided.');
+      case 'not-found':
+        throw ServerFailure(e.message ?? 'Appointment not found.');
+      default:
+        throw ServerFailure('$context: ${e.message ?? e.code}');
+    }
   }
 
   Future<void> approve(Appointment appointment) async {
@@ -56,11 +75,15 @@ class CommitteeReviewDetailController {
       await ref
           .read(appointmentRepositoryProvider)
           .reviewAppointment(appointmentId: appointment.id, action: 'approve');
+      // Invalidate dashboard so the resolved appointment moves to "Resolved" immediately
+      ref.invalidate(committeeDashboardStreamProvider);
       await ref
           .read(analyticsServiceProvider)
           .logReviewActionTaken(action: 'approve');
     } on AuthFailure {
       rethrow;
+    } on FirebaseFunctionsException catch (e) {
+      _translateFunctionError(e, 'Approve failed');
     } catch (e, st) {
       ref
           .read(crashReportingServiceProvider)
@@ -87,6 +110,8 @@ class CommitteeReviewDetailController {
             action: 'reject',
             reasonOrNote: reason.trim(),
           );
+      // Invalidate dashboard so the resolved appointment moves to "Resolved" immediately
+      ref.invalidate(committeeDashboardStreamProvider);
       await ref
           .read(analyticsServiceProvider)
           .logReviewActionTaken(action: 'reject');
@@ -94,6 +119,8 @@ class CommitteeReviewDetailController {
       rethrow;
     } on ValidationFailure {
       rethrow;
+    } on FirebaseFunctionsException catch (e) {
+      _translateFunctionError(e, 'Reject failed');
     } catch (e, st) {
       ref
           .read(crashReportingServiceProvider)
@@ -108,12 +135,14 @@ class CommitteeReviewDetailController {
   ) async {
     _checkReviewerRights(appointment);
 
-    // PRD: cannot request clarification a second time.
-    // If clarificationNote is set AND clarificationReply is null → second attempt, block.
-    if (appointment.clarificationNote != null &&
+    // PRD: block only when a clarification is *pending* (no reply yet).
+    // Once the applicant has replied, the reviewer may clarify again.
+    final isPendingClarification =
+        appointment.clarificationNote != null &&
         appointment.clarificationNote!.isNotEmpty &&
         (appointment.clarificationReply == null ||
-            appointment.clarificationReply!.isEmpty)) {
+            appointment.clarificationReply!.isEmpty);
+    if (isPendingClarification) {
       throw const ValidationFailure(
         'Clarification has already been requested. '
         'Waiting for the applicant\'s reply before you can act again.',
@@ -143,6 +172,8 @@ class CommitteeReviewDetailController {
       rethrow;
     } on ValidationFailure {
       rethrow;
+    } on FirebaseFunctionsException catch (e) {
+      _translateFunctionError(e, 'Request clarification failed');
     } catch (e, st) {
       ref
           .read(crashReportingServiceProvider)
@@ -157,19 +188,18 @@ class CommitteeReviewDetailController {
   }
 
   /// Whether clarification can still be requested on this appointment.
-  /// Returns false if a clarification is pending (no applicant reply yet).
+  /// Returns false only when a clarification is *pending* (no applicant reply yet).
+  /// Once the applicant replies, the reviewer may clarify again — matching CF logic.
   bool canRequestClarification(Appointment appointment) {
-    // No previous clarification → allowed
+    // No prior clarification → always allowed.
     if (appointment.clarificationNote == null ||
         appointment.clarificationNote!.isEmpty) {
       return true;
     }
-    // Clarification was sent and applicant replied → allowed (reviewer must decide)
-    if (appointment.clarificationReply != null &&
-        appointment.clarificationReply!.isNotEmpty) {
-      return false; // At this point they should Approve or Reject
-    }
-    // Clarification sent, awaiting reply → block re-request
-    return false;
+    // A clarification was sent. Block only while waiting for the applicant's reply.
+    final hasReply =
+        appointment.clarificationReply != null &&
+        appointment.clarificationReply!.isNotEmpty;
+    return hasReply;
   }
 }

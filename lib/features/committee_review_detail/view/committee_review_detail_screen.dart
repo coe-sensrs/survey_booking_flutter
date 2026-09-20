@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/appointment_status.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/utils/app_snackbar.dart';
+import '../../../core/widgets/appointment_status_badge.dart';
+import '../../../core/widgets/survey_document_tiles.dart';
 import '../viewmodel/committee_review_detail_viewmodel.dart';
 
 class CommitteeReviewDetailScreen extends ConsumerWidget {
@@ -18,6 +20,7 @@ class CommitteeReviewDetailScreen extends ConsumerWidget {
     final state = ref.watch(committeeReviewDetailStreamProvider(appointmentId));
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(title: const Text('Review Details')),
       body: state.when(
         loading: () => const Center(child: CircularProgressIndicator()),
@@ -122,6 +125,16 @@ class _ReviewDetailBody extends ConsumerWidget {
           ),
           SizedBox(height: 16.h),
 
+          // --- KML / KMZ Boundary File ---
+          _SectionTitle('Survey Boundary File'),
+          KmlFileTile(
+            storagePath: appointment.kmlFile.storagePath,
+            originalFileName: appointment.kmlFile.originalFileName,
+            fileType: appointment.kmlFile.fileType,
+            sizeBytes: appointment.kmlFile.sizeBytes,
+          ),
+          SizedBox(height: 16.h),
+
           // --- Permission Documents ---
           _SectionTitle(
             'Permission Documents (${appointment.permissionDocuments.length})',
@@ -192,21 +205,7 @@ class _HeaderCard extends StatelessWidget {
                   color: colorScheme.primary,
                 ),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: colorScheme.surface,
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Text(
-                  appointment.status.label.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.primary,
-                  ),
-                ),
-              ),
+              AppointmentStatusBadge(status: appointment.status),
             ],
           ),
           SizedBox(height: 10.h),
@@ -378,6 +377,7 @@ class _DocumentList extends StatelessWidget {
       );
     }
 
+    final docs = appointment.permissionDocuments;
     return Container(
       decoration: BoxDecoration(
         color: colorScheme.surface,
@@ -385,35 +385,15 @@ class _DocumentList extends StatelessWidget {
         border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
-        children: appointment.permissionDocuments.asMap().entries.map((entry) {
-          final isLast =
-              entry.key == appointment.permissionDocuments.length - 1;
+        children: docs.asMap().entries.map((entry) {
           final doc = entry.value;
-          return Column(
-            children: [
-              ListTile(
-                leading: Icon(
-                  doc.fileType == 'pdf'
-                      ? Icons.picture_as_pdf_outlined
-                      : Icons.image_outlined,
-                  color: colorScheme.primary,
-                ),
-                title: Text(
-                  doc.originalFileName,
-                  style: TextStyle(fontSize: 13.sp),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(
-                  '${(doc.sizeBytes / 1024).toStringAsFixed(1)} KB · ${doc.fileType.toUpperCase()}',
-                  style: TextStyle(fontSize: 11.sp),
-                ),
-              ),
-              if (!isLast)
-                Divider(
-                  height: 1,
-                  color: colorScheme.outlineVariant.withValues(alpha: 0.4),
-                ),
-            ],
+          final isLast = entry.key == docs.length - 1;
+          return SurveyDocumentTile(
+            storagePath: doc.storagePath,
+            originalFileName: doc.originalFileName,
+            fileType: doc.fileType,
+            sizeBytes: doc.sizeBytes,
+            isLast: isLast,
           );
         }).toList(),
       ),
@@ -431,30 +411,27 @@ class _ClarificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final accentColor = colorScheme.tertiary;
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.08),
+        color: colorScheme.tertiaryContainer.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.orange.withValues(alpha: 0.3)),
+        border: Border.all(color: accentColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(
-                Icons.chat_outlined,
-                size: 16.sp,
-                color: Colors.orange.shade700,
-              ),
+              Icon(Icons.chat_outlined, size: 16.sp, color: accentColor),
               SizedBox(width: 6.w),
               Text(
                 'Your Clarification Request',
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange.shade700,
+                  color: accentColor,
                 ),
               ),
             ],
@@ -467,7 +444,7 @@ class _ClarificationCard extends StatelessWidget {
           if (appointment.clarificationReply != null &&
               appointment.clarificationReply!.isNotEmpty) ...[
             SizedBox(height: 12.h),
-            Divider(color: Colors.orange.withValues(alpha: 0.3)),
+            Divider(color: accentColor.withValues(alpha: 0.3)),
             SizedBox(height: 8.h),
             Row(
               children: [
@@ -539,8 +516,11 @@ class _ReasonCard extends StatelessWidget {
 
 // ---------------------------------------------------------------------------
 // Action buttons — Approve / Clarify / Reject
-// Only rendered when action is possible, avoiding unnecessary widget builds.
+// Buttons stay visible during loading; the active button shows an inline
+// spinner while all others are disabled — no layout shift.
 // ---------------------------------------------------------------------------
+enum _ReviewAction { approve, clarify, reject }
+
 class _ActionButtons extends ConsumerStatefulWidget {
   final Appointment appointment;
   final CommitteeReviewDetailController controller;
@@ -552,38 +532,93 @@ class _ActionButtons extends ConsumerStatefulWidget {
 }
 
 class _ActionButtonsState extends ConsumerState<_ActionButtons> {
-  bool _isLoading = false;
+  _ReviewAction? _activeAction;
 
-  Future<void> _runAction(Future<void> Function() action) async {
-    setState(() => _isLoading = true);
+  bool get _isLoading => _activeAction != null;
+
+  /// Runs [action], tracks which button is loading, then shows feedback.
+  /// Buttons remain in the tree but are disabled during the call.
+  Future<void> _runAction(
+    _ReviewAction tag,
+    Future<void> Function() action, {
+    String successTitle = 'Done',
+    String successMessage = 'Action completed successfully.',
+  }) async {
+    if (_isLoading) return; // guard against double-tap
+    setState(() => _activeAction = tag);
     try {
       await action();
+      if (mounted) {
+        AppSnackbar.showSuccess(
+          context,
+          title: successTitle,
+          message: successMessage,
+        );
+      }
     } catch (e) {
       if (mounted) {
         AppSnackbar.showError(
           context,
           title: 'Action Failed',
-          message: e.toString(),
+          message: e.toString().replaceFirst(RegExp(r'^.*Failure: '), ''),
         );
       }
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _activeAction = null);
     }
   }
 
+  /// Shows a confirmation dialog before executing the approve action.
+  Future<void> _confirmApprove() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Approve Survey Request?'),
+        content: const Text(
+          'This action is irreversible. The applicant will be notified '
+          'and this survey will be marked as approved.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Approve'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    await _runAction(
+      _ReviewAction.approve,
+      () => widget.controller.approve(widget.appointment),
+      successTitle: 'Survey Approved',
+      successMessage: 'The survey request has been approved successfully.',
+    );
+  }
+
   void _showRejectSheet() {
+    final colorScheme = Theme.of(context).colorScheme;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
       builder: (_) => _TextInputSheet(
         title: 'Reject Appointment',
         hint: 'Provide a mandatory rejection reason (max 500 chars)',
         confirmLabel: 'Reject',
-        confirmColor: Theme.of(context).colorScheme.error,
+        confirmColor: colorScheme.error,
         maxLength: 500,
         onConfirm: (text) => _runAction(
+          _ReviewAction.reject,
           () => widget.controller.reject(widget.appointment, text),
+          successTitle: 'Survey Rejected',
+          successMessage: 'The applicant has been notified of the rejection.',
         ),
       ),
     );
@@ -594,6 +629,9 @@ class _ActionButtonsState extends ConsumerState<_ActionButtons> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
       builder: (_) => _TextInputSheet(
         title: 'Request Clarification',
         hint:
@@ -601,12 +639,22 @@ class _ActionButtonsState extends ConsumerState<_ActionButtons> {
         confirmLabel: 'Send Request',
         maxLength: 500,
         onConfirm: (text) => _runAction(
+          _ReviewAction.clarify,
           () =>
               widget.controller.requestClarification(widget.appointment, text),
+          successTitle: 'Clarification Sent',
+          successMessage:
+              'The applicant has been asked to provide more details.',
         ),
       ),
     );
   }
+
+  Widget _buildInlineSpinner(Color color) => SizedBox(
+    height: 18.sp,
+    width: 18.sp,
+    child: CircularProgressIndicator(strokeWidth: 2.5, color: color),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -614,50 +662,71 @@ class _ActionButtonsState extends ConsumerState<_ActionButtons> {
       widget.appointment,
     );
     final colorScheme = Theme.of(context).colorScheme;
-
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    // Semantic green from colorScheme surface tint or fallback
+    const approveColor = Color(0xFF2E7D32); // Material green[800]
+    final approveLoading = _activeAction == _ReviewAction.approve;
+    final clarifyLoading = _activeAction == _ReviewAction.clarify;
+    final rejectLoading = _activeAction == _ReviewAction.reject;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Approve
+        // ── Approve ──────────────────────────────────────────────────────────
         FilledButton.icon(
-          onPressed: () =>
-              _runAction(() => widget.controller.approve(widget.appointment)),
-          icon: const Icon(Icons.check_circle_outline),
-          label: const Text('Approve'),
+          onPressed: _isLoading ? null : _confirmApprove,
+          icon: approveLoading
+              ? _buildInlineSpinner(Colors.white)
+              : const Icon(Icons.check_circle_outline),
+          label: Text(approveLoading ? 'Approving…' : 'Approve'),
           style: FilledButton.styleFrom(
-            backgroundColor: Colors.green.shade700,
+            backgroundColor: approveColor,
+            disabledBackgroundColor: approveColor.withValues(alpha: 0.5),
             foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white70,
             padding: EdgeInsets.symmetric(vertical: 14.h),
           ),
         ),
         SizedBox(height: 10.h),
 
-        // Clarify (conditionally shown per PRD once-per-cycle rule)
-        if (canClarify)
+        // ── Clarify (once-per-cycle per PRD) ─────────────────────────────────
+        if (canClarify) ...[
           OutlinedButton.icon(
-            onPressed: _showClarifySheet,
-            icon: const Icon(Icons.chat_outlined),
-            label: const Text('Request Clarification'),
+            onPressed: _isLoading ? null : _showClarifySheet,
+            icon: clarifyLoading
+                ? _buildInlineSpinner(colorScheme.tertiary)
+                : const Icon(Icons.chat_outlined),
+            label: Text(clarifyLoading ? 'Sending…' : 'Request Clarification'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.orange.shade700,
-              side: BorderSide(color: Colors.orange.shade400),
+              foregroundColor: colorScheme.tertiary,
+              disabledForegroundColor: colorScheme.tertiary.withValues(
+                alpha: 0.4,
+              ),
+              side: BorderSide(
+                color: _isLoading
+                    ? colorScheme.tertiary.withValues(alpha: 0.3)
+                    : colorScheme.tertiary,
+              ),
               padding: EdgeInsets.symmetric(vertical: 14.h),
             ),
           ),
-        if (canClarify) SizedBox(height: 10.h),
+          SizedBox(height: 10.h),
+        ],
 
-        // Reject
+        // ── Reject ────────────────────────────────────────────────────────────
         OutlinedButton.icon(
-          onPressed: _showRejectSheet,
-          icon: const Icon(Icons.cancel_outlined),
-          label: const Text('Reject'),
+          onPressed: _isLoading ? null : _showRejectSheet,
+          icon: rejectLoading
+              ? _buildInlineSpinner(colorScheme.error)
+              : const Icon(Icons.cancel_outlined),
+          label: Text(rejectLoading ? 'Rejecting…' : 'Reject'),
           style: OutlinedButton.styleFrom(
             foregroundColor: colorScheme.error,
-            side: BorderSide(color: colorScheme.error),
+            disabledForegroundColor: colorScheme.error.withValues(alpha: 0.4),
+            side: BorderSide(
+              color: _isLoading
+                  ? colorScheme.error.withValues(alpha: 0.3)
+                  : colorScheme.error,
+            ),
             padding: EdgeInsets.symmetric(vertical: 14.h),
           ),
         ),
@@ -748,7 +817,7 @@ class _TextInputSheetState extends State<_TextInputSheet> {
               width: 40.w,
               height: 4.h,
               decoration: BoxDecoration(
-                color: Colors.grey.shade400,
+                color: Theme.of(context).colorScheme.outlineVariant,
                 borderRadius: BorderRadius.circular(2.r),
               ),
             ),

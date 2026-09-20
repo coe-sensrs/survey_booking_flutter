@@ -13,7 +13,7 @@
 
 ## Navigation Structure
 
-**Applicant:** Bottom tab bar — Home / My Bookings / Profile. The booking wizard is a full-screen modal flow launched from Home, not a tab — it shouldn't be reachable by switching tabs mid-wizard (prevents silently abandoning wizard state via nav bar taps).
+**Applicant:** Bottom tab bar — Home / My Bookings/Appointment Details/ Profile. The booking wizard is a full-screen modal flow launched from Home, not a tab — it shouldn't be reachable by switching tabs mid-wizard (prevents silently abandoning wizard state via nav bar taps).
 **Admin:** Drawer or tab bar — Dashboard / Committee Management / Profile. Task Assignment and Appointment Detail are pushed screens reached from the Dashboard, not top-level tabs.
 **Committee Member:** Single-purpose — Dashboard / Profile (no bottom nav needed for just two destinations; a simple app bar profile icon suffices).
 

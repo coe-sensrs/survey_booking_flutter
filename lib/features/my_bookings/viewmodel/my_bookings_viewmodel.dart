@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/providers/core_providers.dart';
+import '../../applicant_home/viewmodel/home_viewmodel.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 
 class MyBookingsStatusFilterNotifier extends Notifier<String?> {
@@ -20,6 +21,12 @@ final myBookingsStatusFilterProvider =
 final myBookingsViewModelProvider =
     AsyncNotifierProvider<MyBookingsViewModel, List<Appointment>>(() {
       return MyBookingsViewModel();
+    });
+
+final applicantAppointmentDetailStreamProvider = StreamProvider.autoDispose
+    .family<Appointment?, String>((ref, id) {
+      final repo = ref.watch(appointmentRepositoryProvider);
+      return repo.watchAppointmentById(id);
     });
 
 class MyBookingsViewModel extends AsyncNotifier<List<Appointment>> {
@@ -45,6 +52,8 @@ class MyBookingsViewModel extends AsyncNotifier<List<Appointment>> {
   ) async {
     final repo = ref.watch(appointmentRepositoryProvider);
     await repo.submitClarificationReply(appointmentId, replyText);
+    // Invalidate home dashboard so badges refresh immediately
+    ref.invalidate(homeViewModelProvider);
     await refresh();
   }
 }

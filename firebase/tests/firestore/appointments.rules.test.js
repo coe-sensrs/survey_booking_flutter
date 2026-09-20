@@ -15,6 +15,7 @@ const RULES_PATH = resolve(__dirname, '../../../firestore.rules');
 const APPLICANT_A = { uid: 'applicant-a', token: { email: 'a@test.com', email_verified: true, role: 'applicant' } };
 const APPLICANT_B = { uid: 'applicant-b', token: { email: 'b@test.com', email_verified: true, role: 'applicant' } };
 const APPLICANT_UNVERIFIED = { uid: 'applicant-unverified', token: { email: 'uv@test.com', email_verified: false, role: 'applicant' } };
+const APPLICANT_NO_CLAIMS = { uid: 'applicant-no-claims', token: { email: 'noclaims@test.com', email_verified: true } };
 const ADMIN = { uid: 'admin-1', token: { email: 'admin@test.com', email_verified: true, role: 'admin' } };
 const COMMITTEE_ASSIGNED = { uid: 'committee-assigned', token: { email: 'ca@test.com', email_verified: true, role: 'committee' } };
 const COMMITTEE_UNASSIGNED = { uid: 'committee-other', token: { email: 'co@test.com', email_verified: true, role: 'committee' } };
@@ -116,6 +117,32 @@ describe('Firestore rules: appointments — read access', () => {
     });
     const db = testEnv.authenticatedContext(COMMITTEE_ASSIGNED.uid, COMMITTEE_ASSIGNED.token).firestore();
     await assertSucceeds(db.collection('appointments').doc(APPOINTMENT_ID).get());
+  });
+
+  test('applicant without custom claims in token can read own appointment', async () => {
+    await seedAppointment(testEnv, { applicantId: APPLICANT_NO_CLAIMS.uid });
+    const db = testEnv.authenticatedContext(APPLICANT_NO_CLAIMS.uid, APPLICANT_NO_CLAIMS.token).firestore();
+    await assertSucceeds(db.collection('appointments').doc(APPOINTMENT_ID).get());
+  });
+
+  test('applicant without custom claims cannot read another applicant appointment', async () => {
+    await seedAppointment(testEnv, { applicantId: APPLICANT_A.uid });
+    const db = testEnv.authenticatedContext(APPLICANT_NO_CLAIMS.uid, APPLICANT_NO_CLAIMS.token).firestore();
+    await assertFails(db.collection('appointments').doc(APPOINTMENT_ID).get());
+  });
+
+  test('applicant query with applicantId == auth.uid succeeds', async () => {
+    await seedAppointment(testEnv, { applicantId: APPLICANT_NO_CLAIMS.uid });
+    const db = testEnv.authenticatedContext(APPLICANT_NO_CLAIMS.uid, APPLICANT_NO_CLAIMS.token).firestore();
+    await assertSucceeds(
+      db.collection('appointments').where('applicantId', '==', APPLICANT_NO_CLAIMS.uid).get()
+    );
+  });
+
+  test('applicant query without applicantId filter fails', async () => {
+    await seedAppointment(testEnv, { applicantId: APPLICANT_NO_CLAIMS.uid });
+    const db = testEnv.authenticatedContext(APPLICANT_NO_CLAIMS.uid, APPLICANT_NO_CLAIMS.token).firestore();
+    await assertFails(db.collection('appointments').get());
   });
 });
 

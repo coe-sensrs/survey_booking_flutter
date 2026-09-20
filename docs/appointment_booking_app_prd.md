@@ -52,7 +52,7 @@ Kill the phone-call-and-email survey booking process. One app, one source of tru
 - **Recent Appointment Requests** section: last 5 appointments of any status, sorted by creation date descending.
 - **Recent Activity** feed: the applicant's own status-change events across all their appointments (approvals, rejections, clarification requests), pulled via a cross-appointment query — not a separate manually-maintained log.
 - Prominent **"Start New Survey"** button.
-- Bottom navigation: Home / My Bookings / Profile.
+- Bottom navigation: Home / My Bookings / Appointment Details / Profile.
 
 ### 4. New Survey Booking (Applicant) — 9-step wizard
 Linear flow, back-navigable, each step validates before advancing. Nothing is written to the backend until the final Confirm step — steps 1-7 accumulate local state only.
