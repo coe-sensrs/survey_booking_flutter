@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
+import '../../notifications/view/notification_permission_coordinator.dart';
 
 /// The root shell layout for the Applicant user role, providing persistent
 /// bottom navigation across the 4 core tabs: Home, My Bookings, Details, and Profile.
@@ -30,7 +31,7 @@ class ApplicantShellScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        body: navigationShell,
+        body: NotificationPermissionCoordinator(child: navigationShell),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             border: Border(

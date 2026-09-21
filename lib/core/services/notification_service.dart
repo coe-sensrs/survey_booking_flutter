@@ -9,9 +9,12 @@ abstract interface class NotificationService {
   /// background/terminated message handlers.
   Future<void> initialize();
 
-  /// Requests the Android notification permission (Android 13+).
-  /// Failure is non-fatal — the app remains usable without push notifications.
-  Future<void> requestPermission();
+  /// Checks if push notification permission is currently granted.
+  Future<bool> isPermissionGranted();
+
+  /// Requests the Android/iOS notification permission.
+  /// Returns true if permission was granted or is provisional; false otherwise.
+  Future<bool> requestPermission();
 
   /// Returns the current FCM registration token, or null if unavailable.
   Future<String?> getToken();

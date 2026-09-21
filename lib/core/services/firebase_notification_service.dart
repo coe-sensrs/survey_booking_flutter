@@ -85,19 +85,30 @@ class FirebaseNotificationService implements NotificationService {
   }
 
   @override
-  Future<void> requestPermission() async {
+  Future<bool> isPermissionGranted() async {
+    try {
+      final settings = await FirebaseMessaging.instance
+          .getNotificationSettings();
+      return settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> requestPermission() async {
     try {
       final settings = await FirebaseMessaging.instance.requestPermission(
         alert: true,
         badge: true,
         sound: true,
       );
-      // Permission denied is non-fatal — app continues without push.
-      if (settings.authorizationStatus == AuthorizationStatus.denied) {
-        return;
-      }
+      return settings.authorizationStatus == AuthorizationStatus.authorized ||
+          settings.authorizationStatus == AuthorizationStatus.provisional;
     } catch (_) {
       // FCM permission failure must never crash the app.
+      return false;
     }
   }
 

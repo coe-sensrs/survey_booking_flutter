@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
+import '../../notifications/view/notification_permission_coordinator.dart';
 
 /// The root shell layout for the Committee Member role, providing persistent
 /// bottom navigation across 3 tabs: Reviews, My Tasks, and Profile.
@@ -29,7 +30,7 @@ class CommitteeShellScreen extends StatelessWidget {
         }
       },
       child: Scaffold(
-        body: navigationShell,
+        body: NotificationPermissionCoordinator(child: navigationShell),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
             border: Border(

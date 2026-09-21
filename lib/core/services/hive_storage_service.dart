@@ -17,6 +17,7 @@ class HiveStorageService {
   // -- Keys -----------------------------------------------------------------
   static const _keyThemeMode = 'themeMode';
   static const _keyWizardDraft = 'draft';
+  static const _keyNotificationPromptSeen = 'notification_prompt_seen';
 
   // -- Initialization --------------------------------------------------------
 
@@ -42,6 +43,16 @@ class HiveStorageService {
   /// Persists [mode]: `'light'`, `'dark'`, or `'system'`.
   static Future<void> setThemeMode(String mode) =>
       Hive.box(_settingsBox).put(_keyThemeMode, mode);
+
+  // -- Settings: Notifications -----------------------------------------------
+
+  /// Returns true if the post-login notification permission prompt has already been displayed.
+  static bool hasSeenNotificationPrompt() =>
+      Hive.box(_settingsBox).get(_keyNotificationPromptSeen, defaultValue: false) as bool;
+
+  /// Persists that the post-login notification prompt has been shown/dismissed.
+  static Future<void> setNotificationPromptSeen(bool seen) =>
+      Hive.box(_settingsBox).put(_keyNotificationPromptSeen, seen);
 
   // -- Booking Wizard Draft --------------------------------------------------
 
@@ -85,5 +96,6 @@ class HiveStorageService {
       Hive.box(_wizardDraftBox).clear(),
       Hive.box(_cacheBox).clear(),
     ]);
+    await Hive.box(_settingsBox).delete(_keyNotificationPromptSeen);
   }
 }
