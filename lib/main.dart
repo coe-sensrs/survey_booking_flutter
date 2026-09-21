@@ -57,7 +57,6 @@ void main() async {
   try {
     final notificationService = getNotificationServiceForInit();
     await notificationService.initialize();
-    await notificationService.requestPermission();
   } catch (e) {
     debugPrint('FCM non-fatal startup error: $e');
   }
