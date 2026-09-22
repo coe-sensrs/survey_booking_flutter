@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -41,9 +42,13 @@ class StorageUploadService {
     final destination =
         'appointments/$appointmentId/permissionDocuments/${DateTime.now().millisecondsSinceEpoch}_$fileName';
     final ref = _storage.ref().child(destination);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     final metadata = SettableMetadata(
       contentType: _getContentType(fileName),
-      customMetadata: {'originalFileName': fileName},
+      customMetadata: {
+        'originalFileName': fileName,
+        if (uid != null && uid.isNotEmpty) 'uploadedBy': uid,
+      },
     );
     final uploadTask = ref.putFile(File(filePath), metadata);
     if (onProgress != null) {
@@ -66,9 +71,13 @@ class StorageUploadService {
     final destination =
         'appointments/$appointmentId/kml/${DateTime.now().millisecondsSinceEpoch}_$fileName';
     final ref = _storage.ref().child(destination);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
     final metadata = SettableMetadata(
       contentType: _getContentType(fileName),
-      customMetadata: {'originalFileName': fileName},
+      customMetadata: {
+        'originalFileName': fileName,
+        if (uid != null && uid.isNotEmpty) 'uploadedBy': uid,
+      },
     );
     final uploadTask = ref.putFile(File(filePath), metadata);
     if (onProgress != null) {
