@@ -24,7 +24,13 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.refresh),
+            onPressed: () =>
+                ref.read(adminDashboardViewModelProvider.notifier).refresh(),
+            tooltip: 'Refresh Queue',
+          ),
+          IconButton(
+            icon: const Icon(Icons.settings),
             onPressed: () {},
             tooltip: 'Settings',
           ),
@@ -34,7 +40,7 @@ class AdminDashboardScreen extends ConsumerWidget {
         children: [
           _buildStatsRow(context, state),
           _buildFilterBar(context, ref, state),
-          Expanded(child: _buildList(context, state)),
+          Expanded(child: _buildList(context, ref, state)),
         ],
       ),
     );
@@ -123,32 +129,70 @@ class AdminDashboardScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildList(BuildContext context, AdminDashboardState state) {
-    return state.appointments.when(
-      data: (appointments) {
-        if (appointments.isEmpty) {
-          return const EmptyStateWidget(
-            title: 'No appointments found',
-            message:
-                'There are no survey requests matching the current filters.',
-            icon: Icons.search_off,
-          );
-        }
+  Widget _buildList(
+    BuildContext context,
+    WidgetRef ref,
+    AdminDashboardState state,
+  ) {
+    return RefreshIndicator(
+      onRefresh: () =>
+          ref.read(adminDashboardViewModelProvider.notifier).refresh(),
+      child: state.appointments.when(
+        data: (appointments) {
+          if (appointments.isEmpty) {
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: const Center(
+                      child: EmptyStateWidget(
+                        title: 'No appointments found',
+                        message:
+                            'There are no survey requests matching the current filters.',
+                        icon: Icons.search_off,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          }
 
-        return ListView.separated(
-          padding: EdgeInsets.all(16.w),
-          itemCount: appointments.length,
-          separatorBuilder: (context, index) => SizedBox(height: 12.h),
-          itemBuilder: (context, index) {
-            return AdminAppointmentListItem(appointment: appointments[index]);
+          return ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.all(16.w),
+            itemCount: appointments.length,
+            separatorBuilder: (context, index) => SizedBox(height: 12.h),
+            itemBuilder: (context, index) {
+              return AdminAppointmentListItem(appointment: appointments[index]);
+            },
+          );
+        },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, _) => LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: _AdminErrorRetryView(
+                  message:
+                      error.toString().toLowerCase().contains(
+                        'permission-denied',
+                      )
+                      ? 'Permission sync in progress. Please pull down or tap Retry to reload.'
+                      : 'Unable to load appointment queue. Pull down or tap Retry.',
+                  onRetry: () => ref
+                      .read(adminDashboardViewModelProvider.notifier)
+                      .refresh(),
+                ),
+              ),
+            );
           },
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => Center(
-        child: Text(
-          'Error loading appointments',
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
         ),
       ),
     );
@@ -321,5 +365,57 @@ class AdminAppointmentListItem extends StatelessWidget {
       case AppointmentStatus.rejected:
         return Theme.of(context).colorScheme.error;
     }
+  }
+}
+
+class _AdminErrorRetryView extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _AdminErrorRetryView({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.all(32.w),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 56.sp,
+              color: theme.colorScheme.error.withValues(alpha: 0.7),
+            ),
+            SizedBox(height: 16.h),
+            Text(
+              'Could not load appointments',
+              style: TextStyle(
+                fontSize: 17.sp,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            SizedBox(height: 20.h),
+            FilledButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

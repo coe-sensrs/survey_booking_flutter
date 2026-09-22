@@ -109,6 +109,8 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
 
       // Sign in with the server-issued custom token to establish a Firebase session.
       await _firebaseAuth.signInWithCustomToken(result.customToken);
+      // Force token refresh to ensure custom claims are immediately synchronized
+      await _firebaseAuth.currentUser?.getIdToken(true);
       await ref.read(analyticsServiceProvider).logLogin(loginMethod: 'email');
 
       if (!result.emailVerified) {
@@ -149,6 +151,9 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
 
       // Sign in with the server-issued custom token to establish a Firebase session.
       await _firebaseAuth.signInWithCustomToken(result.customToken);
+      // Force token refresh to ensure custom claims ('role': 'admin') are immediately
+      // synchronized to Firestore's auth headers before navigating to dashboard.
+      await _firebaseAuth.currentUser?.getIdToken(true);
       await ref.read(analyticsServiceProvider).logLogin(loginMethod: 'email');
       // userChanges() stream will fire and update state to AsyncData(appUser).
     } catch (e) {
