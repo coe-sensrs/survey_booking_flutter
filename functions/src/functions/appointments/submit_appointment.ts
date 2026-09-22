@@ -35,6 +35,7 @@ interface PermissionDocData {
 }
 
 interface SubmitAppointmentData {
+    appointmentId?: string;
     applicantName: string;
     applicantOrgName?: string | null;
     applicantEmail: string;
@@ -135,7 +136,11 @@ export const submitAppointment = onCall(
 
         // ── 3. Atomic submission transaction ──────────────────────────────────
         const rateLimitRef = db.collection("rateLimits").doc(uid);
-        const appointmentRef = db.collection("appointments").doc(); // pre-generate ID
+        const appointmentRef = (data.appointmentId &&
+            typeof data.appointmentId === "string" &&
+            data.appointmentId.trim().length > 0) ?
+            db.collection("appointments").doc(data.appointmentId.trim()) :
+            db.collection("appointments").doc();
         const now = FieldValue.serverTimestamp();
 
         await db.runTransaction(async (txn) => {
@@ -164,11 +169,17 @@ export const submitAppointment = onCall(
                 district: data.district,
                 xenDetails: data.xenDetails,
                 areaName: data.areaName,
-                kmlFile: data.kmlFile,
+                kmlFile: {
+                    ...data.kmlFile,
+                    uploadedAt: data.kmlFile.uploadedAt ? Timestamp.fromDate(new Date(data.kmlFile.uploadedAt)) : now,
+                },
                 preferredDate: Timestamp.fromDate(new Date(data.preferredDate)),
                 confirmedDate: null,
                 logistics: data.logistics,
-                permissionDocuments: data.permissionDocuments ?? [],
+                permissionDocuments: (data.permissionDocuments ?? []).map((doc) => ({
+                    ...doc,
+                    uploadedAt: doc.uploadedAt ? Timestamp.fromDate(new Date(doc.uploadedAt)) : now,
+                })),
                 // Server-enforced: clients cannot set these on creation
                 status: "pending_assignment",
                 assignedReviewerId: null,

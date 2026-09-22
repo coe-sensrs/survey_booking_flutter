@@ -157,10 +157,14 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
   }
 
   @override
+  String newAppointmentId() => _firestore.collection('appointments').doc().id;
+
+  @override
   Future<String> submitAppointment(Appointment appointment) async {
     await _refreshToken();
     final callable = _functions.httpsCallable('submitAppointment');
     final result = await callable.call<Map<String, dynamic>>({
+      if (appointment.id.isNotEmpty) 'appointmentId': appointment.id,
       'applicantName': appointment.applicantName,
       'applicantOrgName': appointment.applicantOrgName,
       'applicantEmail': appointment.applicantEmail,
@@ -168,13 +172,13 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
       'customSurveyName': appointment.customSurveyName,
       'state': appointment.state,
       'district': appointment.district,
-      'xenDetails': appointment.xenDetails.toMap(),
+      'xenDetails': appointment.xenDetails.toJson(),
       'areaName': appointment.areaName,
-      'kmlFile': appointment.kmlFile.toMap(),
+      'kmlFile': appointment.kmlFile.toJson(),
       'preferredDate': appointment.preferredDate.toIso8601String(),
-      'logistics': appointment.logistics.toMap(),
+      'logistics': appointment.logistics.toJson(),
       'permissionDocuments': appointment.permissionDocuments
-          .map((d) => d.toMap())
+          .map((d) => d.toJson())
           .toList(),
     });
     return result.data['appointmentId'] as String;

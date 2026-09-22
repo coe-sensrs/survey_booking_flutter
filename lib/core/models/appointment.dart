@@ -140,4 +140,34 @@ class Appointment {
       'updatedAt': Timestamp.fromDate(updatedAt),
     };
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'applicantId': applicantId,
+      'applicantName': applicantName,
+      'applicantOrgName': applicantOrgName,
+      'applicantEmail': applicantEmail,
+      'surveyType': surveyType.code,
+      'customSurveyName': customSurveyName,
+      'state': state,
+      'district': district,
+      'xenDetails': xenDetails.toJson(),
+      'areaName': areaName,
+      'kmlFile': kmlFile.toJson(),
+      'preferredDate': preferredDate.toIso8601String(),
+      'confirmedDate': confirmedDate?.toIso8601String(),
+      'logistics': logistics.toJson(),
+      'permissionDocuments': permissionDocuments.map((d) => d.toJson()).toList(),
+      'status': status.code,
+      'assignedReviewerId': assignedReviewerId,
+      'assignedReviewerName': assignedReviewerName,
+      'assignedTaskMemberId': assignedTaskMemberId,
+      'assignedTaskMemberName': assignedTaskMemberName,
+      'rejectionReason': rejectionReason,
+      'clarificationNote': clarificationNote,
+      'clarificationReply': clarificationReply,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
 }

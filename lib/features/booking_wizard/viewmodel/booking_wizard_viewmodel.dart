@@ -277,14 +277,14 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
         );
       }
       final kmlBytes = await kmlFileObj.readAsBytes();
-      final tempId = DateTime.now().millisecondsSinceEpoch.toString();
+      final appointmentId = appointmentRepo.newAppointmentId();
 
       onProgress?.call('Uploading Survey Map (${state.kmlFileName})...', 0.05);
 
       final kmlStoragePath = await performanceService.traceAction(
         'kml_upload_trace',
         () => uploadService.uploadKmlFile(
-          appointmentId: tempId,
+          appointmentId: appointmentId,
           filePath: state.kmlFilePath!,
           fileName: state.kmlFileName!,
           onProgress: (fileProgress) {
@@ -329,7 +329,7 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
         );
 
         final storagePath = await uploadService.uploadPermissionDocument(
-          appointmentId: tempId,
+          appointmentId: appointmentId,
           filePath: path,
           fileName: fileName,
           onProgress: (fileProgress) {
@@ -363,7 +363,7 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
       );
 
       final appointment = Appointment(
-        id: '',
+        id: appointmentId,
         applicantId: user.uid,
         applicantName: user.fullName,
         applicantOrgName: user.orgName,
@@ -396,7 +396,7 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
       );
 
       // 4. Save to Firestore via Repository
-      final appointmentId = await performanceService.traceAction(
+      final createdAppointmentId = await performanceService.traceAction(
         'submit_booking_trace',
         () => appointmentRepo.submitAppointment(appointment),
         attributes: {'survey_type': selectedSurveyType.code},
@@ -415,7 +415,7 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
             hasDocs: uploadedDocs.isNotEmpty,
           );
 
-      return appointmentId;
+      return createdAppointmentId;
     } catch (e, st) {
       ref
           .read(crashReportingServiceProvider)
