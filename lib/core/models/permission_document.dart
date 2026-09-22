@@ -21,7 +21,11 @@ class PermissionDocument {
       originalFileName: map['originalFileName'] as String? ?? '',
       fileType: map['fileType'] as String? ?? 'pdf',
       sizeBytes: (map['sizeBytes'] as num?)?.toInt() ?? 0,
-      uploadedAt: (map['uploadedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      uploadedAt: map['uploadedAt'] is Timestamp
+          ? (map['uploadedAt'] as Timestamp).toDate()
+          : (map['uploadedAt'] is String
+              ? DateTime.tryParse(map['uploadedAt'] as String) ?? DateTime.now()
+              : DateTime.now()),
     );
   }
 
@@ -32,6 +36,16 @@ class PermissionDocument {
       'fileType': fileType,
       'sizeBytes': sizeBytes,
       'uploadedAt': Timestamp.fromDate(uploadedAt),
+    };
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'storagePath': storagePath,
+      'originalFileName': originalFileName,
+      'fileType': fileType,
+      'sizeBytes': sizeBytes,
+      'uploadedAt': uploadedAt.toIso8601String(),
     };
   }
 }

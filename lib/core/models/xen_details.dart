@@ -20,4 +20,8 @@ class XenDetails {
   Map<String, dynamic> toMap() {
     return {'name': name, 'mobile': mobile, 'email': email};
   }
+
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'mobile': mobile, 'email': email};
+  }
 }

@@ -36,4 +36,15 @@ class Logistics {
       'vehicleModel': vehicleModel,
     };
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'coordinatorName': coordinatorName,
+      'coordinatorDesignation': coordinatorDesignation,
+      'driverName': driverName,
+      'driverMobile': driverMobile,
+      'vehicleNumber': vehicleNumber,
+      'vehicleModel': vehicleModel,
+    };
+  }
 }
