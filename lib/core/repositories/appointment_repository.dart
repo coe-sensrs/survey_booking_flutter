@@ -23,6 +23,7 @@ abstract class AppointmentReader {
 }
 
 abstract class AppointmentWriter {
+  String newAppointmentId();
   Future<String> submitAppointment(Appointment appointment);
   Future<void> assignReviewer(
     String appointmentId,
