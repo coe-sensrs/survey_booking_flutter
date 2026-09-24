@@ -99,10 +99,15 @@ export const submitAppointment = onCall(
         }
 
         if (emailVerified === undefined) {
-            try {
-                const authUser = await auth.getUser(uid);
-                emailVerified = authUser.emailVerified;
-            } catch {/* ignore */}
+            const isVerifiedClaim = request.auth.token.is_verified as boolean | undefined;
+            if (isVerifiedClaim !== undefined) {
+                emailVerified = isVerifiedClaim;
+            } else {
+                try {
+                    const authUser = await auth.getUser(uid);
+                    emailVerified = authUser.emailVerified;
+                } catch {/* ignore */}
+            }
         }
 
         if (!emailVerified) {
