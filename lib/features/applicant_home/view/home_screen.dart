@@ -241,7 +241,8 @@ class HomeScreen extends ConsumerWidget {
                     message: err.toString(),
                     icon: Icons.error_outline,
                     buttonText: 'Retry',
-                    onButtonPressed: () => ref.refresh(homeViewModelProvider),
+                    onButtonPressed: () =>
+                        ref.read(homeViewModelProvider.notifier).refresh(),
                   ),
                   data: (data) {
                     final isFirstTime =
@@ -282,6 +283,8 @@ class HomeScreen extends ConsumerWidget {
                         ),
                       );
                     }
+
+                    final recentActivities = data.recentActivity.take(5).toList();
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -346,7 +349,7 @@ class HomeScreen extends ConsumerWidget {
                           icon: Icons.notifications_none,
                         ),
                         SizedBox(height: 8.h),
-                        if (data.recentActivity.isEmpty)
+                        if (recentActivities.isEmpty)
                           const EmptyStateWidget(
                             title: 'No activity yet',
                             message:
@@ -361,11 +364,11 @@ class HomeScreen extends ConsumerWidget {
                             child: ListView.separated(
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
-                              itemCount: data.recentActivity.length,
+                              itemCount: recentActivities.length,
                               separatorBuilder: (context, index) =>
                                   const Divider(height: 1),
                               itemBuilder: (context, index) {
-                                final activity = data.recentActivity[index];
+                                final activity = recentActivities[index];
                                 return _buildActivityTile(context, activity);
                               },
                             ),

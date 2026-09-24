@@ -18,27 +18,23 @@ class HomeDashboardData {
 
 final homeViewModelProvider =
     AsyncNotifierProvider<HomeViewModel, HomeDashboardData>(() {
-  return HomeViewModel();
-});
+      return HomeViewModel();
+    });
 
 class HomeViewModel extends AsyncNotifier<HomeDashboardData> {
-  @override
-  Future<HomeDashboardData> build() async {
-    final user = ref.watch(authViewModelProvider).value;
-    if (user == null) {
-      return const HomeDashboardData(
-        upcomingSurveys: [],
-        recentRequests: [],
-        recentActivity: [],
-      );
-    }
+  Future<HomeDashboardData> _fetchDashboardData(String uid) async {
+    final appointmentRepo = ref.read(appointmentRepositoryProvider);
+    final auditLogRepo = ref.read(auditLogRepositoryProvider);
 
-    final appointmentRepo = ref.watch(appointmentRepositoryProvider);
-    final auditLogRepo = ref.watch(auditLogRepositoryProvider);
-
-    final upcomingFuture = appointmentRepo.getUpcomingSurveysForApplicant(user.uid);
-    final recentFuture = appointmentRepo.getRecentRequestsForApplicant(user.uid, limit: 5);
-    final activityFuture = auditLogRepo.getRecentActivityForApplicant(user.uid, limit: 10);
+    final upcomingFuture = appointmentRepo.getUpcomingSurveysForApplicant(uid);
+    final recentFuture = appointmentRepo.getRecentRequestsForApplicant(
+      uid,
+      limit: 5,
+    );
+    final activityFuture = auditLogRepo.getRecentActivityForApplicant(
+      uid,
+      limit: 5,
+    );
 
     final upcoming = await upcomingFuture.catchError((_) => <Appointment>[]);
     final recent = await recentFuture.catchError((_) => <Appointment>[]);
@@ -51,8 +47,24 @@ class HomeViewModel extends AsyncNotifier<HomeDashboardData> {
     );
   }
 
+  @override
+  Future<HomeDashboardData> build() async {
+    final user = await ref.watch(authViewModelProvider.future);
+    if (user == null) {
+      return const HomeDashboardData(
+        upcomingSurveys: [],
+        recentRequests: [],
+        recentActivity: [],
+      );
+    }
+
+    return _fetchDashboardData(user.uid);
+  }
+
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => build());
+    final user = ref.read(authViewModelProvider).value;
+    if (user == null) return;
+
+    state = await AsyncValue.guard(() => _fetchDashboardData(user.uid));
   }
 }
