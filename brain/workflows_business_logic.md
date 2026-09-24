@@ -230,3 +230,42 @@ sequenceDiagram
         FS-->>CD: Real-time stream updates list; moves to 'Resolved'
     end
 ```
+
+---
+
+### H. Applicant Dashboard & Booking Pull-to-Refresh Lifecycle
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor App as Applicant
+    participant UI as HomeScreen / MyBookingsScreen / DetailScreen
+    participant VM as HomeViewModel / MyBookingsViewModel
+    participant Auth as AuthViewModel (authViewModelProvider)
+    participant Repo as AppointmentRepository
+    participant FS as Cloud Firestore
+
+    App->>UI: App Launch / Tab Selection
+    UI->>VM: build() watches authViewModelProvider.future
+    VM->>Auth: await authViewModelProvider.future
+    Auth-->>VM: AppUser (Guaranteed resolved UID)
+    VM->>Repo: Fetch dashboard data / filtered bookings
+    Repo->>FS: One-shot Query
+    FS-->>Repo: QuerySnapshot
+    Repo-->>VM: List<Appointment>
+    VM-->>UI: AsyncData (Existing data mounted, 0ms flicker)
+
+    App->>UI: User Swipes Down (Pull-to-Refresh)
+    UI->>VM: refresh() [state retained, NO AsyncLoading]
+    VM->>Repo: _fetchDashboardData() / _fetchBookings() in background
+    Repo->>FS: Firestore Query
+    FS-->>Repo: Latest documents
+    Repo-->>VM: Updated appointments
+    VM->>VM: state = await AsyncValue.guard(...)
+    VM-->>UI: Smooth in-place data update (RefreshIndicator completes)
+```
+
+- **Non-Collapsing Refresh**: ViewModel `refresh()` never emits `state = const AsyncLoading()`. The current widget tree remains fully mounted while fresh data is retrieved, preventing layout collapse, jitter, and infinite refresh loops.
+- **Scroll Metric Preservation**: `RefreshIndicator` is provided an active scrollable child (`AlwaysScrollableScrollPhysics` with `ConstrainedBox(minHeight: constraints.maxHeight)`) across all UI states (Data, Empty, Error).
+- **Tab State Preservation**: `AppointmentDetailTabScreen` evaluates `if (bookingsState.hasValue)` to keep the active `AppointmentDetailScreen` mounted during background list refreshes.
+

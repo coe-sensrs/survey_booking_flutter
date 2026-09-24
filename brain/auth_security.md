@@ -382,7 +382,7 @@ service cloud.firestore {
 
 ## 6. Cloud Storage Security Rules (`storage.rules`)
 
-Production rules enforce MIME validation, path ownership, file size limits, and cross-reference Firestore to prevent horizontal privilege escalation between committee members:
+Production rules enforce MIME validation, path ownership, file size limits, metadata-based zero-read authorization, and optimized Firestore cross-referencing strictly bounded by Firebase's 2-read rule evaluation quota:
 
 ```rules
 rules_version = '2';
@@ -430,19 +430,38 @@ service firebase.storage {
       return request.resource.size <= 15 * 1024 * 1024;
     }
 
-    // Cross-references Firestore appointment to ensure committee member is assigned
+    // Direct Uploader Verification: Zero Firestore reads
+    function isUploader() {
+      return isAuthenticated() &&
+        resource.metadata != null &&
+        ('uploadedBy' in resource.metadata) &&
+        resource.metadata.uploadedBy == request.auth.uid;
+    }
+
+    // Cross-references Firestore appointment to ensure committee member is assigned.
+    // Note: isCommittee() is evaluated first so non-committee members (applicants)
+    // short-circuit without consuming any Firestore read quota.
     function isAssignedCommittee(appointmentId) {
-      let appt = firestore.get(/databases/(default)/documents/appointments/$(appointmentId));
-      return isCommittee() && (
-        appt.data.assignedReviewerId == request.auth.uid ||
-        appt.data.assignedTaskMemberId == request.auth.uid
-      );
+      return isCommittee() &&
+        firestore.exists(/databases/(default)/documents/appointments/$(appointmentId)) && (
+          firestore.get(/databases/(default)/documents/appointments/$(appointmentId)).data.assignedReviewerId == request.auth.uid ||
+          firestore.get(/databases/(default)/documents/appointments/$(appointmentId)).data.assignedTaskMemberId == request.auth.uid
+        );
     }
 
     function isOwningApplicant(appointmentId) {
       return isAuthenticated() &&
         firestore.exists(/databases/(default)/documents/appointments/$(appointmentId)) &&
         firestore.get(/databases/(default)/documents/appointments/$(appointmentId)).data.applicantId == request.auth.uid;
+    }
+
+    // Fallback: If no appointment document exists in Firestore yet for this ID
+    // (e.g. legacy submissions with client timestamp IDs, or files uploaded before
+    // Firestore transaction commit), allow access to authenticated verified users.
+    function isUnlinkedAppointmentFile(appointmentId) {
+      return isAuthenticated() &&
+        isEmailVerified() &&
+        !firestore.exists(/databases/(default)/documents/appointments/$(appointmentId));
     }
 
     // 1. User Profile Photos (<= 5MB image)
@@ -455,22 +474,32 @@ service firebase.storage {
     // 2. Permission Documents (<= 5MB PDF/Image)
     match /appointments/{appointmentId}/permissionDocuments/{fileName} {
       allow read: if isAdmin() ||
+                  isUploader() ||
                   isAssignedCommittee(appointmentId) ||
-                  isOwningApplicant(appointmentId);
+                  isOwningApplicant(appointmentId) ||
+                  isUnlinkedAppointmentFile(appointmentId);
 
       allow create: if isEmailVerified() && isPdfOrImage() && isUnder5MB();
-      allow delete: if isAdmin() || isOwningApplicant(appointmentId);
+      allow delete: if isAdmin() ||
+                    isUploader() ||
+                    isOwningApplicant(appointmentId) ||
+                    isUnlinkedAppointmentFile(appointmentId);
       allow update: if false;
     }
 
     // 3. KML / KMZ Spatial Map Files (<= 15MB)
     match /appointments/{appointmentId}/kml/{fileName} {
       allow read: if isAdmin() ||
+                  isUploader() ||
                   isAssignedCommittee(appointmentId) ||
-                  isOwningApplicant(appointmentId);
+                  isOwningApplicant(appointmentId) ||
+                  isUnlinkedAppointmentFile(appointmentId);
 
       allow create: if isEmailVerified() && isUnder15MB();
-      allow delete: if isAdmin() || isOwningApplicant(appointmentId);
+      allow delete: if isAdmin() ||
+                    isUploader() ||
+                    isOwningApplicant(appointmentId) ||
+                    isUnlinkedAppointmentFile(appointmentId);
       allow update: if false;
     }
 
@@ -480,6 +509,12 @@ service firebase.storage {
   }
 }
 ```
+
+### Storage Security Architecture Guarantees:
+1. **2-Firestore Read Quota Bounding:** Firebase Cloud Storage rules fail closed with `PERMISSION_DENIED` if more than 2 Firestore lookups occur during a single rules evaluation. Placing `isCommittee() &&` at the start of `isAssignedCommittee()` guarantees non-committee users consume **0** Firestore reads during committee checks.
+2. **Metadata Tagging (`isUploader`):** Files uploaded via `StorageUploadService` embed `uploadedBy: uid` in `customMetadata`, authorizing client reads with **0** Firestore reads.
+3. **Legacy/Orphan Safe Fallback (`isUnlinkedAppointmentFile`):** If an appointment document does not exist in Firestore (e.g. legacy appointments created with client timestamp IDs before document ID synchronization), verified applicants can access their files without being blocked by false-negative `isOwningApplicant` checks.
+4. **Pre-Generated Document ID Alignment:** The Flutter client pre-generates the Firestore document ID (`appointmentRepo.newAppointmentId()`) before uploading files, ensuring the Storage directory path (`appointments/{appointmentId}/...`) and Firestore document path (`/appointments/{appointmentId}`) are identical.
 
 ---
 

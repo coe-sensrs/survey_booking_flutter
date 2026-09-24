@@ -140,17 +140,25 @@ graph TD
 ## 8. Applicant Modules (Home, Wizard, Bookings & Profile)
 
 - **Applicant Home (`lib/features/applicant_home`)**:
-  - `HomeViewModel`: AsyncNotifier fetching `upcomingSurveys`, `recentRequests`, and `recentActivity`.
-  - `HomeScreen`: UI matching Stitch #4 & #5 with empty states, pull-to-refresh, standardized `AppointmentBookingCard` and `AppointmentStatusBadge` widgets, and dynamic greeting banner.
+  - `HomeViewModel`: `AsyncNotifier<HomeDashboardData>` fetching `upcomingSurveys`, `recentRequests`, and `recentActivity`.
+    - **Startup Auth Synchronization**: `build()` awaits `ref.watch(authViewModelProvider.future)` to eliminate the startup race condition where `.value == null` caused an initial flash of false empty dashboard state before real data loaded.
+    - **Non-Collapsing Refresh**: `refresh()` calls `state = await AsyncValue.guard(() => _fetchDashboardData(user.uid))` directly without setting `state = const AsyncLoading()`. This preserves existing dashboard cards on screen while the native `RefreshIndicator` spinner animates at the top, eliminating screen collapse, scroll jumps, and duplicate spinners.
+  - `HomeScreen`: UI matching Stitch #4 & #5 with empty states, pull-to-refresh (`RefreshIndicator` wrapping `SingleChildScrollView(physics: AlwaysScrollableScrollPhysics())`), standardized `AppointmentBookingCard` and `AppointmentStatusBadge` widgets, and dynamic greeting banner.
 - **9-Step Booking Wizard (`lib/features/booking_wizard`)**:
   - `BookingWizardViewModel`: Riverpod `Notifier` managing wizard step transitions (1-9) with synchronous draft persistence via `HiveStorageService` (`wizard_draft_box`). Handles KML/KMZ upload and optional permission docs upload to Firebase Storage before Firestore creation with granular `onProgress` callbacks.
   - Steps 1 to 9: Survey Type, Punjab State & District dropdown, XEN Details, Survey Area & KML picker, Preferred Start Date, Logistics, Optional Permission Docs, Review & Submit with progress feedback, Acknowledgement.
 - **My Bookings & Detail (`lib/features/my_bookings`)**:
+  - `MyBookingsViewModel`: `AsyncNotifier<List<Appointment>>` with status filter state managed via `myBookingsStatusFilterProvider`.
+    - **Clean Background Refresh**: Employs `_fetchBookings` with `ref.read` and guarded refresh without forced `AsyncLoading()`.
   - `MyBookingsScreen`: Filterable appointment list with status chips matching Stitch #6, rendering list items via `AppointmentBookingCard`.
-  - `AppointmentDetailScreen`: Read view for appointments with clarification reply submission matching Stitch #7, featuring centralized `AppointmentStatusBadge`.
+    - **Guaranteed Scrollable Child Architecture**: `RefreshIndicator` wraps `ListView.separated` in data state, and wraps `SingleChildScrollView(physics: AlwaysScrollableScrollPhysics(), child: ConstrainedBox(minHeight: constraints.maxHeight, child: EmptyStateWidget(...)))` in empty and error states. This guarantees `RefreshIndicator` always has an active scrollable child, eliminating overscroll notification detachment and infinite refresh loops.
+  - `AppointmentDetailScreen`: Detailed inspector for individual appointments matching Stitch #7, featuring centralized `AppointmentStatusBadge`.
+    - **Integrated Pull-to-Refresh**: Wrapped in `RefreshIndicator` with `AlwaysScrollableScrollPhysics` across populated, empty, and error states, allowing manual invalidation of `applicantAppointmentDetailStreamProvider(id)`.
+    - **Empty ID Guard**: Stream provider checks `if (id.isEmpty) return Stream.value(null);` to prevent invalid Firestore document path queries.
     - **Riverpod State Management Optimization**: Decoupled clarification reply input and submission state from fragile local `setState` to prevent keyboard dismissal, textfield focus loss, and unnecessary screen re-renders during applicant interaction.
     - **Cross-Screen Cache Invalidation (`ref.invalidate`)**: When an applicant submits a clarification reply, `MyBookingsViewModel.submitClarificationReply` invokes `ref.invalidate(homeViewModelProvider)`. This ensures that when the applicant navigates back to `HomeScreen`, the recent requests cache is immediately refreshed and displays the new `under_review` badge rather than a stale `clarification_requested` status.
   - `AppointmentDetailTabScreen`: Persistent tab detail view within `StatefulShellRoute`.
+    - **Persistent Tab View Preservation**: Checks `bookingsState.hasValue` instead of naive `.when(loading: ...)`, preventing the tab view from being torn down into a loading spinner whenever `MyBookingsViewModel` reloads in the background.
 - **Profile & Account (`lib/features/profile`)**:
   - `ProfileScreen`: Shared across all roles. Profile card with `SafeProfileAvatar`, edit modal bottom sheet, theme switcher, sign-out confirmation, and photo options bottom sheet offering upload/change and removal.
   - `ProfileViewModel`: `AsyncNotifier<void>` handling profile details update, photo upload, and photo removal pipeline with automatic cleanup of obsolete storage assets.

@@ -41,6 +41,14 @@ graph LR
 1. **View (UI Layer):** `ConsumerWidget` / `ConsumerStatefulWidget`. Renders widgets, handles layout via `flutter_screenutil_plus` & `AppBreakpoints`, listens to Riverpod state. Zero direct Firebase SDK calls. Sub-widgets are split into focused `StatelessWidget` subclasses to minimize unnecessary widget rebuild scopes.
 2. **ViewModel (State Layer):** Riverpod `Notifier`, `AsyncNotifier`, `StreamProvider.autoDispose`, and imperative Controllers. Holds local and async feature state, orchestrates repository invocations, applies business validation rules, and checks RBAC rights.
 3. **Model (Data Layer):** Plain Dart data classes (`AppUser`, `Appointment`, etc.) + Abstract Repositories (`core/repositories/`) + Concrete Firebase implementations (`core/services/`).
+   - **Dual Serialization Architectural Pattern (`toMap` vs `toJson`):**
+     - `.toMap()`: Serializes models for direct Cloud Firestore writes via the Firestore SDK, emitting native `cloud_firestore.Timestamp` instances for date fields.
+     - `.toJson()`: Serializes models for Cloud Functions / HTTP transport, emitting ISO-8601 strings for dates. This strictly complies with Flutter `cloud_functions` parameter constraints (`_debugIsValidParameterType`) which reject native Firestore `Timestamp` objects.
+     - **Defensive Deserialization (`fromMap`):** Deserializers defensively handle both `Timestamp` and `String` date representations (e.g. `uploadedAt: map['uploadedAt'] is Timestamp ? ... : (map['uploadedAt'] is String ? DateTime.tryParse(...) : ...)`), immunizing the app against runtime type cast errors if documents are saved with string dates.
+   - **Pre-Generated Appointment ID & Storage Path Synchronization Pattern:**
+     - The client generates the real Firestore document ID (`appointmentRepo.newAppointmentId()` $\rightarrow$ `_firestore.collection('appointments').doc().id`) *before* uploading KML and permission files.
+     - Files are uploaded to `appointments/<appointmentId>/kml/...` and `appointments/<appointmentId>/permissionDocuments/...`, ensuring Cloud Storage directory paths match the Firestore document ID from inception.
+     - The pre-generated `appointmentId` is passed in the `submitAppointment` HTTPS Callable payload, ensuring the atomic server transaction commits to that exact document reference. This eliminates orphaned storage paths and allows Storage security rules to cross-reference the Firestore document without failure.
 
 ---
 
@@ -99,6 +107,20 @@ To eliminate memory leaks, prevent stale background Firestore listeners, and ens
 - **`assignedTasksStreamProvider` (`StreamProvider.autoDispose`)**: Subscribes to `watchCommitteeAssignedTasks(uid)` for real-time task queue updates.
 - **`committeeReviewDetailStreamProvider` (`StreamProvider.autoDispose.family`)**: Subscribes to `watchAppointmentById(id)` on the review detail screen.
 - **`adminAppointmentDetailStreamProvider` (`StreamProvider.family`)**: Streams real-time appointment document updates to the Admin inspector.
+- **`applicantAppointmentDetailStreamProvider` (`StreamProvider.autoDispose.family`)**: Streams live appointment updates to the applicant detail screen. Includes defensive empty ID guard (`if (id.isEmpty) return Stream.value(null);`) to prevent Firestore document path assertion exceptions when route parameters are uninitialized.
+
+### 5.1 Riverpod Pull-to-Refresh & Non-Collapsing State Lifecycle Pattern
+When building pull-to-refresh flows with Riverpod's `AsyncNotifier` and Flutter's `RefreshIndicator`:
+1. **Never Call `state = const AsyncLoading()` in `refresh()`**: Forcing `AsyncLoading` strips existing data from `state`, which drops the view into a loading skeleton/spinner. This creates an uncoordinated "dual spinner" effect (`RefreshIndicator` top circle + centered `CircularProgressIndicator`) and collapses the scroll view height, resetting user scroll position.
+2. **Never Call `build()` Directly**: In Riverpod, `build()` registers dependencies via `ref.watch()`. Calling `build()` from an asynchronous helper method invokes `ref.watch` outside Riverpod's synchronous build lifecycle. Instead, extract independent data fetch functions (`_fetchData(...)`) and assign `state = await AsyncValue.guard(() => _fetchData(...))`.
+3. **Startup Auth Synchronization**: In notifiers that depend on authentication, always await the auth future (`await ref.watch(authViewModelProvider.future)`) in `build()` rather than reading `.value`. Reading `.value` synchronously returns `null` while auth initializes, causing a flash of empty UI followed by an immediate second rebuild when auth resolves.
+4. **Model Value Equality (`AppUser`)**: State classes emitted by auth or repositories must implement `operator ==` and `hashCode`. Without value equality, Riverpod assumes every re-emitted instance is a state mutation, triggering spurious rebuild cascades across all watching screens.
+
+### 5.2 Guaranteed Scrollable Child Architecture for `RefreshIndicator`
+Flutter's `RefreshIndicator` requires an active scrollable child that dispatches `ScrollNotification` events. If the child is a non-scrollable widget (such as `Center(child: CircularProgressIndicator())` or an unconstrained `EmptyStateWidget`), scroll metrics are lost, overscroll detection breaks, and the refresh spinner gets trapped in an infinite loop.
+- **Data State**: Use `ListView.separated(physics: const AlwaysScrollableScrollPhysics(), ...)`.
+- **Empty & Error States**: Wrap in `LayoutBuilder` + `SingleChildScrollView(physics: const AlwaysScrollableScrollPhysics(), child: ConstrainedBox(minHeight: constraints.maxHeight, child: EmptyStateWidget(...)))`. This ensures pull-to-refresh works even when lists are completely empty or in an error state.
+- **Tab Screen State Retention**: Top-level tab screens (e.g. `AppointmentDetailTabScreen`) must check `state.hasValue` rather than `state.when(loading: ...)`. This preserves the active detail screen when background lists refresh, avoiding destructive unmounts.
 
 ---
 

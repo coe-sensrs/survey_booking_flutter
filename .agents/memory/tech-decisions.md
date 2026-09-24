@@ -1,7 +1,7 @@
 ---
 type: project
 created: 2026-07-18
-updated: 2026-08-18
+updated: 2026-09-24
 ---
 
 # Technical Decisions
@@ -123,3 +123,42 @@ updated: 2026-08-18
      - *Auth & Role Resolution Guard*: `NotificationNavigation` defers deep links until `authViewModelProvider.value` resolves, preventing unauthorized access or routing flashes on cold start.
   4. **Backend Multicast & Automatic Token Pruning**: Cloud Functions dispatch via `admin.messaging().sendEachForMulticast()`. Delivery failures never interrupt business transactions. Errors matching invalid token codes (`messaging/registration-token-not-registered`, `messaging/invalid-registration-token`) trigger `pruneInvalidToken(uid, token)`, removing stale entries from Firestore via `FieldValue.arrayRemove`.
   5. **Firestore Security Rules Hardening (DoS & Resource Exhaustion Defense)**: Hardened `firestore.rules` on `/users/{uid}` to enforce `request.resource.data.fcmTokens is list && request.resource.data.fcmTokens.size() <= 10` on `create` and `update`. Eliminates document bloat and prevents clients from writing non-list values. Verified via 4 new automated unit tests in `firebase/tests/firestore/users.rules.test.js`.
+- **Cloud Storage Rules 2-Read Cap & Pre-Generated Appointment ID Synchronization**:
+  1. **Root Cause Analysis (KML / Document Read StorageException -13021 / Permission Denied)**: When an applicant attempted to open or download a KML boundary map or permission document in `AppointmentDetailScreen`, Firebase Storage threw `StorageException: User does not have permission to access this object (Code: -13021, HttpResult: 403)`. Investigation identified two distinct flaws:
+     - *Quota Crash (Exceeding 2 Firestore Reads)*: Firebase Storage rules strictly enforce a limit of at most two Firestore document reads per rule evaluation. `isAssignedCommittee(appointmentId)` unconditionally called `let appt = firestore.get(...)` (Read 1) before evaluating `isCommittee()`. For applicants, `isCommittee()` returned `false`, and evaluation proceeded to `isOwningApplicant(appointmentId)`, which invoked `firestore.exists(...)` (Read 2) and `firestore.get(...)` (Read 3). The 3rd read crashed the rules engine with a quota violation, returning an immediate 403.
+     - *ID Desynchronization*: In `BookingWizardViewModel.submitBooking()`, files were uploaded using `tempId = DateTime.now().millisecondsSinceEpoch.toString()`, storing files in `appointments/<tempId>/kml/...`. The Cloud Function `submitAppointment` then generated a separate random Firestore ID (`appointmentRef = db.collection('appointments').doc()`, e.g. `xyz123`). The appointment document was saved at `/appointments/xyz123`, while the storage path referenced `<tempId>`. When `storage.rules` evaluated `firestore.exists(/databases/(default)/documents/appointments/$(appointmentId))`, `appointmentId` was `<tempId>` (which never existed in Firestore), failing the ownership check.
+  2. **Client ID Pre-Generation Pattern**: Added `String newAppointmentId()` to `AppointmentWriter` and `FirebaseAppointmentRepository` (`_firestore.collection('appointments').doc().id`). In `BookingWizardViewModel`, the real Firestore document ID is generated *prior* to uploading files. KML and permission files are uploaded to `appointments/<appointmentId>/...`, perfectly matching the Firestore document path.
+  3. **Backend Cloud Function Adoption**: `SubmitAppointmentData` interface and transaction logic in `submit_appointment.ts` accept optional `appointmentId?: string`. When provided, the transaction binds `appointmentRef = db.collection('appointments').doc(data.appointmentId.trim())`, ensuring Storage and Firestore paths are 100% synchronized from inception.
+  4. **Direct Uploader Metadata (`uploadedBy`)**: `StorageUploadService.uploadKmlFile` and `uploadPermissionDocument` embed `uploadedBy: uid` in `customMetadata`. In `storage.rules`, `isUploader()` checks `resource.metadata.uploadedBy == request.auth.uid`, authorizing client reads with **0** Firestore reads.
+  5. **Short-Circuit Committee Check & Legacy Fallback**:
+     - `isAssignedCommittee(appointmentId)` now evaluates `isCommittee() &&` before executing any Firestore lookups, ensuring applicants consume **0** Firestore reads during committee checks.
+     - Added `isUnlinkedAppointmentFile(appointmentId)` (`isAuthenticated() && isEmailVerified() && !firestore.exists(...)`), allowing verified applicants to access legacy submissions (created with `tempId` before ID synchronization) or pre-creation files without 403 errors.
+- **Admin Dashboard Real-Time Stream Synchronization, Auto-Retry & Resilient Pull-to-Refresh**:
+  1. **Root Cause Analysis (Permission-Denied Race Condition on Admin Login)**: When an administrator logged in via `AdminLoginScreen`, `AuthViewModel.loginAdmin()` exchanged the server-minted custom token via `_firebaseAuth.signInWithCustomToken()`. GoRouter immediately redirected to `/admin-dashboard`, where `AdminDashboardViewModel` initialized `watchAdminDashboardAppointments()`. Because the Firebase Auth custom claim (`role: 'admin'`) had not yet finished propagating to the Firestore client's internal authentication headers, `firestore.rules` (`isAdmin()`) rejected the collection query with `[cloud_firestore/permission-denied]`. The stream failed into `AsyncError` with no auto-recovery, and `AdminDashboardScreen` lacked a `RefreshIndicator` or retry button. Tapping a filter chip ("Pending Assignment") and returning to "All" forced `_initStream()` to re-subscribe seconds later after the token had settled, which resolved the error.
+  2. **Proactive ID Token Refresh on Login**: Added `await _firebaseAuth.currentUser?.getIdToken(true)` immediately following `signInWithCustomToken()` in `loginAdmin()` (and `loginApplicant()`), ensuring that custom claims are retrieved from Identity Toolkit and propagated to Firebase client plugins before routing triggers.
+  3. **Self-Healing Stream with Token Verification & Exponential Retry**: In `AdminDashboardViewModel`:
+     - Checks `currentUser.getIdTokenResult()` and force-refreshes if the `admin` claim is missing before listening.
+     - Automatically intercepts transient `permission-denied` errors, refreshes the ID token, and retries the stream up to 2 times with a 700ms backoff before exposing an error to the UI.
+     - Added proper lifecycle management via `ref.onDispose` to cancel the `_subscription`.
+     - Added a public `Future<void> refresh()` method to allow manual and pull-to-refresh re-initialization.
+  4. **Full-Spectrum Pull-to-Refresh & Interactive Retry View**:
+     - `AdminDashboardScreen` wraps the queue in a `RefreshIndicator` powered by `ref.read(adminDashboardViewModelProvider.notifier).refresh()`.
+     - Applies `AlwaysScrollableScrollPhysics` with `LayoutBuilder` across Data, Empty, and Error states, ensuring swipe-to-refresh works even when 0 appointments are returned.
+     - Added an AppBar Refresh `IconButton` for desktop and quick one-tap reloads.
+     - Replaced the static error text with `_AdminErrorRetryView` featuring an error icon, contextual explanation, and a dedicated "Retry" action button.
+- **Riverpod Pull-to-Refresh Non-Collapsing Lifecycle, Scrollable Child Architecture & Tab State Preservation**:
+  1. **Root Cause Analysis (Infinite Refresh Loops & View Disconnection)**:
+     In Applicant role, `HomeScreen`, `MyBookingsScreen`, and `AppointmentDetailScreen` suffered from repeating refresh animations and scroll collapse due to five intersecting issues:
+     - *ViewModel `refresh()` Destruction*: Calling `state = const AsyncLoading()` and invoking `build()` stripped existing cached data, triggered rebuilds outside Riverpod's synchronous context, and collapsed the scroll view to a 40px centered spinner while `RefreshIndicator` was active.
+     - *Scroll Metric Disconnection*: In `MyBookingsScreen`, `RefreshIndicator` wrapped `bookingsState.when(...)`, placing non-scrollable `Center` and `EmptyStateWidget` directly under `RefreshIndicator`. Mid-refresh state transitions destroyed scroll metrics and caused infinite refresh loops.
+     - *Startup Auth Race*: Reading `ref.watch(authViewModelProvider).value` synchronously yielded `null` during startup loading, emitting empty dummy data before re-running a second time once auth resolved (causing visual flicker).
+     - *Tab View Unmounting*: `AppointmentDetailTabScreen`'s `.when(loading: ...)` unmounted `AppointmentDetailScreen` during background list refreshes.
+     - *`AppUser` Value Equality*: Lacking `operator ==` and `hashCode` caused every session reload/check to be treated as a state change.
+  2. **Non-Collapsing Refresh Pattern**:
+     In `HomeViewModel` and `MyBookingsViewModel`, `refresh()` directly executes `state = await AsyncValue.guard(...)` without calling `state = const AsyncLoading()`. Extracted data fetching to dedicated private helper methods (`_fetchDashboardData`, `_fetchBookings`). Existing data stays mounted during background re-fetch, eliminating layout shifts and flicker.
+  3. **Guaranteed Scrollable Child Architecture**:
+     `RefreshIndicator` requires an active scrollable child with `AlwaysScrollableScrollPhysics`. Empty and error states in `MyBookingsScreen` and `AppointmentDetailScreen` are wrapped inside `LayoutBuilder` + `SingleChildScrollView(physics: const AlwaysScrollableScrollPhysics())` with `ConstrainedBox(minHeight: constraints.maxHeight)`.
+  4. **Auth State Synchronization**:
+     ViewModels await `ref.watch(authViewModelProvider.future)` in `build()`, ensuring authentication and UID resolution complete before Firestore queries execute.
+  5. **Tab State Preservation & Value Equality**:
+     `AppointmentDetailTabScreen` uses `if (bookingsState.hasValue)` instead of blocking on `.when(loading: ...)`, preserving child detail views during background updates. `AppUser` implements structural `operator ==` and `hashCode` to prevent spurious widget rebuilds.
