@@ -53,6 +53,36 @@ class AppUser {
     );
   }
 
+  AppUser copyWith({
+    String? uid,
+    String? role,
+    String? fullName,
+    String? orgName,
+    String? email,
+    String? phone,
+    String? expertiseTag,
+    bool? active,
+    String? photoUrl,
+    List<String>? fcmTokens,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return AppUser(
+      uid: uid ?? this.uid,
+      role: role ?? this.role,
+      fullName: fullName ?? this.fullName,
+      orgName: orgName ?? this.orgName,
+      email: email ?? this.email,
+      phone: phone ?? this.phone,
+      expertiseTag: expertiseTag ?? this.expertiseTag,
+      active: active ?? this.active,
+      photoUrl: photoUrl ?? this.photoUrl,
+      fcmTokens: fcmTokens ?? this.fcmTokens,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   Map<String, dynamic> toMap() {
     final data = <String, dynamic>{
       'role': role,
@@ -71,4 +101,34 @@ class AppUser {
     }
     return data;
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is AppUser &&
+        other.uid == uid &&
+        other.role == role &&
+        other.fullName == fullName &&
+        other.orgName == orgName &&
+        other.email == email &&
+        other.phone == phone &&
+        other.expertiseTag == expertiseTag &&
+        other.active == active &&
+        other.photoUrl == photoUrl &&
+        other.updatedAt == updatedAt;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        uid,
+        role,
+        fullName,
+        orgName,
+        email,
+        phone,
+        expertiseTag,
+        active,
+        photoUrl,
+        updatedAt,
+      );
 }
