@@ -284,7 +284,9 @@ class HomeScreen extends ConsumerWidget {
                       );
                     }
 
-                    final recentActivities = data.recentActivity.take(5).toList();
+                    final recentActivities = data.recentActivity
+                        .take(5)
+                        .toList();
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
