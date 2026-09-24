@@ -31,6 +31,33 @@ void main() {
 
       expect(deserialized.photoUrl, isNull);
     });
+
+    test('AppUser equality and hashCode work correctly for identical values', () {
+      final now = DateTime(2026, 9, 24);
+      final user1 = AppUser(
+        uid: 'user_1',
+        role: 'applicant',
+        fullName: 'Same Name',
+        email: 'same@example.com',
+        phone: '1234567890',
+        createdAt: now,
+        updatedAt: now,
+      );
+      final user2 = AppUser(
+        uid: 'user_1',
+        role: 'applicant',
+        fullName: 'Same Name',
+        email: 'same@example.com',
+        phone: '1234567890',
+        createdAt: now,
+        updatedAt: now,
+      );
+      final user3 = user1.copyWith(fullName: 'Different Name');
+
+      expect(user1, equals(user2));
+      expect(user1.hashCode, equals(user2.hashCode));
+      expect(user1, isNot(equals(user3)));
+    });
   });
 
   group('Booking Wizard Step 7 Permission Documents Tests', () {
