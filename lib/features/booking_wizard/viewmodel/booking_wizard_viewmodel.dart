@@ -11,6 +11,7 @@ import '../../../core/models/permission_document.dart';
 import '../../../core/models/xen_details.dart';
 import '../../../core/providers/core_providers.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
+import '../../applicant_home/viewmodel/home_viewmodel.dart';
 
 class WizardStateData {
   final int currentStep;
@@ -208,8 +209,12 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
     } catch (_) {}
   }
 
-  Future<void> clearDraft() async {
-    state = const WizardStateData();
+  /// Clears all wizard draft data.
+  /// Pass [preserveStep] to keep the UI on the current step (e.g. step 9
+  /// acknowledgement) while still wiping the filled-in form data.
+  Future<void> clearDraft({bool preserveStep = false}) async {
+    final stepToKeep = preserveStep ? state.currentStep : 1;
+    state = WizardStateData(currentStep: stepToKeep);
     try {
       await HiveStorageService.clearWizardDraft();
     } catch (_) {}
@@ -405,8 +410,18 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
 
       onProgress?.call('Booking submitted successfully!', 1.0);
 
-      // 5. Clear draft after successful creation
-      await clearDraft();
+      // 5. Advance to Step 9 BEFORE clearing draft so the wizard UI
+      //    transitions to the acknowledgement screen while this widget
+      //    is still mounted. Calling clearDraft() first would reset
+      //    currentStep to 1, unmounting Step8Review before setStep(9)
+      //    runs and producing a 'bad ref in widget' error.
+      setStep(9);
+
+      // 6. Clear draft data (preserveStep=true keeps currentStep=9).
+      await clearDraft(preserveStep: true);
+
+      // 7. Refresh home dashboard so the new booking appears immediately.
+      ref.invalidate(homeViewModelProvider);
 
       await ref
           .read(analyticsServiceProvider)

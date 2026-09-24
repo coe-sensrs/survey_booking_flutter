@@ -40,18 +40,22 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
               }
             },
           );
-      AppSnackbar.showGlobalSuccess(
-        title: 'Booking Confirmed',
-        message: 'Appointment submitted successfully!',
-      );
-
-      // Advance to step 9 (Acknowledgement)
-      ref.read(bookingWizardViewModelProvider.notifier).setStep(9);
+      // submitBooking() already called setStep(9) inside the viewmodel
+      // before clearing the draft, so this widget may already be unmounted.
+      // Guard the snackbar call accordingly.
+      if (mounted) {
+        AppSnackbar.showGlobalSuccess(
+          title: 'Booking Confirmed',
+          message: 'Appointment submitted successfully!',
+        );
+      }
     } catch (e) {
-      AppSnackbar.showGlobalError(
-        title: 'Submission Failed',
-        message: 'Booking submission failed: $e',
-      );
+      if (mounted) {
+        AppSnackbar.showGlobalError(
+          title: 'Submission Failed',
+          message: 'Booking submission failed: $e',
+        );
+      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

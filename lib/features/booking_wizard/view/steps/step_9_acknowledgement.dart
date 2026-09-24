@@ -4,6 +4,7 @@ import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/widgets/app_button.dart';
+import '../../viewmodel/booking_wizard_viewmodel.dart';
 
 class Step9Acknowledgement extends ConsumerWidget {
   const Step9Acknowledgement({super.key});
@@ -40,15 +41,21 @@ class Step9Acknowledgement extends ConsumerWidget {
             'An admin will assign a reviewer shortly.',
             style: TextStyle(
               fontSize: 14.sp,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
             textAlign: TextAlign.center,
           ),
           SizedBox(height: 36.h),
           AppButton(
             text: 'Return to Home',
-            onPressed: () {
-              context.go('/home');
+            onPressed: () async {
+              // Reset the wizard fully so the next booking starts at step 1.
+              await ref
+                  .read(bookingWizardViewModelProvider.notifier)
+                  .clearDraft();
+              if (context.mounted) context.go('/home');
             },
           ),
         ],
