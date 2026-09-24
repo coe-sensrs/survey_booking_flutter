@@ -82,43 +82,66 @@ class MyBookingsScreen extends ConsumerWidget {
           ),
 
           Expanded(
-            child: RefreshIndicator(
-              onRefresh: () =>
-                  ref.read(myBookingsViewModelProvider.notifier).refresh(),
-              child: bookingsState.when(
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, stack) => EmptyStateWidget(
-                  title: 'Failed to load bookings',
-                  message: err.toString(),
-                  icon: Icons.error_outline,
-                  buttonText: 'Retry',
-                  onButtonPressed: () =>
-                      ref.refresh(myBookingsViewModelProvider),
+            child: bookingsState.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => RefreshIndicator(
+                onRefresh: () =>
+                    ref.read(myBookingsViewModelProvider.notifier).refresh(),
+                child: LayoutBuilder(
+                  builder: (context, constraints) => SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight: constraints.maxHeight,
+                      ),
+                      child: EmptyStateWidget(
+                        title: 'Failed to load bookings',
+                        message: err.toString(),
+                        icon: Icons.error_outline,
+                        buttonText: 'Retry',
+                        onButtonPressed: () => ref
+                            .read(myBookingsViewModelProvider.notifier)
+                            .refresh(),
+                      ),
+                    ),
+                  ),
                 ),
-                data: (appointments) {
-                  if (appointments.isEmpty) {
-                    return EmptyStateWidget(
-                      title: 'No bookings found',
-                      message: selectedFilter == null
-                          ? 'You have not made any survey appointments yet.'
-                          : 'No appointments match the selected filter.',
-                      icon: Icons.bookmark_border,
-                      buttonText: 'Start New Survey',
-                      onButtonPressed: () => context.push('/booking-wizard'),
-                    );
-                  }
-
-                  return ListView.separated(
-                    padding: EdgeInsets.all(16.w),
-                    itemCount: appointments.length,
-                    separatorBuilder: (context, index) =>
-                        SizedBox(height: 12.h),
-                    itemBuilder: (context, index) {
-                      final item = appointments[index];
-                      return AppointmentBookingCard(item: item);
-                    },
-                  );
-                },
+              ),
+              data: (appointments) => RefreshIndicator(
+                onRefresh: () =>
+                    ref.read(myBookingsViewModelProvider.notifier).refresh(),
+                child: appointments.isEmpty
+                    ? LayoutBuilder(
+                        builder: (context, constraints) => SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
+                            ),
+                            child: EmptyStateWidget(
+                              title: 'No bookings found',
+                              message: selectedFilter == null
+                                  ? 'You have not made any survey appointments yet.'
+                                  : 'No appointments match the selected filter.',
+                              icon: Icons.bookmark_border,
+                              buttonText: 'Start New Survey',
+                              onButtonPressed: () =>
+                                  context.push('/booking-wizard'),
+                            ),
+                          ),
+                        ),
+                      )
+                    : ListView.separated(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: EdgeInsets.all(16.w),
+                        itemCount: appointments.length,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 12.h),
+                        itemBuilder: (context, index) {
+                          final item = appointments[index];
+                          return AppointmentBookingCard(item: item);
+                        },
+                      ),
               ),
             ),
           ),

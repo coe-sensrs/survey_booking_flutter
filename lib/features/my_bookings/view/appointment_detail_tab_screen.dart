@@ -29,17 +29,36 @@ class AppointmentDetailTabScreen extends ConsumerWidget {
     }
 
     // Fallback: check if bookings are loaded and have at least one item
-    return bookingsState.when(
-      loading: () => Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Appointment Details',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
+    if (bookingsState.hasValue) {
+      final bookings = bookingsState.requireValue;
+      if (bookings.isNotEmpty) {
+        // Default to displaying the most recent appointment
+        final latestId = bookings.first.id;
+        return AppointmentDetailScreen(
+          appointmentId: latestId,
+          showBackButton: false,
+        );
+      }
+
+      // No bookings created yet
+      return Scaffold(
+        appBar: AppBar(title: const Text('Appointment Details')),
+        body: Padding(
+          padding: EdgeInsets.all(24.w),
+          child: EmptyStateWidget(
+            title: 'No Appointment Selected',
+            message:
+                'You don\'t have any active survey bookings yet. Start a new survey or select a request from My Bookings.',
+            icon: Icons.assignment_outlined,
+            buttonText: 'Go to My Bookings',
+            onButtonPressed: () => context.go(AppRoutes.myBookings),
           ),
         ),
-        body: const Center(child: CircularProgressIndicator()),
-      ),
-      error: (err, _) => Scaffold(
+      );
+    }
+
+    if (bookingsState.hasError) {
+      return Scaffold(
         appBar: AppBar(
           title: Text(
             'Appointment Details',
@@ -48,38 +67,22 @@ class AppointmentDetailTabScreen extends ConsumerWidget {
         ),
         body: EmptyStateWidget(
           title: 'Unable to load details',
-          message: err.toString(),
+          message: bookingsState.error.toString(),
           icon: Icons.error_outline,
           buttonText: 'View My Bookings',
           onButtonPressed: () => context.go(AppRoutes.myBookings),
         ),
-      ),
-      data: (bookings) {
-        if (bookings.isNotEmpty) {
-          // Default to displaying the most recent appointment
-          final latestId = bookings.first.id;
-          return AppointmentDetailScreen(
-            appointmentId: latestId,
-            showBackButton: false,
-          );
-        }
+      );
+    }
 
-        // No bookings created yet
-        return Scaffold(
-          appBar: AppBar(title: const Text('Appointment Details')),
-          body: Padding(
-            padding: EdgeInsets.all(24.w),
-            child: EmptyStateWidget(
-              title: 'No Appointment Selected',
-              message:
-                  'You don\'t have any active survey bookings yet. Start a new survey or select a request from My Bookings.',
-              icon: Icons.assignment_outlined,
-              buttonText: 'Go to My Bookings',
-              onButtonPressed: () => context.go(AppRoutes.myBookings),
-            ),
-          ),
-        );
-      },
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Appointment Details',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20.sp),
+        ),
+      ),
+      body: const Center(child: CircularProgressIndicator()),
     );
   }
 }

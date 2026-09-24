@@ -25,32 +25,42 @@ final myBookingsViewModelProvider =
 
 final applicantAppointmentDetailStreamProvider = StreamProvider.autoDispose
     .family<Appointment?, String>((ref, id) {
+      if (id.isEmpty) return Stream.value(null);
       final repo = ref.watch(appointmentRepositoryProvider);
       return repo.watchAppointmentById(id);
     });
 
 class MyBookingsViewModel extends AsyncNotifier<List<Appointment>> {
+  Future<List<Appointment>> _fetchBookings(
+    String uid,
+    String? statusFilter,
+  ) async {
+    final repo = ref.read(appointmentRepositoryProvider);
+    return repo.getBookingsForApplicant(uid, statusFilter: statusFilter);
+  }
+
   @override
   Future<List<Appointment>> build() async {
-    final user = ref.watch(authViewModelProvider).value;
+    final user = await ref.watch(authViewModelProvider.future);
     if (user == null) return [];
 
     final statusFilter = ref.watch(myBookingsStatusFilterProvider);
-    final repo = ref.watch(appointmentRepositoryProvider);
-
-    return repo.getBookingsForApplicant(user.uid, statusFilter: statusFilter);
+    return _fetchBookings(user.uid, statusFilter);
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() => build());
+    final user = ref.read(authViewModelProvider).value;
+    if (user == null) return;
+
+    final statusFilter = ref.read(myBookingsStatusFilterProvider);
+    state = await AsyncValue.guard(() => _fetchBookings(user.uid, statusFilter));
   }
 
   Future<void> submitClarificationReply(
     String appointmentId,
     String replyText,
   ) async {
-    final repo = ref.watch(appointmentRepositoryProvider);
+    final repo = ref.read(appointmentRepositoryProvider);
     await repo.submitClarificationReply(appointmentId, replyText);
     // Invalidate home dashboard so badges refresh immediately
     ref.invalidate(homeViewModelProvider);

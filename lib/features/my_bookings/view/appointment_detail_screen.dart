@@ -93,17 +93,51 @@ class _AppointmentDetailScreenState
       ),
       body: appointmentAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => const EmptyStateWidget(
-          title: 'Appointment Not Found',
-          message: 'Could not load details for this appointment.',
-          icon: Icons.search_off,
+        error: (error, stackTrace) => RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(
+              applicantAppointmentDetailStreamProvider(widget.appointmentId),
+            );
+          },
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: const EmptyStateWidget(
+                  title: 'Appointment Not Found',
+                  message: 'Could not load details for this appointment.',
+                  icon: Icons.search_off,
+                ),
+              ),
+            ),
+          ),
         ),
         data: (appointment) {
           if (appointment == null) {
-            return const EmptyStateWidget(
-              title: 'Appointment Not Found',
-              message: 'Could not load details for this appointment.',
-              icon: Icons.search_off,
+            return RefreshIndicator(
+              onRefresh: () async {
+                ref.invalidate(
+                  applicantAppointmentDetailStreamProvider(
+                    widget.appointmentId,
+                  ),
+                );
+              },
+              child: LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: const EmptyStateWidget(
+                      title: 'Appointment Not Found',
+                      message: 'Could not load details for this appointment.',
+                      icon: Icons.search_off,
+                    ),
+                  ),
+                ),
+              ),
             );
           }
 
@@ -111,231 +145,241 @@ class _AppointmentDetailScreenState
               ? (appointment.customSurveyName ?? 'Other Survey')
               : appointment.surveyType.label;
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header Status Card
-                Card(
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.primaryContainer.withValues(alpha: 0.15)
-                      : Theme.of(
-                          context,
-                        ).colorScheme.primary.withValues(alpha: 0.05),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                    side: BorderSide(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withValues(alpha: 0.2),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(16.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                surveyTitle,
-                                style: TextStyle(
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            AppointmentStatusBadge(status: appointment.status),
-                          ],
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          'ID: ${appointment.id}',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 16.h),
-
-                // Rejection or Clarification Note Box
-                if (appointment.status == AppointmentStatus.rejected &&
-                    appointment.rejectionReason != null)
-                  _buildAlertCard(
-                    title: 'Rejection Reason',
-                    message: appointment.rejectionReason!,
-                    color: Colors.red,
-                    icon: Icons.cancel,
-                  ),
-
-                if (appointment.status ==
-                        AppointmentStatus.clarificationRequested &&
-                    appointment.clarificationNote != null) ...[
-                  _buildAlertCard(
-                    title: 'Clarification Requested by Reviewer',
-                    message: appointment.clarificationNote!,
-                    color: Colors.orange,
-                    icon: Icons.help_outline,
-                  ),
-                  SizedBox(height: 12.h),
-
-                  if (appointment.clarificationReply != null)
-                    _buildAlertCard(
-                      title: 'Your Reply',
-                      message: appointment.clarificationReply!,
-                      color: Colors.blue,
-                      icon: Icons.reply,
-                    )
-                  else ...[
-                    Card(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Submit Clarification Reply',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14.sp,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            AppTextField(
-                              label: 'Your Response (max 500 chars)',
-                              controller: _replyController,
-                              maxLines: 3,
-                            ),
-                            SizedBox(height: 12.h),
-                            AppButton(
-                              text: 'Submit Reply',
-                              isLoading: _isSubmittingReply,
-                              onPressed: _submitReply,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ],
-
-                SizedBox(height: 16.h),
-
-                // Survey Location & XEN Details
-                _buildDetailSection(
-                  title: 'Survey Area & Contact',
-                  icon: Icons.location_on,
-                  items: [
-                    'State: ${appointment.state}',
-                    'District: ${appointment.district}',
-                    'Area Name: ${appointment.areaName}',
-                    'XEN Name: ${appointment.xenDetails.name}',
-                    'XEN Mobile: ${appointment.xenDetails.mobile}',
-                    'XEN Email: ${appointment.xenDetails.email}',
-                  ],
-                ),
-
-                SizedBox(height: 16.h),
-
-                // KML File Section
-                _buildDetailSectionHeader(
-                  title: 'Survey Area Map File (KML/KMZ)',
-                  icon: Icons.map,
-                ),
-                SizedBox(height: 8.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 0),
-                  child: KmlFileTile(
-                    storagePath: appointment.kmlFile.storagePath,
-                    originalFileName: appointment.kmlFile.originalFileName,
-                    fileType: appointment.kmlFile.fileType,
-                    sizeBytes: appointment.kmlFile.sizeBytes,
-                  ),
-                ),
-
-                SizedBox(height: 16.h),
-
-                // Dates Section
-                _buildDetailSection(
-                  title: 'Dates',
-                  icon: Icons.calendar_month,
-                  items: [
-                    'Requested Start Date: ${DateFormat('dd MMM yyyy').format(appointment.preferredDate)}',
-                    if (appointment.confirmedDate != null)
-                      'Confirmed Date: ${DateFormat('dd MMM yyyy').format(appointment.confirmedDate!)}',
-                  ],
-                ),
-
-                SizedBox(height: 16.h),
-
-                // Logistics Section
-                _buildDetailSection(
-                  title: 'Logistics & Personnel',
-                  icon: Icons.directions_car,
-                  items: [
-                    'Coordinator: ${appointment.logistics.coordinatorName} (${appointment.logistics.coordinatorDesignation})',
-                    'Driver: ${appointment.logistics.driverName} (${appointment.logistics.driverMobile})',
-                    'Vehicle: ${appointment.logistics.vehicleModel} (${appointment.logistics.vehicleNumber})',
-                  ],
-                ),
-
-                SizedBox(height: 16.h),
-
-                // Permission Documents
-                _buildDetailSectionHeader(
-                  title:
-                      'Permission Documents (${appointment.permissionDocuments.length})',
-                  icon: Icons.folder,
-                ),
-                SizedBox(height: 8.h),
-                if (appointment.permissionDocuments.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w),
-                    child: Text(
-                      'No permission documents uploaded.',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  )
-                else
+          return RefreshIndicator(
+            onRefresh: () async {
+              ref.invalidate(
+                applicantAppointmentDetailStreamProvider(widget.appointmentId),
+              );
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Status Card
                   Card(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer.withValues(alpha: 0.15)
+                        : Theme.of(
+                            context,
+                          ).colorScheme.primary.withValues(alpha: 0.05),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12.r),
+                      side: BorderSide(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.2),
+                      ),
                     ),
-                    child: Column(
-                      children: appointment.permissionDocuments
-                          .asMap()
-                          .entries
-                          .map((entry) {
-                            final doc = entry.value;
-                            final isLast =
-                                entry.key ==
-                                appointment.permissionDocuments.length - 1;
-                            return SurveyDocumentTile(
-                              storagePath: doc.storagePath,
-                              originalFileName: doc.originalFileName,
-                              fileType: doc.fileType,
-                              sizeBytes: doc.sizeBytes,
-                              isLast: isLast,
-                            );
-                          })
-                          .toList(),
+                    child: Padding(
+                      padding: EdgeInsets.all(16.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  surveyTitle,
+                                  style: TextStyle(
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              AppointmentStatusBadge(
+                                status: appointment.status,
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            'ID: ${appointment.id}',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
-                SizedBox(height: 24.h),
-              ],
+                  SizedBox(height: 16.h),
+
+                  // Rejection or Clarification Note Box
+                  if (appointment.status == AppointmentStatus.rejected &&
+                      appointment.rejectionReason != null)
+                    _buildAlertCard(
+                      title: 'Rejection Reason',
+                      message: appointment.rejectionReason!,
+                      color: Colors.red,
+                      icon: Icons.cancel,
+                    ),
+
+                  if (appointment.status ==
+                          AppointmentStatus.clarificationRequested &&
+                      appointment.clarificationNote != null) ...[
+                    _buildAlertCard(
+                      title: 'Clarification Requested by Reviewer',
+                      message: appointment.clarificationNote!,
+                      color: Colors.orange,
+                      icon: Icons.help_outline,
+                    ),
+                    SizedBox(height: 12.h),
+
+                    if (appointment.clarificationReply != null)
+                      _buildAlertCard(
+                        title: 'Your Reply',
+                        message: appointment.clarificationReply!,
+                        color: Colors.blue,
+                        icon: Icons.reply,
+                      )
+                    else ...[
+                      Card(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Submit Clarification Reply',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14.sp,
+                                ),
+                              ),
+                              SizedBox(height: 8.h),
+                              AppTextField(
+                                label: 'Your Response (max 500 chars)',
+                                controller: _replyController,
+                                maxLines: 3,
+                              ),
+                              SizedBox(height: 12.h),
+                              AppButton(
+                                text: 'Submit Reply',
+                                isLoading: _isSubmittingReply,
+                                onPressed: _submitReply,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+
+                  SizedBox(height: 16.h),
+
+                  // Survey Location & XEN Details
+                  _buildDetailSection(
+                    title: 'Survey Area & Contact',
+                    icon: Icons.location_on,
+                    items: [
+                      'State: ${appointment.state}',
+                      'District: ${appointment.district}',
+                      'Area Name: ${appointment.areaName}',
+                      'XEN Name: ${appointment.xenDetails.name}',
+                      'XEN Mobile: ${appointment.xenDetails.mobile}',
+                      'XEN Email: ${appointment.xenDetails.email}',
+                    ],
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  // KML File Section
+                  _buildDetailSectionHeader(
+                    title: 'Survey Area Map File (KML/KMZ)',
+                    icon: Icons.map,
+                  ),
+                  SizedBox(height: 8.h),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 0),
+                    child: KmlFileTile(
+                      storagePath: appointment.kmlFile.storagePath,
+                      originalFileName: appointment.kmlFile.originalFileName,
+                      fileType: appointment.kmlFile.fileType,
+                      sizeBytes: appointment.kmlFile.sizeBytes,
+                    ),
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  // Dates Section
+                  _buildDetailSection(
+                    title: 'Dates',
+                    icon: Icons.calendar_month,
+                    items: [
+                      'Requested Start Date: ${DateFormat('dd MMM yyyy').format(appointment.preferredDate)}',
+                      if (appointment.confirmedDate != null)
+                        'Confirmed Date: ${DateFormat('dd MMM yyyy').format(appointment.confirmedDate!)}',
+                    ],
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  // Logistics Section
+                  _buildDetailSection(
+                    title: 'Logistics & Personnel',
+                    icon: Icons.directions_car,
+                    items: [
+                      'Coordinator: ${appointment.logistics.coordinatorName} (${appointment.logistics.coordinatorDesignation})',
+                      'Driver: ${appointment.logistics.driverName} (${appointment.logistics.driverMobile})',
+                      'Vehicle: ${appointment.logistics.vehicleModel} (${appointment.logistics.vehicleNumber})',
+                    ],
+                  ),
+
+                  SizedBox(height: 16.h),
+
+                  // Permission Documents
+                  _buildDetailSectionHeader(
+                    title:
+                        'Permission Documents (${appointment.permissionDocuments.length})',
+                    icon: Icons.folder,
+                  ),
+                  SizedBox(height: 8.h),
+                  if (appointment.permissionDocuments.isEmpty)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.w),
+                      child: Text(
+                        'No permission documents uploaded.',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    )
+                  else
+                    Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Column(
+                        children: appointment.permissionDocuments
+                            .asMap()
+                            .entries
+                            .map((entry) {
+                              final doc = entry.value;
+                              final isLast =
+                                  entry.key ==
+                                  appointment.permissionDocuments.length - 1;
+                              return SurveyDocumentTile(
+                                storagePath: doc.storagePath,
+                                originalFileName: doc.originalFileName,
+                                fileType: doc.fileType,
+                                sizeBytes: doc.sizeBytes,
+                                isLast: isLast,
+                              );
+                            })
+                            .toList(),
+                      ),
+                    ),
+
+                  SizedBox(height: 24.h),
+                ],
+              ),
             ),
           );
         },
