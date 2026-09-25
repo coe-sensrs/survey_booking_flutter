@@ -80,18 +80,34 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
   mocktail: ^1.0.5
+  flutter_launcher_icons: ^0.14.4
 
 # Native Splash Screen Configuration
 flutter_native_splash:
   color: "#1B3B2B"
   color_dark: "#0D1611"
+  image: "assets/images/splash_logo.png"
   fullscreen: true
 
   android_12:
     color: "#1B3B2B"
     color_dark: "#0D1611"
+    image: "assets/images/splash_logo.png"
 
   web: false
+
+flutter_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/splash_logo.png" # Main image for all platforms
+
+  # Android Adaptive Icon
+  adaptive_icon_background: "#316342"
+  adaptive_icon_foreground: "assets/images/splash_logo.png"
+  adaptive_icon_monochrome: "assets/images/app_icon_monochrome.png"
+
+  # iOS Settings
+  min_sdk_android: 21 # Minimum API level for Android 5.0+ (recommended for adaptive icons)
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -105,6 +121,7 @@ flutter:
 
   assets:
     - assets/
+    - assets/images/
 
 
   # To add assets to your application, add an assets section, like this:
