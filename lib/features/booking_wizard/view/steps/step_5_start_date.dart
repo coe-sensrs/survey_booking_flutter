@@ -35,26 +35,32 @@ class _Step5StartDateState extends ConsumerState<Step5StartDate> {
     });
   }
 
-  Future<void> _pickDate(BuildContext context, DateTime initialDate) async {
+  Future<void> _pickDateRange(BuildContext context) async {
+    final wizardState = ref.read(bookingWizardViewModelProvider);
     final tomorrow = _getNextWorkingDay();
     final maxDate = DateTime.now().add(const Duration(days: 90));
-    final picked = await showDatePicker(
+
+    final initialRange =
+        wizardState.startDate != null && wizardState.endDate != null
+        ? DateTimeRange(
+            start: wizardState.startDate!,
+            end: wizardState.endDate!,
+          )
+        : null;
+
+    final picked = await showDateRangePicker(
       context: context,
-      initialDate: initialDate.isBefore(tomorrow) ? tomorrow : initialDate,
+      initialDateRange: initialRange,
       firstDate: tomorrow,
       lastDate: maxDate,
-      selectableDayPredicate: (day) {
-        // Disable Saturday (6) and Sunday (7)
-        return day.weekday != DateTime.saturday &&
-            day.weekday != DateTime.sunday;
-      },
     );
 
     if (picked != null) {
-      final wizardState = ref.read(bookingWizardViewModelProvider);
       ref
           .read(bookingWizardViewModelProvider.notifier)
-          .updateState(wizardState.copyWith(startDate: picked));
+          .updateState(
+            wizardState.copyWith(startDate: picked.start, endDate: picked.end),
+          );
     }
   }
 
@@ -62,7 +68,14 @@ class _Step5StartDateState extends ConsumerState<Step5StartDate> {
   Widget build(BuildContext context) {
     final wizardState = ref.watch(bookingWizardViewModelProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final selectedDate = wizardState.startDate ?? _getNextWorkingDay();
+
+    final startDate = wizardState.startDate;
+    final endDate = wizardState.endDate;
+
+    int? duration;
+    if (startDate != null && endDate != null) {
+      duration = endDate.difference(startDate).inDays + 1;
+    }
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.w),
@@ -70,12 +83,12 @@ class _Step5StartDateState extends ConsumerState<Step5StartDate> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Survey Preferred Start Date',
+            'Survey Dates',
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 6.h),
           Text(
-            'Select your preferred date to start the survey (Weekends are excluded).',
+            'Select the dates for your survey work. Weekends are allowed.',
             style: TextStyle(
               fontSize: 13.sp,
               color: colorScheme.onSurface.withValues(alpha: 0.6),
@@ -83,69 +96,103 @@ class _Step5StartDateState extends ConsumerState<Step5StartDate> {
           ),
           SizedBox(height: 20.h),
 
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.r),
-              side: BorderSide(
-                color: colorScheme.primary.withValues(alpha: 0.3),
-              ),
-            ),
-            child: Padding(
+          // Start Date
+          Text(
+            'Start Date',
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: 8.h),
+          InkWell(
+            onTap: () => _pickDateRange(context),
+            borderRadius: BorderRadius.circular(12.r),
+            child: Container(
               padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                border: Border.all(color: colorScheme.outline),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(
-                      color: colorScheme.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Icon(
-                      Icons.calendar_month,
-                      size: 28.sp,
-                      color: colorScheme.primary,
-                    ),
+                  Text(
+                    startDate != null
+                        ? DateFormat('dd MMM yyyy').format(startDate)
+                        : 'Select Start Date',
+                    style: TextStyle(fontSize: 15.sp),
                   ),
-                  SizedBox(width: 14.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Selected Preferred Date',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: colorScheme.onSurface.withValues(alpha: 0.6),
-                          ),
-                        ),
-                        SizedBox(height: 4.h),
-                        Text(
-                          DateFormat('EEEE, dd MMMM yyyy').format(selectedDate),
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.bold,
-                            color: colorScheme.primary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 8.w),
-                  OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: Size.zero,
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 14.w,
-                        vertical: 10.h,
-                      ),
-                    ),
-                    onPressed: () => _pickDate(context, selectedDate),
-                    child: const Text('Change'),
-                  ),
+                  Icon(Icons.calendar_month, color: colorScheme.primary),
                 ],
               ),
             ),
           ),
+
+          SizedBox(height: 20.h),
+
+          // End Date
+          Text(
+            'End Date',
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
+          ),
+          SizedBox(height: 8.h),
+          InkWell(
+            onTap: () => _pickDateRange(context),
+            borderRadius: BorderRadius.circular(12.r),
+            child: Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                border: Border.all(color: colorScheme.outline),
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    endDate != null
+                        ? DateFormat('dd MMM yyyy').format(endDate)
+                        : 'Select End Date',
+                    style: TextStyle(fontSize: 15.sp),
+                  ),
+                  Icon(Icons.calendar_month, color: colorScheme.primary),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(height: 24.h),
+
+          // Duration
+          if (duration != null)
+            Container(
+              padding: EdgeInsets.all(16.w),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: colorScheme.primary.withValues(alpha: 0.3),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Survey duration',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    '$duration calendar days',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );

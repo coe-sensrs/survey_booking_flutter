@@ -53,7 +53,11 @@ class AdminAppointmentDetailController {
     }
   }
 
-  Future<void> setConfirmedDate(String appointmentId, DateTime date) async {
+  Future<void> setConfirmedDate(
+    String appointmentId,
+    DateTime start,
+    DateTime end,
+  ) async {
     _checkAdminRights();
     try {
       await ref
@@ -62,7 +66,8 @@ class AdminAppointmentDetailController {
             functionName: 'setConfirmedDate',
             data: {
               'appointmentId': appointmentId,
-              'confirmedDate': date.toIso8601String(),
+              'confirmedStart': start.toIso8601String(),
+              'confirmedEnd': end.toIso8601String(),
             },
           );
     } on Failure {

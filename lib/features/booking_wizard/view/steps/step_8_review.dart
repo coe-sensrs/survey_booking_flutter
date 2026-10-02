@@ -69,9 +69,11 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
         ? (state.customSurveyName ?? 'Other')
         : SurveyType.fromCode(state.surveyType ?? '').label;
 
-    final formattedDate = state.startDate != null
-        ? DateFormat('EEEE, dd MMMM yyyy').format(state.startDate!)
-        : 'Not selected';
+    final formattedDate = state.startDate != null && state.endDate != null
+        ? '${DateFormat('dd MMM').format(state.startDate!)} - ${DateFormat('dd MMM yyyy').format(state.endDate!)} (${state.endDate!.difference(state.startDate!).inDays + 1} calendar days)'
+        : state.startDate != null
+            ? DateFormat('EEEE, dd MMMM yyyy').format(state.startDate!)
+            : 'Not selected';
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.w),
@@ -142,9 +144,9 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
 
           // Section 5: Date
           _buildSummarySection(
-            title: '5. Preferred Start Date',
+            title: '5. Survey Dates',
             stepNum: 5,
-            items: ['Date: $formattedDate'],
+            items: ['Dates: $formattedDate'],
           ),
 
           SizedBox(height: 12.h),

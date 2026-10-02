@@ -63,7 +63,7 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
             AppointmentStatus.taskAssigned.code,
           ],
         )
-        .orderBy('confirmedDate', descending: false)
+        .orderBy('confirmedStart', descending: false)
         .get();
 
     return snap.docs
@@ -175,7 +175,8 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
       'xenDetails': appointment.xenDetails.toJson(),
       'areaName': appointment.areaName,
       'kmlFile': appointment.kmlFile.toJson(),
-      'preferredDate': appointment.preferredDate.toIso8601String(),
+      'preferredStart': appointment.preferredStart.toIso8601String(),
+      'preferredEnd': appointment.preferredEnd.toIso8601String(),
       'logistics': appointment.logistics.toJson(),
       'permissionDocuments': appointment.permissionDocuments
           .map((d) => d.toJson())
@@ -201,12 +202,14 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
   @override
   Future<void> setConfirmedDate(
     String appointmentId,
-    DateTime confirmedDate,
+    DateTime confirmedStart,
+    DateTime confirmedEnd,
   ) async {
     final callable = _functions.httpsCallable('setConfirmedDate');
     await callable.call(<String, dynamic>{
       'appointmentId': appointmentId,
-      'confirmedDate': confirmedDate.toIso8601String(),
+      'confirmedStart': confirmedStart.toIso8601String(),
+      'confirmedEnd': confirmedEnd.toIso8601String(),
     });
   }
 

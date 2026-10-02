@@ -30,7 +30,11 @@ abstract class AppointmentWriter {
     String reviewerId,
     String reviewerName,
   );
-  Future<void> setConfirmedDate(String appointmentId, DateTime confirmedDate);
+  Future<void> setConfirmedDate(
+    String appointmentId,
+    DateTime confirmedStart,
+    DateTime confirmedEnd,
+  );
   Future<void> reviewAppointment({
     required String appointmentId,
     required String action, // 'approve' | 'reject' | 'clarify'

@@ -21,8 +21,10 @@ class Appointment {
   final String areaName;
   final KmlFile kmlFile;
 
-  final DateTime preferredDate;
-  final DateTime? confirmedDate;
+  final DateTime preferredStart;
+  final DateTime preferredEnd;
+  final DateTime? confirmedStart;
+  final DateTime? confirmedEnd;
   final Logistics logistics;
   final List<PermissionDocument> permissionDocuments;
 
@@ -52,8 +54,10 @@ class Appointment {
     required this.xenDetails,
     required this.areaName,
     required this.kmlFile,
-    required this.preferredDate,
-    this.confirmedDate,
+    required this.preferredStart,
+    required this.preferredEnd,
+    this.confirmedStart,
+    this.confirmedEnd,
     required this.logistics,
     required this.permissionDocuments,
     required this.status,
@@ -85,9 +89,12 @@ class Appointment {
       ),
       areaName: map['areaName'] as String? ?? '',
       kmlFile: KmlFile.fromMap((map['kmlFile'] as Map<String, dynamic>?) ?? {}),
-      preferredDate:
-          (map['preferredDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-      confirmedDate: (map['confirmedDate'] as Timestamp?)?.toDate(),
+      preferredStart:
+          (map['preferredStart'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      preferredEnd:
+          (map['preferredEnd'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      confirmedStart: (map['confirmedStart'] as Timestamp?)?.toDate(),
+      confirmedEnd: (map['confirmedEnd'] as Timestamp?)?.toDate(),
       logistics: Logistics.fromMap(
         (map['logistics'] as Map<String, dynamic>?) ?? {},
       ),
@@ -122,9 +129,13 @@ class Appointment {
       'xenDetails': xenDetails.toMap(),
       'areaName': areaName,
       'kmlFile': kmlFile.toMap(),
-      'preferredDate': Timestamp.fromDate(preferredDate),
-      'confirmedDate': confirmedDate != null
-          ? Timestamp.fromDate(confirmedDate!)
+      'preferredStart': Timestamp.fromDate(preferredStart),
+      'preferredEnd': Timestamp.fromDate(preferredEnd),
+      'confirmedStart': confirmedStart != null
+          ? Timestamp.fromDate(confirmedStart!)
+          : null,
+      'confirmedEnd': confirmedEnd != null
+          ? Timestamp.fromDate(confirmedEnd!)
           : null,
       'logistics': logistics.toMap(),
       'permissionDocuments': permissionDocuments.map((d) => d.toMap()).toList(),
@@ -154,10 +165,14 @@ class Appointment {
       'xenDetails': xenDetails.toJson(),
       'areaName': areaName,
       'kmlFile': kmlFile.toJson(),
-      'preferredDate': preferredDate.toIso8601String(),
-      'confirmedDate': confirmedDate?.toIso8601String(),
+      'preferredStart': preferredStart.toIso8601String(),
+      'preferredEnd': preferredEnd.toIso8601String(),
+      'confirmedStart': confirmedStart?.toIso8601String(),
+      'confirmedEnd': confirmedEnd?.toIso8601String(),
       'logistics': logistics.toJson(),
-      'permissionDocuments': permissionDocuments.map((d) => d.toJson()).toList(),
+      'permissionDocuments': permissionDocuments
+          .map((d) => d.toJson())
+          .toList(),
       'status': status.code,
       'assignedReviewerId': assignedReviewerId,
       'assignedReviewerName': assignedReviewerName,

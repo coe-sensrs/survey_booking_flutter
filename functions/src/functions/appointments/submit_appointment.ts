@@ -46,7 +46,8 @@ interface SubmitAppointmentData {
     xenDetails: XenDetailsData;
     areaName: string;
     kmlFile: KmlFileData;
-    preferredDate: string; // ISO-8601
+    preferredStart: string; // ISO-8601
+    preferredEnd: string; // ISO-8601
     logistics: LogisticsData;
     permissionDocuments: PermissionDocData[];
 }
@@ -132,8 +133,8 @@ export const submitAppointment = onCall(
         if (!data?.kmlFile?.storagePath) {
             throw new HttpsError("invalid-argument", "KML/KMZ spatial file reference is required.");
         }
-        if (!data?.preferredDate) {
-            throw new HttpsError("invalid-argument", "preferredDate is required.");
+        if (!data?.preferredStart || !data?.preferredEnd) {
+            throw new HttpsError("invalid-argument", "preferredStart and preferredEnd are required.");
         }
         if (!data?.logistics?.coordinatorName) {
             throw new HttpsError("invalid-argument", "Logistics details are required.");
@@ -178,8 +179,10 @@ export const submitAppointment = onCall(
                     ...data.kmlFile,
                     uploadedAt: data.kmlFile.uploadedAt ? Timestamp.fromDate(new Date(data.kmlFile.uploadedAt)) : now,
                 },
-                preferredDate: Timestamp.fromDate(new Date(data.preferredDate)),
-                confirmedDate: null,
+                preferredStart: Timestamp.fromDate(new Date(data.preferredStart)),
+                preferredEnd: Timestamp.fromDate(new Date(data.preferredEnd)),
+                confirmedStart: null,
+                confirmedEnd: null,
                 logistics: data.logistics,
                 permissionDocuments: (data.permissionDocuments ?? []).map((doc) => ({
                     ...doc,

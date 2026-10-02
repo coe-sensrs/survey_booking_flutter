@@ -11,7 +11,7 @@ import {NotificationType} from "../notifications/notification_types";
 //    when the custom claim hasn't propagated yet, then backfills the claim.
 // ─────────────────────────────────────────────────────────────────────────────
 async function requireAdmin(
-    request: {auth?: {uid: string; token: Record<string, unknown>} | null},
+    request: { auth?: { uid: string; token: Record<string, unknown> } | null },
 ): Promise<void> {
     if (!request.auth) {
         throw new HttpsError("unauthenticated", "You must be signed in to perform this action.");
@@ -116,18 +116,22 @@ export const setConfirmedDate = onCall(
     async (request) => {
         await requireAdmin(request);
 
-        const {appointmentId, confirmedDate} = request.data as {
+        const {appointmentId, confirmedStart, confirmedEnd} = request.data as {
             appointmentId: string;
-            confirmedDate: string; // ISO-8601 string from client
+            confirmedStart: string; // ISO-8601 string from client
+            confirmedEnd: string;
         };
 
-        if (!appointmentId || !confirmedDate) {
-            throw new HttpsError("invalid-argument", "appointmentId and confirmedDate are required.");
+        if (!appointmentId || !confirmedStart || !confirmedEnd) {
+            throw new HttpsError("invalid-argument",
+                "appointmentId, confirmedStart and confirmedEnd are required.");
         }
 
-        const parsedDate = new Date(confirmedDate);
-        if (isNaN(parsedDate.getTime())) {
-            throw new HttpsError("invalid-argument", "confirmedDate must be a valid ISO-8601 date string.");
+        const parsedStart = new Date(confirmedStart);
+        const parsedEnd = new Date(confirmedEnd);
+        if (isNaN(parsedStart.getTime()) || isNaN(parsedEnd.getTime())) {
+            throw new HttpsError("invalid-argument",
+                "confirmedStart and confirmedEnd must be valid ISO-8601 date strings.");
         }
 
         const appointmentRef = db.collection("appointments").doc(appointmentId);
@@ -141,7 +145,8 @@ export const setConfirmedDate = onCall(
             }
 
             txn.update(appointmentRef, {
-                confirmedDate: Timestamp.fromDate(parsedDate),
+                confirmedStart: Timestamp.fromDate(parsedStart),
+                confirmedEnd: Timestamp.fromDate(parsedEnd),
                 updatedAt: now,
             });
 
@@ -152,7 +157,7 @@ export const setConfirmedDate = onCall(
                 performedByRole: "admin",
                 applicantId: snap.data()!.applicantId,
                 timestamp: now,
-                note: `Confirmed date set to: ${parsedDate.toISOString()}`,
+                note: `Confirmed dates set to: ${parsedStart.toISOString()} - ${parsedEnd.toISOString()}`,
             });
         });
 

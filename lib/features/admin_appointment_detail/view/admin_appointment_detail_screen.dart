@@ -55,17 +55,16 @@ class AdminAppointmentDetailScreen extends ConsumerWidget {
                 _buildSectionTitle(context, 'Schedule'),
                 _buildInfoCard(context, [
                   _InfoRow(
-                    label: 'Preferred Date',
-                    value: DateFormat(
-                      'MMM dd, yyyy',
-                    ).format(appointment.preferredDate),
+                    label: 'Preferred Dates',
+                    value:
+                        '${DateFormat('MMM dd, yyyy').format(appointment.preferredStart)} - ${DateFormat('MMM dd, yyyy').format(appointment.preferredEnd)}',
                   ),
                   _InfoRow(
-                    label: 'Confirmed Date',
-                    value: appointment.confirmedDate != null
-                        ? DateFormat(
-                            'MMM dd, yyyy',
-                          ).format(appointment.confirmedDate!)
+                    label: 'Confirmed Dates',
+                    value:
+                        appointment.confirmedStart != null &&
+                            appointment.confirmedEnd != null
+                        ? '${DateFormat('MMM dd, yyyy').format(appointment.confirmedStart!)} - ${DateFormat('MMM dd, yyyy').format(appointment.confirmedEnd!)}'
                         : 'Not yet confirmed',
                     actionIcon: Icons.edit_calendar,
                     onAction: () => _showSetDateSheet(context, appointmentId),

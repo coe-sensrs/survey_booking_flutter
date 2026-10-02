@@ -312,9 +312,10 @@ class _AppointmentDetailScreenState
                     title: 'Dates',
                     icon: Icons.calendar_month,
                     items: [
-                      'Requested Start Date: ${DateFormat('dd MMM yyyy').format(appointment.preferredDate)}',
-                      if (appointment.confirmedDate != null)
-                        'Confirmed Date: ${DateFormat('dd MMM yyyy').format(appointment.confirmedDate!)}',
+                      'Requested Dates: ${DateFormat('dd MMM').format(appointment.preferredStart)} - ${DateFormat('dd MMM yyyy').format(appointment.preferredEnd)}',
+                      if (appointment.confirmedStart != null &&
+                          appointment.confirmedEnd != null)
+                        'Confirmed Dates: ${DateFormat('dd MMM').format(appointment.confirmedStart!)} - ${DateFormat('dd MMM yyyy').format(appointment.confirmedEnd!)}',
                     ],
                   ),
 

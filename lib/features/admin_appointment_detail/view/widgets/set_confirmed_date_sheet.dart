@@ -19,23 +19,18 @@ class SetConfirmedDateSheet extends ConsumerStatefulWidget {
 }
 
 class _SetConfirmedDateSheetState extends ConsumerState<SetConfirmedDateSheet> {
-  DateTime? _selectedDate;
+  DateTimeRange? _selectedDateRange;
   bool _isSubmitting = false;
 
   Future<void> _selectDate(BuildContext context) async {
     final now = DateTime.now();
     final tomorrow = now.add(const Duration(days: 1));
 
-    final picked = await showDatePicker(
+    final picked = await showDateRangePicker(
       context: context,
-      initialDate: _selectedDate ?? tomorrow,
+      initialDateRange: _selectedDateRange,
       firstDate: tomorrow,
       lastDate: now.add(const Duration(days: 365)),
-      selectableDayPredicate: (date) {
-        // Example: Only weekdays (Mon-Fri)
-        return date.weekday >= DateTime.monday &&
-            date.weekday <= DateTime.friday;
-      },
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
@@ -53,20 +48,24 @@ class _SetConfirmedDateSheetState extends ConsumerState<SetConfirmedDateSheet> {
 
     if (picked != null) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDateRange = picked;
       });
     }
   }
 
   Future<void> _submit() async {
-    if (_selectedDate == null) return;
+    if (_selectedDateRange == null) return;
 
     setState(() => _isSubmitting = true);
 
     try {
       await ref
           .read(adminAppointmentDetailControllerProvider)
-          .setConfirmedDate(widget.appointmentId, _selectedDate!);
+          .setConfirmedDate(
+            widget.appointmentId,
+            _selectedDateRange!.start,
+            _selectedDateRange!.end,
+          );
 
       // Pop first so the snackbar renders on the parent Scaffold.
       if (mounted && context.canPop()) context.pop();
@@ -99,7 +98,7 @@ class _SetConfirmedDateSheetState extends ConsumerState<SetConfirmedDateSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Set Confirmed Date',
+              'Set Confirmed Survey Dates',
               style: TextStyle(
                 fontSize: 20.sp,
                 fontWeight: FontWeight.bold,
@@ -108,7 +107,7 @@ class _SetConfirmedDateSheetState extends ConsumerState<SetConfirmedDateSheet> {
             ),
             SizedBox(height: 8.h),
             Text(
-              'This date will override the applicant\'s preferred date.',
+              'These dates will override the applicant\'s preferred dates.',
               style: TextStyle(
                 fontSize: 14.sp,
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -136,17 +135,15 @@ class _SetConfirmedDateSheetState extends ConsumerState<SetConfirmedDateSheet> {
                     SizedBox(width: 16.w),
                     Expanded(
                       child: Text(
-                        _selectedDate != null
-                            ? DateFormat(
-                                'EEEE, MMM dd, yyyy',
-                              ).format(_selectedDate!)
-                            : 'Select a date',
+                        _selectedDateRange != null
+                            ? '${DateFormat('MMM dd').format(_selectedDateRange!.start)} - ${DateFormat('MMM dd, yyyy').format(_selectedDateRange!.end)}'
+                            : 'Select date range',
                         style: TextStyle(
                           fontSize: 16.sp,
-                          fontWeight: _selectedDate != null
+                          fontWeight: _selectedDateRange != null
                               ? FontWeight.bold
                               : FontWeight.normal,
-                          color: _selectedDate != null
+                          color: _selectedDateRange != null
                               ? Theme.of(context).colorScheme.onSurface
                               : Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -172,7 +169,7 @@ class _SetConfirmedDateSheetState extends ConsumerState<SetConfirmedDateSheet> {
                 SizedBox(width: 16.w),
                 Expanded(
                   child: FilledButton(
-                    onPressed: (_isSubmitting || _selectedDate == null)
+                    onPressed: (_isSubmitting || _selectedDateRange == null)
                         ? null
                         : _submit,
                     style: FilledButton.styleFrom(

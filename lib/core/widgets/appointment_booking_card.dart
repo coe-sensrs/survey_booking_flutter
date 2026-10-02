@@ -28,9 +28,10 @@ class AppointmentBookingCard extends ConsumerWidget {
         ? (item.customSurveyName ?? 'Other Survey')
         : item.surveyType.label;
 
-    final formattedDate = item.confirmedDate != null
-        ? DateFormat('dd MMM yyyy').format(item.confirmedDate!)
-        : DateFormat('dd MMM yyyy').format(item.preferredDate);
+    final formattedDate =
+        item.confirmedStart != null && item.confirmedEnd != null
+        ? '${DateFormat('MMM dd').format(item.confirmedStart!)} - ${DateFormat('MMM dd, yyyy').format(item.confirmedEnd!)}'
+        : '${DateFormat('MMM dd').format(item.preferredStart)} - ${DateFormat('MMM dd, yyyy').format(item.preferredEnd)}';
 
     return Card(
       elevation: 2,

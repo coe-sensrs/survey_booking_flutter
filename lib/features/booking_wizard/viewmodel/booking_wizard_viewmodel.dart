@@ -28,6 +28,7 @@ class WizardStateData {
   final String? kmlFileType;
   final int? kmlFileSize;
   final DateTime? startDate;
+  final DateTime? endDate;
   final String? coordinatorName;
   final String? coordinatorDesignation;
   final String? driverName;
@@ -51,6 +52,7 @@ class WizardStateData {
     this.kmlFileType,
     this.kmlFileSize,
     this.startDate,
+    this.endDate,
     this.coordinatorName,
     this.coordinatorDesignation,
     this.driverName,
@@ -75,6 +77,7 @@ class WizardStateData {
     String? kmlFileType,
     int? kmlFileSize,
     DateTime? startDate,
+    DateTime? endDate,
     String? coordinatorName,
     String? coordinatorDesignation,
     String? driverName,
@@ -98,6 +101,7 @@ class WizardStateData {
       kmlFileType: kmlFileType ?? this.kmlFileType,
       kmlFileSize: kmlFileSize ?? this.kmlFileSize,
       startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
       coordinatorName: coordinatorName ?? this.coordinatorName,
       coordinatorDesignation:
           coordinatorDesignation ?? this.coordinatorDesignation,
@@ -125,6 +129,7 @@ class WizardStateData {
       'kmlFileType': kmlFileType,
       'kmlFileSize': kmlFileSize,
       'startDate': startDate?.toIso8601String(),
+      'endDate': endDate?.toIso8601String(),
       'coordinatorName': coordinatorName,
       'coordinatorDesignation': coordinatorDesignation,
       'driverName': driverName,
@@ -152,6 +157,9 @@ class WizardStateData {
       kmlFileSize: map['kmlFileSize'],
       startDate: map['startDate'] != null
           ? DateTime.tryParse(map['startDate'])
+          : null,
+      endDate: map['endDate'] != null
+          ? DateTime.tryParse(map['endDate'])
           : null,
       coordinatorName: map['coordinatorName'],
       coordinatorDesignation: map['coordinatorDesignation'],
@@ -384,8 +392,10 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
         ),
         areaName: state.areaName ?? '',
         kmlFile: kmlModel,
-        preferredDate:
+        preferredStart:
             state.startDate ?? DateTime.now().add(const Duration(days: 1)),
+        preferredEnd:
+            state.endDate ?? DateTime.now().add(const Duration(days: 1)),
         logistics: Logistics(
           coordinatorName: state.coordinatorName ?? '',
           coordinatorDesignation: state.coordinatorDesignation ?? '',

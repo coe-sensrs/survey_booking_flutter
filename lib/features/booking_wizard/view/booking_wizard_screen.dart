@@ -89,10 +89,10 @@ class BookingWizardScreen extends ConsumerWidget {
         }
         return true;
       case 5:
-        if (state.startDate == null) {
+        if (state.startDate == null || state.endDate == null) {
           AppSnackbar.showGlobalError(
             title: 'Validation Error',
-            message: 'Please select a preferred start date.',
+            message: 'Please select survey start and end dates.',
           );
           return false;
         }
