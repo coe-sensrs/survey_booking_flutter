@@ -44,13 +44,58 @@ class AppUser {
       expertiseTag: map['expertiseTag'] as String?,
       active: map['active'] as bool?,
       photoUrl: map['photoUrl'] as String?,
-      fcmTokens: (map['fcmTokens'] as List<dynamic>?)
+      fcmTokens:
+          (map['fcmTokens'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           const [],
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (map['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
     );
+  }
+
+  /// Deserializes [AppUser] from Hive local storage cache without Firestore dependencies.
+  factory AppUser.fromCacheMap(Map<String, dynamic> map) {
+    return AppUser(
+      uid: map['uid'] as String? ?? '',
+      role: map['role'] as String? ?? 'applicant',
+      fullName: map['fullName'] as String? ?? '',
+      orgName: map['orgName'] as String?,
+      email: map['email'] as String? ?? '',
+      phone: map['phone'] as String? ?? '',
+      expertiseTag: map['expertiseTag'] as String?,
+      active: map['active'] as bool?,
+      photoUrl: map['photoUrl'] as String?,
+      fcmTokens:
+          (map['fcmTokens'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      createdAt:
+          DateTime.tryParse(map['createdAt'] as String? ?? '') ??
+          DateTime.now(),
+      updatedAt:
+          DateTime.tryParse(map['updatedAt'] as String? ?? '') ??
+          DateTime.now(),
+    );
+  }
+
+  /// Serializes [AppUser] into a map safe for Hive local storage.
+  Map<String, dynamic> toCacheMap() {
+    return {
+      'uid': uid,
+      'role': role,
+      'fullName': fullName,
+      'orgName': orgName,
+      'email': email,
+      'phone': phone,
+      'expertiseTag': expertiseTag,
+      'active': active,
+      'photoUrl': photoUrl,
+      'fcmTokens': fcmTokens,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
   }
 
   AppUser copyWith({
@@ -120,15 +165,15 @@ class AppUser {
 
   @override
   int get hashCode => Object.hash(
-        uid,
-        role,
-        fullName,
-        orgName,
-        email,
-        phone,
-        expertiseTag,
-        active,
-        photoUrl,
-        updatedAt,
-      );
+    uid,
+    role,
+    fullName,
+    orgName,
+    email,
+    phone,
+    expertiseTag,
+    active,
+    photoUrl,
+    updatedAt,
+  );
 }

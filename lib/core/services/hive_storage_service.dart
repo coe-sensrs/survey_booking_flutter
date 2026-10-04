@@ -1,4 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import '../models/app_user.dart';
 
 /// Centralized Hive local storage service.
 ///
@@ -18,6 +19,7 @@ class HiveStorageService {
   static const _keyThemeMode = 'themeMode';
   static const _keyWizardDraft = 'draft';
   static const _keyNotificationPromptSeen = 'notification_prompt_seen';
+  static const _keyCachedUser = 'cached_app_user';
 
   // -- Initialization --------------------------------------------------------
 
@@ -48,7 +50,10 @@ class HiveStorageService {
 
   /// Returns true if the post-login notification permission prompt has already been displayed.
   static bool hasSeenNotificationPrompt() =>
-      Hive.box(_settingsBox).get(_keyNotificationPromptSeen, defaultValue: false) as bool;
+      Hive.box(
+            _settingsBox,
+          ).get(_keyNotificationPromptSeen, defaultValue: false)
+          as bool;
 
   /// Persists that the post-login notification prompt has been shown/dismissed.
   static Future<void> setNotificationPromptSeen(bool seen) =>
@@ -77,6 +82,23 @@ class HiveStorageService {
 
   /// Returns the cached value for [key], or `null` if not found.
   static T? getCachedData<T>(String key) => Hive.box(_cacheBox).get(key) as T?;
+
+  /// Caches the authenticated [AppUser] in Hive for instant zero-jank offline rendering.
+  static Future<void> saveCachedUser(AppUser user) =>
+      Hive.box(_cacheBox).put(_keyCachedUser, user.toCacheMap());
+
+  /// Synchronously returns the locally cached [AppUser], or `null` if none.
+  static AppUser? getCachedUser() {
+    final raw = Hive.box(_cacheBox).get(_keyCachedUser);
+    if (raw is Map) {
+      try {
+        return AppUser.fromCacheMap(Map<String, dynamic>.from(raw));
+      } catch (_) {
+        return null;
+      }
+    }
+    return null;
+  }
 
   /// Returns true if the cache contains [key].
   static bool isCached(String key) => Hive.box(_cacheBox).containsKey(key);
