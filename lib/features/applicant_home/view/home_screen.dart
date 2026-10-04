@@ -64,6 +64,10 @@ class HomeScreen extends ConsumerWidget {
         .watch(bookingWizardViewModelProvider.notifier)
         .hasDraft;
 
+    final resolvedName = (user?.fullName.trim().isNotEmpty == true)
+        ? user!.fullName.trim()
+        : null;
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -109,7 +113,9 @@ class HomeScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Welcome, ${user?.fullName ?? 'Applicant'}',
+                        resolvedName != null
+                            ? 'Welcome, $resolvedName'
+                            : 'Welcome',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20.sp,
@@ -245,9 +251,7 @@ class HomeScreen extends ConsumerWidget {
                         ref.read(homeViewModelProvider.notifier).refresh(),
                   ),
                   data: (data) {
-                    final isFirstTime =
-                        data.upcomingSurveys.isEmpty &&
-                        data.recentRequests.isEmpty;
+                    final isFirstTime = data.recentRequests.isEmpty;
 
                     if (isFirstTime) {
                       return Center(
@@ -291,29 +295,7 @@ class HomeScreen extends ConsumerWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Section 1: Upcoming Scheduled Surveys
-                        if (data.upcomingSurveys.isNotEmpty) ...[
-                          _buildSectionHeader(
-                            context,
-                            title: 'Upcoming Scheduled Surveys',
-                            icon: Icons.event,
-                          ),
-                          SizedBox(height: 8.h),
-                          ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: data.upcomingSurveys.length,
-                            separatorBuilder: (context, index) =>
-                                SizedBox(height: 10.h),
-                            itemBuilder: (context, index) {
-                              final item = data.upcomingSurveys[index];
-                              return AppointmentBookingCard(item: item);
-                            },
-                          ),
-                          SizedBox(height: 24.h),
-                        ],
-
-                        // Section 2: Recent Appointment Requests
+                        // Section 1: Recent Appointment Requests
                         _buildSectionHeader(
                           context,
                           title: 'Recent Appointment Requests',
@@ -344,7 +326,7 @@ class HomeScreen extends ConsumerWidget {
 
                         SizedBox(height: 24.h),
 
-                        // Section 3: Recent Activity Feed
+                        // Section 2: Recent Activity Feed
                         _buildSectionHeader(
                           context,
                           title: 'Recent Activity',
@@ -396,15 +378,28 @@ class HomeScreen extends ConsumerWidget {
   }) {
     return Row(
       children: [
-        Icon(icon, size: 20.sp, color: Theme.of(context).colorScheme.primary),
+        Icon(icon, size: 20.r, color: Theme.of(context).colorScheme.primary),
         SizedBox(width: 8.w),
-        Text(
-          title,
-          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+        Flexible(
+          child: Text(
+            title,
+            style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
         ),
-        const Spacer(),
-        if (actionText != null && onAction != null)
-          TextButton(onPressed: onAction, child: Text(actionText)),
+        if (actionText != null && onAction != null) ...[
+          SizedBox(width: 4.w),
+          TextButton(
+            onPressed: onAction,
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              minimumSize: Size.zero,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: Text(actionText),
+          ),
+        ],
       ],
     );
   }
@@ -424,7 +419,7 @@ class HomeScreen extends ConsumerWidget {
         ).colorScheme.primary.withValues(alpha: 0.1),
         child: Icon(
           Icons.history,
-          size: 16.sp,
+          size: 16.r,
           color: Theme.of(context).colorScheme.primary,
         ),
       ),

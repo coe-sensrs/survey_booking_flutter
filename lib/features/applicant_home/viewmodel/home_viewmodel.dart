@@ -5,12 +5,10 @@ import '../../../core/providers/core_providers.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 
 class HomeDashboardData {
-  final List<Appointment> upcomingSurveys;
   final List<Appointment> recentRequests;
   final List<AuditLogEntry> recentActivity;
 
   const HomeDashboardData({
-    required this.upcomingSurveys,
     required this.recentRequests,
     required this.recentActivity,
   });
@@ -26,7 +24,6 @@ class HomeViewModel extends AsyncNotifier<HomeDashboardData> {
     final appointmentRepo = ref.read(appointmentRepositoryProvider);
     final auditLogRepo = ref.read(auditLogRepositoryProvider);
 
-    final upcomingFuture = appointmentRepo.getUpcomingSurveysForApplicant(uid);
     final recentFuture = appointmentRepo.getRecentRequestsForApplicant(
       uid,
       limit: 5,
@@ -36,12 +33,10 @@ class HomeViewModel extends AsyncNotifier<HomeDashboardData> {
       limit: 5,
     );
 
-    final upcoming = await upcomingFuture.catchError((_) => <Appointment>[]);
     final recent = await recentFuture.catchError((_) => <Appointment>[]);
     final activity = await activityFuture.catchError((_) => <AuditLogEntry>[]);
 
     return HomeDashboardData(
-      upcomingSurveys: upcoming,
       recentRequests: recent,
       recentActivity: activity,
     );
@@ -52,7 +47,6 @@ class HomeViewModel extends AsyncNotifier<HomeDashboardData> {
     final user = await ref.watch(authViewModelProvider.future);
     if (user == null) {
       return const HomeDashboardData(
-        upcomingSurveys: [],
         recentRequests: [],
         recentActivity: [],
       );
