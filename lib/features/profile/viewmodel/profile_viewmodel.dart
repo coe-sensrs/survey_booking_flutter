@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors/failures.dart';
 import '../../../core/providers/core_providers.dart';
+import '../../../core/services/hive_storage_service.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 
 final profileViewModelProvider = AsyncNotifierProvider<ProfileViewModel, void>(
@@ -34,6 +35,13 @@ class ProfileViewModel extends AsyncNotifier<void> {
         orgName: orgName?.trim().isEmpty == true ? null : orgName?.trim(),
         phone: phone.trim(),
       );
+
+      final updatedUser = user.copyWith(
+        fullName: fullName.trim(),
+        orgName: orgName?.trim().isEmpty == true ? null : orgName?.trim(),
+        phone: phone.trim(),
+      );
+      await HiveStorageService.saveCachedUser(updatedUser);
 
       // Force refresh user profile across the app
       ref.invalidate(authViewModelProvider);
