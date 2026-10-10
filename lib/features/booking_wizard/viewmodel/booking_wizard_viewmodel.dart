@@ -78,6 +78,7 @@ class WizardStateData {
     int? kmlFileSize,
     DateTime? startDate,
     DateTime? endDate,
+    bool clearEndDate = false,
     String? coordinatorName,
     String? coordinatorDesignation,
     String? driverName,
@@ -101,7 +102,7 @@ class WizardStateData {
       kmlFileType: kmlFileType ?? this.kmlFileType,
       kmlFileSize: kmlFileSize ?? this.kmlFileSize,
       startDate: startDate ?? this.startDate,
-      endDate: endDate ?? this.endDate,
+      endDate: clearEndDate ? null : (endDate ?? this.endDate),
       coordinatorName: coordinatorName ?? this.coordinatorName,
       coordinatorDesignation:
           coordinatorDesignation ?? this.coordinatorDesignation,

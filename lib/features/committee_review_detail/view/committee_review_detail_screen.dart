@@ -90,13 +90,14 @@ class _ReviewDetailBody extends ConsumerWidget {
           _InfoCard(
             rows: [
               _InfoRow(
-                'Preferred Date',
-                DateFormat('dd MMM yyyy').format(appointment.preferredDate),
+                'Preferred Dates',
+                '${DateFormat('MMM dd').format(appointment.preferredStart)} - ${DateFormat('MMM dd, yyyy').format(appointment.preferredEnd)}',
               ),
-              if (appointment.confirmedDate != null)
+              if (appointment.confirmedStart != null &&
+                  appointment.confirmedEnd != null)
                 _InfoRow(
-                  'Confirmed Date',
-                  DateFormat('dd MMM yyyy').format(appointment.confirmedDate!),
+                  'Confirmed Dates',
+                  '${DateFormat('MMM dd').format(appointment.confirmedStart!)} - ${DateFormat('MMM dd, yyyy').format(appointment.confirmedEnd!)}',
                 ),
             ],
           ),

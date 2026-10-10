@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/utils/app_snackbar.dart';
 import '../../viewmodel/booking_wizard_viewmodel.dart';
 
 class Step5StartDate extends ConsumerStatefulWidget {
@@ -35,32 +36,73 @@ class _Step5StartDateState extends ConsumerState<Step5StartDate> {
     });
   }
 
-  Future<void> _pickDateRange(BuildContext context) async {
+  Future<void> _pickStartDate(BuildContext context) async {
     final wizardState = ref.read(bookingWizardViewModelProvider);
-    final tomorrow = _getNextWorkingDay();
-    final maxDate = DateTime.now().add(const Duration(days: 90));
+    final now = DateTime.now();
+    final tomorrow = DateTime(now.year, now.month, now.day + 1);
+    final maxDate = DateTime(now.year, now.month, now.day + 90);
 
-    final initialRange =
-        wizardState.startDate != null && wizardState.endDate != null
-        ? DateTimeRange(
-            start: wizardState.startDate!,
-            end: wizardState.endDate!,
-          )
-        : null;
+    DateTime initial = wizardState.startDate ?? _getNextWorkingDay();
+    if (initial.isBefore(tomorrow)) {
+      initial = tomorrow;
+    } else if (initial.isAfter(maxDate)) {
+      initial = maxDate;
+    }
 
-    final picked = await showDateRangePicker(
+    final picked = await showDatePicker(
       context: context,
-      initialDateRange: initialRange,
+      initialDate: initial,
       firstDate: tomorrow,
+      lastDate: maxDate,
+    );
+
+    if (picked != null) {
+      final shouldClearEndDate =
+          wizardState.endDate != null && wizardState.endDate!.isBefore(picked);
+
+      ref
+          .read(bookingWizardViewModelProvider.notifier)
+          .updateState(
+            wizardState.copyWith(
+              startDate: picked,
+              clearEndDate: shouldClearEndDate,
+            ),
+          );
+    }
+  }
+
+  Future<void> _pickEndDate(BuildContext context) async {
+    final wizardState = ref.read(bookingWizardViewModelProvider);
+    if (wizardState.startDate == null) {
+      AppSnackbar.showGlobalWarning(
+        title: 'Start Date Required',
+        message: 'Please select a survey start date first.',
+      );
+      return;
+    }
+
+    final start = wizardState.startDate!;
+    final firstDate = DateTime(start.year, start.month, start.day);
+    final maxDate = DateTime(start.year, start.month, start.day + 90);
+
+    DateTime initial = wizardState.endDate ?? start;
+    if (initial.isBefore(firstDate)) {
+      initial = firstDate;
+    } else if (initial.isAfter(maxDate)) {
+      initial = maxDate;
+    }
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: firstDate,
       lastDate: maxDate,
     );
 
     if (picked != null) {
       ref
           .read(bookingWizardViewModelProvider.notifier)
-          .updateState(
-            wizardState.copyWith(startDate: picked.start, endDate: picked.end),
-          );
+          .updateState(wizardState.copyWith(endDate: picked));
     }
   }
 
@@ -103,7 +145,7 @@ class _Step5StartDateState extends ConsumerState<Step5StartDate> {
           ),
           SizedBox(height: 8.h),
           InkWell(
-            onTap: () => _pickDateRange(context),
+            onTap: () => _pickStartDate(context),
             borderRadius: BorderRadius.circular(12.r),
             child: Container(
               padding: EdgeInsets.all(16.w),
@@ -135,7 +177,7 @@ class _Step5StartDateState extends ConsumerState<Step5StartDate> {
           ),
           SizedBox(height: 8.h),
           InkWell(
-            onTap: () => _pickDateRange(context),
+            onTap: () => _pickEndDate(context),
             borderRadius: BorderRadius.circular(12.r),
             child: Container(
               padding: EdgeInsets.all(16.w),
@@ -184,7 +226,9 @@ class _Step5StartDateState extends ConsumerState<Step5StartDate> {
                   ),
                   SizedBox(height: 4.h),
                   Text(
-                    '$duration calendar days',
+                    duration == 1
+                        ? '1 calendar day'
+                        : '$duration calendar days',
                     style: TextStyle(
                       fontSize: 16.sp,
                       color: colorScheme.onSurface,
