@@ -63,14 +63,16 @@ class _Step3XenDetailsState extends ConsumerState<Step3XenDetails> {
             'Provide contact details of the Executive Engineer responsible for the district.',
             style: TextStyle(
               fontSize: 13.sp,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           SizedBox(height: 20.h),
 
           AppTextField(
-            label: 'XEN Name *',
-            hint: 'Enter full name of XEN',
+            label: 'Name *',
+            hint: 'Enter full name',
             controller: _nameController,
             keyboardType: TextInputType.name,
             onChanged: (_) => _onChanged(),
@@ -79,7 +81,7 @@ class _Step3XenDetailsState extends ConsumerState<Step3XenDetails> {
           SizedBox(height: 16.h),
 
           AppTextField(
-            label: 'XEN Mobile Number *',
+            label: 'Mobile Number *',
             hint: '10 digit mobile number',
             controller: _mobileController,
             keyboardType: TextInputType.phone,
@@ -89,7 +91,7 @@ class _Step3XenDetailsState extends ConsumerState<Step3XenDetails> {
           SizedBox(height: 16.h),
 
           AppTextField(
-            label: 'XEN Email Address *',
+            label: 'Email Address *',
             hint: 'e.g. xen.district@gov.in',
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
