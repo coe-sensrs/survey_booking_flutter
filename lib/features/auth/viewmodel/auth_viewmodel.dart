@@ -32,6 +32,27 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
     _firebaseAuth = auth.FirebaseAuth.instance;
     _userRepository = ref.watch(userRepositoryProvider);
 
+    // 1. Synchronously load cached user from Hive or Auth fallback so the UI renders instantly
+    final currentFirebaseUser = _firebaseAuth.currentUser;
+    final cachedUser = HiveStorageService.getCachedUser();
+
+    AppUser? initialUser;
+    if (currentFirebaseUser != null) {
+      if (cachedUser != null && cachedUser.uid == currentFirebaseUser.uid) {
+        initialUser = cachedUser;
+      } else if (currentFirebaseUser.displayName?.trim().isNotEmpty == true) {
+        initialUser = AppUser(
+          uid: currentFirebaseUser.uid,
+          role: 'applicant',
+          fullName: currentFirebaseUser.displayName!.trim(),
+          email: currentFirebaseUser.email ?? '',
+          phone: currentFirebaseUser.phoneNumber ?? '',
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+      }
+    }
+
     // Listen to user changes (fires on token refresh, profile updates, sign-out).
     final completer = Completer<AppUser?>();
     _firebaseAuth.userChanges().listen((user) async {
@@ -49,6 +70,7 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
         ref
             .read(analyticsServiceProvider)
             .setUserProperty(name: 'role', value: 'none');
+        await HiveStorageService.clearUserData();
         state = const AsyncData(null);
         if (!completer.isCompleted) completer.complete(null);
       } else {
@@ -71,6 +93,9 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
           _previousUid = user.uid;
 
           if (appUser != null) {
+            // Persist the latest user profile to Hive for instant offline restore
+            await HiveStorageService.saveCachedUser(appUser);
+
             ref
                 .read(crashReportingServiceProvider)
                 .setCustomKey('role', appUser.role);
@@ -89,11 +114,21 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
           state = AsyncData(appUser);
           if (!completer.isCompleted) completer.complete(appUser);
         } catch (e) {
-          state = AsyncError(_handleAuthException(e), StackTrace.current);
-          if (!completer.isCompleted) completer.completeError(e);
+          // If network fetch fails but we have a valid cached user, keep the cached state
+          if (initialUser != null) {
+            state = AsyncData(initialUser);
+            if (!completer.isCompleted) completer.complete(initialUser);
+          } else {
+            state = AsyncError(_handleAuthException(e), StackTrace.current);
+            if (!completer.isCompleted) completer.completeError(e);
+          }
         }
       }
     });
+
+    if (initialUser != null) {
+      return initialUser;
+    }
     return completer.future;
   }
 
@@ -119,7 +154,17 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
         state = const AsyncData(null);
         throw EmailNotVerifiedException(email.trim());
       }
-      // userChanges() stream will fire and update state to AsyncData(appUser).
+
+      // Eagerly fetch and cache user profile so destination screen has full name immediately
+      final applicantUid = _firebaseAuth.currentUser?.uid;
+      if (applicantUid != null) {
+        final appUser = await _userRepository.getUserById(applicantUid);
+        if (appUser != null) {
+          await HiveStorageService.saveCachedUser(appUser);
+          state = AsyncData(appUser);
+        }
+      }
+      // userChanges() stream will also fire and keep state synchronized.
     } on EmailNotVerifiedException {
       rethrow;
     } catch (e) {
@@ -155,6 +200,16 @@ class AuthViewModel extends AsyncNotifier<AppUser?> {
       // synchronized to Firestore's auth headers before navigating to dashboard.
       await _firebaseAuth.currentUser?.getIdToken(true);
       await ref.read(analyticsServiceProvider).logLogin(loginMethod: 'email');
+
+      // Eagerly fetch and cache admin profile so dashboard has user details immediately
+      final adminUid = _firebaseAuth.currentUser?.uid;
+      if (adminUid != null) {
+        final appUser = await _userRepository.getUserById(adminUid);
+        if (appUser != null) {
+          await HiveStorageService.saveCachedUser(appUser);
+          state = AsyncData(appUser);
+        }
+      }
       // userChanges() stream will fire and update state to AsyncData(appUser).
     } catch (e) {
       if (e is Failure) {
