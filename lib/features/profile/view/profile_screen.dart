@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:intl/intl.dart';
+import 'package:survey_desk/core/widgets/keyboard_dismiss_wrapper.dart';
 
 import '../../../core/models/app_user.dart';
 import '../../../core/theme/app_colors.dart' show AppStatusColors;
@@ -295,6 +296,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               child: Form(
                 key: formKey,
                 child: SingleChildScrollView(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,6 +324,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       AppTextField(
                         label: 'Full Name',
                         controller: nameController,
+                        keyboardType: TextInputType.name,
+                        onTapOutside: AppKeyboardDismiss.onTapOutside,
                         validator: (val) {
                           if (val == null || val.trim().isEmpty) {
                             return 'Name is required';
@@ -332,6 +337,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       AppTextField(
                         label: 'Organization (Optional)',
                         controller: orgController,
+                        keyboardType: TextInputType.text,
+                        onTapOutside: AppKeyboardDismiss.onTapOutside,
                         hint: 'Company or Agency name',
                       ),
                       SizedBox(height: 12.h),
@@ -339,6 +346,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         label: 'Phone Number (10 Digits)',
                         controller: phoneController,
                         keyboardType: TextInputType.phone,
+                        onTapOutside: AppKeyboardDismiss.onTapOutside,
                         inputFormatters: [
                           FilteringTextInputFormatter.digitsOnly,
                           LengthLimitingTextInputFormatter(10),
@@ -471,6 +479,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ref.invalidate(authViewModelProvider);
             },
             child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.all(16.w),
               child: Column(

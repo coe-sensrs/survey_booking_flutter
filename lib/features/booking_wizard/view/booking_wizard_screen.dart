@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/constants/survey_type.dart';
 
 import '../../../core/utils/app_snackbar.dart';
+import '../../../core/widgets/keyboard_dismiss_wrapper.dart';
 import '../viewmodel/booking_wizard_viewmodel.dart';
 import 'steps/step_1_survey_type.dart';
 import 'steps/step_2_state_district.dart';
@@ -217,67 +218,75 @@ class BookingWizardScreen extends ConsumerWidget {
                   onPressed: () => context.pop(),
                 ),
         ),
-        body: Column(
-          children: [
-            // Linear Progress Bar
-            LinearProgressIndicator(
-              value: currentStep / 9.0,
-              backgroundColor: Theme.of(
-                context,
-              ).colorScheme.surfaceContainerHighest,
-              valueColor: AlwaysStoppedAnimation<Color>(
-                Theme.of(context).colorScheme.primary,
-              ),
-            ),
-
-            Expanded(child: currentStepWidget),
-
-            // Navigation bar at bottom (for steps 1-7)
-            if (currentStep < 8)
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, -4),
-                    ),
-                  ],
+        body: AppKeyboardDismiss(
+          child: Column(
+            children: [
+              // Linear Progress Bar
+              LinearProgressIndicator(
+                value: currentStep / 9.0,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Theme.of(context).colorScheme.primary,
                 ),
-                child: Row(
-                  children: [
-                    if (currentStep > 1)
+              ),
+
+              Expanded(child: currentStepWidget),
+
+              // Navigation bar at bottom (for steps 1-7)
+              if (currentStep < 8)
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, -4),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      if (currentStep > 1)
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              ref
+                                  .read(bookingWizardViewModelProvider.notifier)
+                                  .previousStep();
+                            },
+                            child: const Text('Back'),
+                          ),
+                        ),
+                      if (currentStep > 1) SizedBox(width: 16.w),
                       Expanded(
-                        child: OutlinedButton(
+                        child: ElevatedButton(
                           onPressed: () {
-                            ref
-                                .read(bookingWizardViewModelProvider.notifier)
-                                .previousStep();
+                            if (_validateCurrentStep(
+                              currentStep,
+                              wizardState,
+                            )) {
+                              ref
+                                  .read(bookingWizardViewModelProvider.notifier)
+                                  .nextStep();
+                            }
                           },
-                          child: const Text('Back'),
+                          child: Text(
+                            currentStep == 7 ? 'Proceed to Review' : 'Next',
+                          ),
                         ),
                       ),
-                    if (currentStep > 1) SizedBox(width: 16.w),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_validateCurrentStep(currentStep, wizardState)) {
-                            ref
-                                .read(bookingWizardViewModelProvider.notifier)
-                                .nextStep();
-                          }
-                        },
-                        child: Text(
-                          currentStep == 7 ? 'Proceed to Review' : 'Next',
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

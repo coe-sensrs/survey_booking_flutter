@@ -100,6 +100,7 @@ class _Step4SurveyAreaState extends ConsumerState<Step4SurveyArea> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

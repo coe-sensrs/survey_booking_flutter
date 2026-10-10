@@ -111,6 +111,7 @@ class _ProfileBody extends StatelessWidget {
     final isActive = member.active ?? true;
 
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(20.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,8 +125,7 @@ class _ProfileBody extends StatelessWidget {
                   imageUrl: member.photoUrl,
                   radius: 36.r,
                   fallbackIcon: Icons.person,
-                  backgroundColor:
-                      colorScheme.primary.withValues(alpha: 0.12),
+                  backgroundColor: colorScheme.primary.withValues(alpha: 0.12),
                   iconColor: colorScheme.primary,
                 ),
                 SizedBox(width: 16.w),
@@ -257,7 +257,11 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow({required this.icon, required this.label, required this.value});
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +309,9 @@ class _Divider extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 1,
-      color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+      color: Theme.of(
+        context,
+      ).colorScheme.outlineVariant.withValues(alpha: 0.5),
     );
   }
 }

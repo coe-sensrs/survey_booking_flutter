@@ -149,13 +149,14 @@ class _TaskCard extends StatelessWidget {
                   ),
                   SizedBox(width: 4.w),
                   Text(
-                    appointment.confirmedDate != null
-                        ? 'Survey on ${DateFormat('dd MMM yyyy').format(appointment.confirmedDate!)}'
-                        : 'Preferred: ${DateFormat('dd MMM yyyy').format(appointment.preferredDate)}',
+                    appointment.confirmedStart != null &&
+                            appointment.confirmedEnd != null
+                        ? 'Survey: ${DateFormat('dd MMM').format(appointment.confirmedStart!)} - ${DateFormat('dd MMM yyyy').format(appointment.confirmedEnd!)}'
+                        : 'Preferred: ${DateFormat('dd MMM').format(appointment.preferredStart)} - ${DateFormat('dd MMM yyyy').format(appointment.preferredEnd)}',
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
-                      color: appointment.confirmedDate != null
+                      color: appointment.confirmedStart != null
                           ? colorScheme.primary
                           : colorScheme.onSurfaceVariant,
                     ),

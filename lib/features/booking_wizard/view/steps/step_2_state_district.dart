@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
 import '../../viewmodel/booking_wizard_viewmodel.dart';
+import '../../../../core/widgets/keyboard_dismiss_wrapper.dart';
 
 class Step2StateDistrict extends ConsumerStatefulWidget {
   const Step2StateDistrict({super.key});
@@ -71,6 +72,7 @@ class _Step2StateDistrictState extends ConsumerState<Step2StateDistrict> {
     }
 
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,6 +95,7 @@ class _Step2StateDistrictState extends ConsumerState<Step2StateDistrict> {
           TextFormField(
             initialValue: 'Punjab',
             readOnly: true,
+            onTapOutside: AppKeyboardDismiss.onTapOutside,
             decoration: const InputDecoration(
               labelText: 'State',
               prefixIcon: Icon(Icons.map),

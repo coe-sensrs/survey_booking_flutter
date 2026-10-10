@@ -9,6 +9,7 @@ import 'package:survey_desk/core/widgets/app_button.dart';
 import 'package:survey_desk/core/widgets/app_text_field.dart';
 import 'package:survey_desk/core/utils/validators.dart';
 import 'package:survey_desk/core/utils/sanitizing_text_input_formatter.dart';
+import 'package:survey_desk/core/widgets/keyboard_dismiss_wrapper.dart';
 import 'package:survey_desk/features/auth/viewmodel/auth_viewmodel.dart';
 
 class ApplicantSignupScreen extends ConsumerStatefulWidget {
@@ -97,6 +98,7 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(24.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
@@ -108,6 +110,8 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
                     AppTextField(
                       label: 'Full Name',
                       controller: _nameController,
+                      keyboardType: TextInputType.name,
+                      onTapOutside: AppKeyboardDismiss.onTapOutside,
                       inputFormatters: [
                         SanitizingTextInputFormatter(),
                         LengthLimitingTextInputFormatter(54),
@@ -122,6 +126,8 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
                     AppTextField(
                       label: 'Organization Name (Optional)',
                       controller: _orgController,
+                      keyboardType: TextInputType.name,
+                      onTapOutside: AppKeyboardDismiss.onTapOutside,
                       inputFormatters: [
                         SanitizingTextInputFormatter(),
                         LengthLimitingTextInputFormatter(30),
@@ -132,6 +138,7 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
                       label: 'Email Address',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
+                      onTapOutside: AppKeyboardDismiss.onTapOutside,
                       inputFormatters: [
                         SanitizingTextInputFormatter(),
                         LengthLimitingTextInputFormatter(54),
@@ -143,6 +150,7 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
                       label: 'Phone Number',
                       controller: _phoneController,
                       keyboardType: TextInputType.phone,
+                      onTapOutside: AppKeyboardDismiss.onTapOutside,
                       inputFormatters: [
                         SanitizingTextInputFormatter(),
                         LengthLimitingTextInputFormatter(10),
@@ -154,6 +162,7 @@ class _ApplicantSignupScreenState extends ConsumerState<ApplicantSignupScreen> {
                       label: 'Password',
                       controller: _passwordController,
                       obscureText: _obscurePassword,
+                      onTapOutside: AppKeyboardDismiss.onTapOutside,
                       inputFormatters: [
                         SanitizingTextInputFormatter(),
                         LengthLimitingTextInputFormatter(64),

@@ -9,6 +9,7 @@ import 'package:survey_desk/core/utils/sanitizing_text_input_formatter.dart';
 
 import '../../../core/errors/failures.dart';
 import '../../../core/utils/validators.dart';
+import '../../../core/widgets/keyboard_dismiss_wrapper.dart';
 import '../viewmodel/committee_management_viewmodel.dart';
 
 class AddCommitteeMemberScreen extends ConsumerStatefulWidget {
@@ -177,6 +178,7 @@ class _AddCommitteeMemberScreenState
     return Scaffold(
       appBar: AppBar(title: const Text('Add Member')),
       body: SingleChildScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: EdgeInsets.all(24.w),
         child: Form(
           key: _formKey,
@@ -194,6 +196,8 @@ class _AddCommitteeMemberScreenState
               SizedBox(height: 16.h),
               TextFormField(
                 controller: _nameController,
+                onTapOutside: AppKeyboardDismiss.onTapOutside,
+                keyboardType: TextInputType.name,
                 decoration: const InputDecoration(
                   labelText: 'Full Name',
                   hintText: 'Your Name',
@@ -209,6 +213,8 @@ class _AddCommitteeMemberScreenState
               SizedBox(height: 16.h),
               TextFormField(
                 controller: _emailController,
+                onTapOutside: AppKeyboardDismiss.onTapOutside,
+                keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: 'Email Address',
                   hintText: 'Your Email',
@@ -217,12 +223,12 @@ class _AddCommitteeMemberScreenState
                   SanitizingTextInputFormatter(),
                   LengthLimitingTextInputFormatter(54),
                 ],
-                keyboardType: TextInputType.emailAddress,
                 validator: Validators.validateEmail,
               ),
               SizedBox(height: 16.h),
               TextFormField(
                 controller: _phoneController,
+                onTapOutside: AppKeyboardDismiss.onTapOutside,
                 decoration: const InputDecoration(
                   labelText: 'Phone Number',
                   hintText: 'Your Phone Number',
@@ -246,6 +252,8 @@ class _AddCommitteeMemberScreenState
               SizedBox(height: 16.h),
               TextFormField(
                 controller: _expertiseController,
+                onTapOutside: AppKeyboardDismiss.onTapOutside,
+                keyboardType: TextInputType.multiline,
                 decoration: const InputDecoration(
                   labelText: 'Role / Expertise Description',
                   hintText: 'Briefly describe specific expertise...',

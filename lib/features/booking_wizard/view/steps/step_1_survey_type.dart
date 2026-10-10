@@ -36,6 +36,7 @@ class _Step1SurveyTypeState extends ConsumerState<Step1SurveyType> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,6 +108,7 @@ class _Step1SurveyTypeState extends ConsumerState<Step1SurveyType> {
               label: 'Custom Survey Name *',
               hint: 'Enter custom survey title (max 60 chars)',
               controller: _customNameController,
+              keyboardType: TextInputType.name,
               onChanged: (val) {
                 ref
                     .read(bookingWizardViewModelProvider.notifier)

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'keyboard_dismiss_wrapper.dart';
 
 class AppTextField extends StatelessWidget {
   final String label;
@@ -15,6 +16,7 @@ class AppTextField extends StatelessWidget {
   final bool readOnly;
   final VoidCallback? onTap;
   final List<TextInputFormatter>? inputFormatters;
+  final TapRegionCallback? onTapOutside;
 
   const AppTextField({
     super.key,
@@ -31,6 +33,7 @@ class AppTextField extends StatelessWidget {
     this.readOnly = false,
     this.onTap,
     this.inputFormatters,
+    this.onTapOutside,
   });
 
   @override
@@ -52,6 +55,7 @@ class AppTextField extends StatelessWidget {
           onChanged: onChanged,
           readOnly: readOnly,
           onTap: onTap,
+          onTapOutside: onTapOutside ?? AppKeyboardDismiss.onTapOutside,
           inputFormatters: inputFormatters,
           decoration: InputDecoration(
             hintText: hint,

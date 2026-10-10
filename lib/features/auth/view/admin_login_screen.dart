@@ -10,6 +10,7 @@ import 'package:survey_desk/core/utils/sanitizing_text_input_formatter.dart';
 import 'package:survey_desk/core/utils/validators.dart';
 import 'package:survey_desk/core/widgets/app_button.dart';
 import 'package:survey_desk/core/widgets/app_text_field.dart';
+import 'package:survey_desk/core/widgets/keyboard_dismiss_wrapper.dart';
 import 'package:survey_desk/features/auth/viewmodel/auth_viewmodel.dart';
 
 class AdminLoginScreen extends ConsumerStatefulWidget {
@@ -110,6 +111,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(24.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
@@ -133,6 +135,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       label: 'Email Address',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
+                      onTapOutside: AppKeyboardDismiss.onTapOutside,
                       inputFormatters: [
                         SanitizingTextInputFormatter(),
                         LengthLimitingTextInputFormatter(54),
@@ -144,6 +147,7 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       label: 'Password',
                       controller: _passwordController,
                       obscureText: _obscurePassword,
+                      onTapOutside: AppKeyboardDismiss.onTapOutside,
                       inputFormatters: [
                         SanitizingTextInputFormatter(),
                         LengthLimitingTextInputFormatter(64),

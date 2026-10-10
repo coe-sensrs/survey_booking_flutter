@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/models/app_user.dart';
 import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/keyboard_dismiss_wrapper.dart';
 import '../view/manage_committee_member_sheet.dart';
 import '../viewmodel/committee_management_viewmodel.dart';
 
@@ -41,6 +42,7 @@ class CommitteeManagementScreen extends ConsumerWidget {
           Padding(
             padding: EdgeInsets.all(16.w),
             child: TextField(
+              onTapOutside: AppKeyboardDismiss.onTapOutside,
               decoration: InputDecoration(
                 hintText: 'Search members...',
                 prefixIcon: const Icon(Icons.search),

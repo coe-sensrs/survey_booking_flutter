@@ -10,6 +10,7 @@ import 'package:survey_desk/core/widgets/app_button.dart';
 import 'package:survey_desk/core/widgets/app_text_field.dart';
 import 'package:survey_desk/core/utils/validators.dart';
 import 'package:survey_desk/core/utils/sanitizing_text_input_formatter.dart';
+import 'package:survey_desk/core/widgets/keyboard_dismiss_wrapper.dart';
 import 'package:survey_desk/features/auth/viewmodel/auth_viewmodel.dart';
 
 class ApplicantLoginScreen extends ConsumerStatefulWidget {
@@ -165,6 +166,7 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.all(24.0),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 400),
@@ -187,7 +189,11 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
                       label: 'Email Address',
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
-                      inputFormatters: [SanitizingTextInputFormatter()],
+                      onTapOutside: AppKeyboardDismiss.onTapOutside,
+                      inputFormatters: [
+                        SanitizingTextInputFormatter(),
+                        LengthLimitingTextInputFormatter(64),
+                      ],
                       validator: Validators.validateEmail,
                     ),
                     const SizedBox(height: 16),
@@ -195,6 +201,7 @@ class _ApplicantLoginScreenState extends ConsumerState<ApplicantLoginScreen> {
                       label: 'Password',
                       controller: _passwordController,
                       obscureText: _obscurePassword,
+                      onTapOutside: AppKeyboardDismiss.onTapOutside,
                       inputFormatters: [
                         SanitizingTextInputFormatter(),
                         LengthLimitingTextInputFormatter(64),

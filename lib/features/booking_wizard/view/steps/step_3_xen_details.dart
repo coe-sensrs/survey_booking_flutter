@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
+import 'package:survey_desk/core/utils/sanitizing_text_input_formatter.dart';
+import 'package:survey_desk/core/utils/validators.dart';
 
 import '../../../../core/widgets/app_text_field.dart';
 import '../../viewmodel/booking_wizard_viewmodel.dart';
@@ -50,6 +53,7 @@ class _Step3XenDetailsState extends ConsumerState<Step3XenDetails> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,6 +79,10 @@ class _Step3XenDetailsState extends ConsumerState<Step3XenDetails> {
             hint: 'Enter full name',
             controller: _nameController,
             keyboardType: TextInputType.name,
+            inputFormatters: [
+              SanitizingTextInputFormatter(),
+              LengthLimitingTextInputFormatter(64),
+            ],
             onChanged: (_) => _onChanged(),
           ),
 
@@ -84,6 +92,10 @@ class _Step3XenDetailsState extends ConsumerState<Step3XenDetails> {
             label: 'Mobile Number *',
             hint: '10 digit mobile number',
             controller: _mobileController,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(10),
+            ],
             keyboardType: TextInputType.phone,
             onChanged: (_) => _onChanged(),
           ),
@@ -95,6 +107,11 @@ class _Step3XenDetailsState extends ConsumerState<Step3XenDetails> {
             hint: 'e.g. xen.district@gov.in',
             controller: _emailController,
             keyboardType: TextInputType.emailAddress,
+            validator: Validators.validateEmail,
+            inputFormatters: [
+              SanitizingTextInputFormatter(),
+              LengthLimitingTextInputFormatter(125),
+            ],
             onChanged: (_) => _onChanged(),
           ),
         ],

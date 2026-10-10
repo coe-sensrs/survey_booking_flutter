@@ -19,6 +19,7 @@ import 'core/providers/core_providers.dart';
 import 'features/auth/viewmodel/auth_viewmodel.dart';
 import 'features/notifications/view/notification_handler.dart';
 import 'features/notifications/view/notification_overlay.dart';
+import 'core/widgets/keyboard_dismiss_wrapper.dart';
 
 void main() async {
   WidgetsBinding binding = WidgetsFlutterBinding.ensureInitialized();
@@ -116,8 +117,10 @@ class _SurveyDeskAppState extends ConsumerState<SurveyDeskApp> {
             themeMode: themeMode,
             routerConfig: appRouter,
             debugShowCheckedModeBanner: false,
-            builder: (context, routerChild) => NotificationOverlayWrapper(
-              child: routerChild ?? const SizedBox.shrink(),
+            builder: (context, routerChild) => AppKeyboardDismiss(
+              child: NotificationOverlayWrapper(
+                child: routerChild ?? const SizedBox.shrink(),
+              ),
             ),
           ),
         );

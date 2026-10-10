@@ -7,6 +7,7 @@ import '../../../core/constants/appointment_status.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/utils/app_snackbar.dart';
 import '../../../core/widgets/appointment_status_badge.dart';
+import '../../../core/widgets/keyboard_dismiss_wrapper.dart';
 import '../../../core/widgets/survey_document_tiles.dart';
 import '../viewmodel/committee_review_detail_viewmodel.dart';
 
@@ -56,6 +57,7 @@ class _ReviewDetailBody extends ConsumerWidget {
         appointment.status == AppointmentStatus.rejected;
 
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -834,6 +836,8 @@ class _TextInputSheetState extends State<_TextInputSheet> {
             maxLength: widget.maxLength,
             maxLines: 4,
             autofocus: true,
+            onTapOutside: AppKeyboardDismiss.onTapOutside,
+            keyboardType: TextInputType.multiline,
             decoration: InputDecoration(
               hintText: widget.hint,
               errorText: _error,

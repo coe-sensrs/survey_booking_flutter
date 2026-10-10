@@ -72,10 +72,11 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
     final formattedDate = state.startDate != null && state.endDate != null
         ? '${DateFormat('dd MMM').format(state.startDate!)} - ${DateFormat('dd MMM yyyy').format(state.endDate!)} (${state.endDate!.difference(state.startDate!).inDays + 1} calendar days)'
         : state.startDate != null
-            ? DateFormat('EEEE, dd MMMM yyyy').format(state.startDate!)
-            : 'Not selected';
+        ? DateFormat('EEEE, dd MMMM yyyy').format(state.startDate!)
+        : 'Not selected';
 
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

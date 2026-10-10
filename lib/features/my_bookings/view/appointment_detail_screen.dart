@@ -152,6 +152,7 @@ class _AppointmentDetailScreenState
               );
             },
             child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.all(16.w),
               child: Column(
@@ -256,6 +257,7 @@ class _AppointmentDetailScreenState
                               AppTextField(
                                 label: 'Your Response (max 500 chars)',
                                 controller: _replyController,
+                                keyboardType: TextInputType.multiline,
                                 maxLines: 3,
                               ),
                               SizedBox(height: 12.h),

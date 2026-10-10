@@ -160,6 +160,7 @@ class Step7Permissions extends ConsumerWidget {
     final maxDocs = ValidationConstants.maxPermissionDocsCount;
 
     return SingleChildScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
