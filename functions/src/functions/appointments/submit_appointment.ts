@@ -45,7 +45,7 @@ interface SubmitAppointmentData {
     district: string;
     xenDetails: XenDetailsData;
     areaName: string;
-    kmlFile: KmlFileData;
+    kmlFile?: KmlFileData | null;
     preferredStart: string; // ISO-8601
     preferredEnd: string; // ISO-8601
     logistics: LogisticsData;
@@ -130,7 +130,8 @@ export const submitAppointment = onCall(
         if (!data?.xenDetails?.name || !data?.xenDetails?.mobile || !data?.xenDetails?.email) {
             throw new HttpsError("invalid-argument", "XEN details (name, mobile, email) are required.");
         }
-        if (!data?.kmlFile?.storagePath) {
+        const isKmlRequired = data.surveyType !== "socio_economic_survey";
+        if (isKmlRequired && !data?.kmlFile?.storagePath) {
             throw new HttpsError("invalid-argument", "KML/KMZ spatial file reference is required.");
         }
         if (!data?.preferredStart || !data?.preferredEnd) {
@@ -175,10 +176,10 @@ export const submitAppointment = onCall(
                 district: data.district,
                 xenDetails: data.xenDetails,
                 areaName: data.areaName,
-                kmlFile: {
+                kmlFile: data.kmlFile?.storagePath ? {
                     ...data.kmlFile,
                     uploadedAt: data.kmlFile.uploadedAt ? Timestamp.fromDate(new Date(data.kmlFile.uploadedAt)) : now,
-                },
+                } : null,
                 preferredStart: Timestamp.fromDate(new Date(data.preferredStart)),
                 preferredEnd: Timestamp.fromDate(new Date(data.preferredEnd)),
                 confirmedStart: null,

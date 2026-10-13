@@ -292,22 +292,23 @@ class _AppointmentDetailScreenState
                   SizedBox(height: 16.h),
 
                   // KML File Section
-                  _buildDetailSectionHeader(
-                    title: 'Survey Area Map File (KML/KMZ)',
-                    icon: Icons.map,
-                  ),
-                  SizedBox(height: 8.h),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 0),
-                    child: KmlFileTile(
-                      storagePath: appointment.kmlFile.storagePath,
-                      originalFileName: appointment.kmlFile.originalFileName,
-                      fileType: appointment.kmlFile.fileType,
-                      sizeBytes: appointment.kmlFile.sizeBytes,
+                  if (appointment.kmlFile != null) ...[
+                    _buildDetailSectionHeader(
+                      title: 'Survey Area Map File (KML/KMZ)',
+                      icon: Icons.map,
                     ),
-                  ),
-
-                  SizedBox(height: 16.h),
+                    SizedBox(height: 8.h),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 0),
+                      child: KmlFileTile(
+                        storagePath: appointment.kmlFile!.storagePath,
+                        originalFileName: appointment.kmlFile!.originalFileName,
+                        fileType: appointment.kmlFile!.fileType,
+                        sizeBytes: appointment.kmlFile!.sizeBytes,
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+                  ],
 
                   // Dates Section
                   _buildDetailSection(

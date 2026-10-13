@@ -19,7 +19,7 @@ class Appointment {
   final String district;
   final XenDetails xenDetails;
   final String areaName;
-  final KmlFile kmlFile;
+  final KmlFile? kmlFile;
 
   final DateTime preferredStart;
   final DateTime preferredEnd;
@@ -53,7 +53,7 @@ class Appointment {
     required this.district,
     required this.xenDetails,
     required this.areaName,
-    required this.kmlFile,
+    this.kmlFile,
     required this.preferredStart,
     required this.preferredEnd,
     this.confirmedStart,
@@ -88,7 +88,11 @@ class Appointment {
         (map['xenDetails'] as Map<String, dynamic>?) ?? {},
       ),
       areaName: map['areaName'] as String? ?? '',
-      kmlFile: KmlFile.fromMap((map['kmlFile'] as Map<String, dynamic>?) ?? {}),
+      kmlFile: map['kmlFile'] != null &&
+              map['kmlFile'] is Map &&
+              (map['kmlFile'] as Map).isNotEmpty
+          ? KmlFile.fromMap(map['kmlFile'] as Map<String, dynamic>)
+          : null,
       preferredStart:
           (map['preferredStart'] as Timestamp?)?.toDate() ?? DateTime.now(),
       preferredEnd:
@@ -128,7 +132,7 @@ class Appointment {
       'district': district,
       'xenDetails': xenDetails.toMap(),
       'areaName': areaName,
-      'kmlFile': kmlFile.toMap(),
+      'kmlFile': kmlFile?.toMap(),
       'preferredStart': Timestamp.fromDate(preferredStart),
       'preferredEnd': Timestamp.fromDate(preferredEnd),
       'confirmedStart': confirmedStart != null
@@ -164,7 +168,7 @@ class Appointment {
       'district': district,
       'xenDetails': xenDetails.toJson(),
       'areaName': areaName,
-      'kmlFile': kmlFile.toJson(),
+      'kmlFile': kmlFile?.toJson(),
       'preferredStart': preferredStart.toIso8601String(),
       'preferredEnd': preferredEnd.toIso8601String(),
       'confirmedStart': confirmedStart?.toIso8601String(),

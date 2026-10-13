@@ -129,14 +129,16 @@ class _ReviewDetailBody extends ConsumerWidget {
           SizedBox(height: 16.h),
 
           // --- KML / KMZ Boundary File ---
-          _SectionTitle('Survey Boundary File'),
-          KmlFileTile(
-            storagePath: appointment.kmlFile.storagePath,
-            originalFileName: appointment.kmlFile.originalFileName,
-            fileType: appointment.kmlFile.fileType,
-            sizeBytes: appointment.kmlFile.sizeBytes,
-          ),
-          SizedBox(height: 16.h),
+          if (appointment.kmlFile != null) ...[
+            _SectionTitle('Survey Boundary File'),
+            KmlFileTile(
+              storagePath: appointment.kmlFile!.storagePath,
+              originalFileName: appointment.kmlFile!.originalFileName,
+              fileType: appointment.kmlFile!.fileType,
+              sizeBytes: appointment.kmlFile!.sizeBytes,
+            ),
+            SizedBox(height: 16.h),
+          ],
 
           // --- Permission Documents ---
           _SectionTitle(

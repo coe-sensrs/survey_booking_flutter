@@ -174,7 +174,7 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
       'district': appointment.district,
       'xenDetails': appointment.xenDetails.toJson(),
       'areaName': appointment.areaName,
-      'kmlFile': appointment.kmlFile.toJson(),
+      'kmlFile': appointment.kmlFile?.toJson(),
       'preferredStart': appointment.preferredStart.toIso8601String(),
       'preferredEnd': appointment.preferredEnd.toIso8601String(),
       'logistics': appointment.logistics.toJson(),

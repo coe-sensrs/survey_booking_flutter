@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../../../../core/constants/survey_type.dart';
 import '../../../../core/providers/core_providers.dart';
 import '../../../../core/utils/app_snackbar.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -99,6 +100,9 @@ class _Step4SurveyAreaState extends ConsumerState<Step4SurveyArea> {
     final wizardState = ref.watch(bookingWizardViewModelProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
+    final isSocioEconomic =
+        wizardState.surveyType == SurveyType.socioEconomicSurvey.code;
+
     return SingleChildScrollView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(16.w),
@@ -106,12 +110,14 @@ class _Step4SurveyAreaState extends ConsumerState<Step4SurveyArea> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Survey Area & Map File',
+            isSocioEconomic ? 'Survey Area' : 'Survey Area & Map File',
             style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
           ),
           SizedBox(height: 6.h),
           Text(
-            'Provide the area name and upload the KML or KMZ spatial file.',
+            isSocioEconomic
+                ? 'Provide the survey area / site name for your booking.'
+                : 'Provide the area name and upload the KML or KMZ spatial file.',
             style: TextStyle(
               fontSize: 13.sp,
               color: colorScheme.onSurface.withValues(alpha: 0.6),
@@ -130,92 +136,94 @@ class _Step4SurveyAreaState extends ConsumerState<Step4SurveyArea> {
             },
           ),
 
-          SizedBox(height: 20.h),
+          if (!isSocioEconomic) ...[
+            SizedBox(height: 20.h),
 
-          Text(
-            'Upload KML/KMZ File *',
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 8.h),
+            Text(
+              'Upload KML/KMZ File *',
+              style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.h),
 
-          InkWell(
-            onTap: _pickKmlFile,
-            borderRadius: BorderRadius.circular(12.r),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(20.w),
-              decoration: BoxDecoration(
-                color: colorScheme.primary.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(
-                  color: wizardState.kmlFileName != null
-                      ? colorScheme.primary
-                      : colorScheme.outline.withValues(alpha: 0.4),
-                  style: BorderStyle.solid,
+            InkWell(
+              onTap: _pickKmlFile,
+              borderRadius: BorderRadius.circular(12.r),
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: wizardState.kmlFileName != null
+                        ? colorScheme.primary
+                        : colorScheme.outline.withValues(alpha: 0.4),
+                    style: BorderStyle.solid,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Icon(
+                      wizardState.kmlFileName != null
+                          ? Icons.insert_drive_file
+                          : Icons.cloud_upload_outlined,
+                      size: 40.sp,
+                      color: colorScheme.primary,
+                    ),
+                    SizedBox(height: 10.h),
+                    Text(
+                      wizardState.kmlFileName ??
+                          'Tap to select .kml or .kmz file',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: wizardState.kmlFileName != null
+                            ? FontWeight.bold
+                            : FontWeight.normal,
+                        color: wizardState.kmlFileName != null
+                            ? colorScheme.onSurface
+                            : colorScheme.onSurface.withValues(alpha: 0.6),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (wizardState.kmlFileSize != null) ...[
+                      SizedBox(height: 4.h),
+                      Text(
+                        '${(wizardState.kmlFileSize! / 1024).toStringAsFixed(1)} KB',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: colorScheme.onSurface.withValues(alpha: 0.6),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              child: Column(
+            ),
+
+            if (wizardState.kmlFilePath != null) ...[
+              SizedBox(height: 12.h),
+              Row(
                 children: [
-                  Icon(
-                    wizardState.kmlFileName != null
-                        ? Icons.insert_drive_file
-                        : Icons.cloud_upload_outlined,
-                    size: 40.sp,
-                    color: colorScheme.primary,
-                  ),
-                  SizedBox(height: 10.h),
-                  Text(
-                    wizardState.kmlFileName ??
-                        'Tap to select .kml or .kmz file',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: wizardState.kmlFileName != null
-                          ? FontWeight.bold
-                          : FontWeight.normal,
-                      color: wizardState.kmlFileName != null
-                          ? colorScheme.onSurface
-                          : colorScheme.onSurface.withValues(alpha: 0.6),
+                  Expanded(
+                    flex: 3,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _openKmlFile(wizardState.kmlFilePath!),
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: const Text('Open / Preview File'),
                     ),
-                    textAlign: TextAlign.center,
                   ),
-                  if (wizardState.kmlFileSize != null) ...[
-                    SizedBox(height: 4.h),
-                    Text(
-                      '${(wizardState.kmlFileSize! / 1024).toStringAsFixed(1)} KB',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: colorScheme.onSurface.withValues(alpha: 0.6),
-                      ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    flex: 2,
+                    child: OutlinedButton.icon(
+                      onPressed: _pickKmlFile,
+                      icon: const Icon(Icons.swap_horiz, size: 18),
+                      label: const Text('Change'),
                     ),
-                  ],
+                  ),
                 ],
               ),
-            ),
-          ),
-
-          if (wizardState.kmlFilePath != null) ...[
-            SizedBox(height: 12.h),
-            Row(
-              children: [
-                Expanded(
-                  flex: 3,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _openKmlFile(wizardState.kmlFilePath!),
-                    icon: const Icon(Icons.open_in_new, size: 18),
-                    label: const Text('Open / Preview File'),
-                  ),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  flex: 2,
-                  child: OutlinedButton.icon(
-                    onPressed: _pickKmlFile,
-                    icon: const Icon(Icons.swap_horiz, size: 18),
-                    label: const Text('Change'),
-                  ),
-                ),
-              ],
-            ),
+            ],
           ],
         ],
       ),

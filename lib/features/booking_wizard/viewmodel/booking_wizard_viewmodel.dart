@@ -276,49 +276,61 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
       final appointmentRepo = ref.read(appointmentRepositoryProvider);
       final performanceService = ref.read(performanceServiceProvider);
 
+      final selectedSurveyType = SurveyType.fromCode(
+        state.surveyType ?? SurveyType.droneSurvey.code,
+      );
+      final isKmlRequired =
+          selectedSurveyType != SurveyType.socioEconomicSurvey;
+
       final totalDocs = state.permissionDocs.length;
-      final totalSteps = 1 + totalDocs + 1; // KML + Docs + Firestore
+      final totalSteps = (isKmlRequired ? 1 : 0) + totalDocs + 1; // KML + Docs + Firestore
+      int currentStepIndex = 0;
 
-      // 1. Upload KML/KMZ File
-      if (state.kmlFilePath == null || state.kmlFileName == null) {
-        throw Exception('KML/KMZ file is required');
-      }
-
-      final kmlFileObj = File(state.kmlFilePath!);
-      if (!kmlFileObj.existsSync()) {
-        throw Exception(
-          'The selected KML/KMZ file (${state.kmlFileName}) is no longer accessible on this device. Please go back to Step 4 and re-select the file.',
-        );
-      }
-      final kmlBytes = await kmlFileObj.readAsBytes();
       final appointmentId = appointmentRepo.newAppointmentId();
+      KmlFile? kmlModel;
 
-      onProgress?.call('Uploading Survey Map (${state.kmlFileName})...', 0.05);
+      // 1. Upload KML/KMZ File (only if required)
+      if (isKmlRequired) {
+        if (state.kmlFilePath == null || state.kmlFileName == null) {
+          throw Exception('KML/KMZ file is required');
+        }
 
-      final kmlStoragePath = await performanceService.traceAction(
-        'kml_upload_trace',
-        () => uploadService.uploadKmlFile(
-          appointmentId: appointmentId,
-          filePath: state.kmlFilePath!,
-          fileName: state.kmlFileName!,
-          onProgress: (fileProgress) {
-            final scaled = (fileProgress / totalSteps);
-            onProgress?.call(
-              'Uploading Survey Map (${state.kmlFileName})...',
-              scaled.clamp(0.0, 1.0),
-            );
-          },
-        ),
-        metrics: {'size_bytes': kmlBytes.length},
-      );
+        final kmlFileObj = File(state.kmlFilePath!);
+        if (!kmlFileObj.existsSync()) {
+          throw Exception(
+            'The selected KML/KMZ file (${state.kmlFileName}) is no longer accessible on this device. Please go back to Step 4 and re-select the file.',
+          );
+        }
+        final kmlBytes = await kmlFileObj.readAsBytes();
 
-      final kmlModel = KmlFile(
-        storagePath: kmlStoragePath,
-        originalFileName: state.kmlFileName!,
-        fileType: state.kmlFileType ?? 'kml',
-        sizeBytes: state.kmlFileSize ?? kmlBytes.length,
-        uploadedAt: DateTime.now(),
-      );
+        onProgress?.call('Uploading Survey Map (${state.kmlFileName})...', 0.05);
+
+        final kmlStoragePath = await performanceService.traceAction(
+          'kml_upload_trace',
+          () => uploadService.uploadKmlFile(
+            appointmentId: appointmentId,
+            filePath: state.kmlFilePath!,
+            fileName: state.kmlFileName!,
+            onProgress: (fileProgress) {
+              final scaled = (fileProgress / totalSteps);
+              onProgress?.call(
+                'Uploading Survey Map (${state.kmlFileName})...',
+                scaled.clamp(0.0, 1.0),
+              );
+            },
+          ),
+          metrics: {'size_bytes': kmlBytes.length},
+        );
+
+        kmlModel = KmlFile(
+          storagePath: kmlStoragePath,
+          originalFileName: state.kmlFileName!,
+          fileType: state.kmlFileType ?? 'kml',
+          sizeBytes: state.kmlFileSize ?? kmlBytes.length,
+          uploadedAt: DateTime.now(),
+        );
+        currentStepIndex++;
+      }
 
       // 2. Upload Permission Documents (if any)
       final List<PermissionDocument> uploadedDocs = [];
@@ -335,7 +347,7 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
         }
         final bytes = await file.readAsBytes();
 
-        final stepBase = (1.0 + i) / totalSteps;
+        final stepBase = (currentStepIndex + i) / totalSteps;
         final stepWeight = 1.0 / totalSteps;
         onProgress?.call(
           'Uploading document ${i + 1} of $totalDocs ($fileName)...',
@@ -370,10 +382,6 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
       onProgress?.call(
         'Finalizing and creating booking...',
         (totalSteps - 0.5) / totalSteps,
-      );
-
-      final selectedSurveyType = SurveyType.fromCode(
-        state.surveyType ?? SurveyType.socioEconomicSurvey.code,
       );
 
       final appointment = Appointment(

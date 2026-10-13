@@ -72,8 +72,11 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
     final formattedDate = state.startDate != null && state.endDate != null
         ? '${DateFormat('dd MMM').format(state.startDate!)} - ${DateFormat('dd MMM yyyy').format(state.endDate!)} (${state.endDate!.difference(state.startDate!).inDays + 1} calendar days)'
         : state.startDate != null
-        ? DateFormat('EEEE, dd MMMM yyyy').format(state.startDate!)
-        : 'Not selected';
+            ? DateFormat('EEEE, dd MMMM yyyy').format(state.startDate!)
+            : 'Not selected';
+
+    final isSocioEconomic =
+        state.surveyType == SurveyType.socioEconomicSurvey.code;
 
     return SingleChildScrollView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -133,11 +136,14 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
 
           // Section 4: Survey Area & Map File
           _buildSummarySection(
-            title: '4. Survey Area & KML File',
+            title: isSocioEconomic
+                ? '4. Survey Area'
+                : '4. Survey Area & KML File',
             stepNum: 4,
             items: [
               'Area Name: ${state.areaName ?? "-"}',
-              'KML/KMZ File: ${state.kmlFileName ?? "None"}',
+              if (!isSocioEconomic)
+                'KML/KMZ File: ${state.kmlFileName ?? "None"}',
             ],
           ),
 

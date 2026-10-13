@@ -91,14 +91,16 @@ class AdminAppointmentDetailScreen extends ConsumerWidget {
                 SizedBox(height: 32.h),
 
                 // --- Survey Boundary File ---
-                _buildSectionTitle(context, 'Survey Boundary File'),
-                KmlFileTile(
-                  storagePath: appointment.kmlFile.storagePath,
-                  originalFileName: appointment.kmlFile.originalFileName,
-                  fileType: appointment.kmlFile.fileType,
-                  sizeBytes: appointment.kmlFile.sizeBytes,
-                ),
-                SizedBox(height: 24.h),
+                if (appointment.kmlFile != null) ...[
+                  _buildSectionTitle(context, 'Survey Boundary File'),
+                  KmlFileTile(
+                    storagePath: appointment.kmlFile!.storagePath,
+                    originalFileName: appointment.kmlFile!.originalFileName,
+                    fileType: appointment.kmlFile!.fileType,
+                    sizeBytes: appointment.kmlFile!.sizeBytes,
+                  ),
+                  SizedBox(height: 24.h),
+                ],
 
                 // --- Permission Documents ---
                 _buildSectionTitle(

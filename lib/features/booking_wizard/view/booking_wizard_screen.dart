@@ -81,7 +81,10 @@ class BookingWizardScreen extends ConsumerWidget {
           );
           return false;
         }
-        if (state.kmlFilePath == null || state.kmlFileName == null) {
+        final isKmlRequired =
+            state.surveyType != SurveyType.socioEconomicSurvey.code;
+        if (isKmlRequired &&
+            (state.kmlFilePath == null || state.kmlFileName == null)) {
           AppSnackbar.showGlobalError(
             title: 'Validation Error',
             message: 'Please upload a KML/KMZ file.',
