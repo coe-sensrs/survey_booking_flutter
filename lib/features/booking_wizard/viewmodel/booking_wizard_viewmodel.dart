@@ -41,7 +41,7 @@ class WizardStateData {
     this.currentStep = 1,
     this.surveyType,
     this.customSurveyName,
-    this.stateName = 'Punjab',
+    this.stateName = '',
     this.district,
     this.xenName,
     this.xenMobile,
@@ -67,7 +67,9 @@ class WizardStateData {
     String? surveyType,
     String? customSurveyName,
     String? stateName,
+    bool clearStateName = false,
     String? district,
+    bool clearDistrict = false,
     String? xenName,
     String? xenMobile,
     String? xenEmail,
@@ -91,8 +93,8 @@ class WizardStateData {
       currentStep: currentStep ?? this.currentStep,
       surveyType: surveyType ?? this.surveyType,
       customSurveyName: customSurveyName ?? this.customSurveyName,
-      stateName: stateName ?? this.stateName,
-      district: district ?? this.district,
+      stateName: clearStateName ? '' : (stateName ?? this.stateName),
+      district: clearDistrict ? null : (district ?? this.district),
       xenName: xenName ?? this.xenName,
       xenMobile: xenMobile ?? this.xenMobile,
       xenEmail: xenEmail ?? this.xenEmail,
@@ -146,8 +148,8 @@ class WizardStateData {
       currentStep: map['currentStep'] ?? 1,
       surveyType: map['surveyType'],
       customSurveyName: map['customSurveyName'],
-      stateName: map['stateName'] ?? 'Punjab',
-      district: map['district'],
+      stateName: map['stateName'] as String? ?? '',
+      district: map['district'] as String?,
       xenName: map['xenName'],
       xenMobile: map['xenMobile'],
       xenEmail: map['xenEmail'],
@@ -186,7 +188,7 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
   @override
   WizardStateData build() {
     ref.listen(authViewModelProvider, (previous, next) {
-      if (next.value == null) {
+      if (previous?.value != null && next.value == null) {
         state = const WizardStateData();
       }
     });
@@ -203,6 +205,8 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
 
   bool get hasDraft {
     return state.surveyType != null ||
+        state.stateName.isNotEmpty ||
+        state.district != null ||
         (state.areaName != null && state.areaName!.trim().isNotEmpty) ||
         state.currentStep > 1 ||
         state.kmlFilePath != null ||
@@ -238,6 +242,23 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
   void updateState(WizardStateData newState) {
     state = newState;
     _saveDraft();
+  }
+
+  void selectState(String stateName) {
+    if (state.stateName != stateName) {
+      state = state.copyWith(
+        stateName: stateName,
+        clearDistrict: true,
+      );
+      _saveDraft();
+    }
+  }
+
+  void selectDistrict(String district) {
+    if (state.district != district) {
+      state = state.copyWith(district: district);
+      _saveDraft();
+    }
   }
 
   void setStep(int step) {
@@ -393,7 +414,7 @@ class BookingWizardViewModel extends Notifier<WizardStateData> {
         surveyType: selectedSurveyType,
         customSurveyName: state.customSurveyName,
         state: state.stateName,
-        district: state.district ?? 'Amritsar',
+        district: state.district ?? '',
         xenDetails: XenDetails(
           name: state.xenName ?? '',
           mobile: state.xenMobile ?? '',

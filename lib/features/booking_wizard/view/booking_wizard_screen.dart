@@ -42,6 +42,13 @@ class BookingWizardScreen extends ConsumerWidget {
         }
         return true;
       case 2:
+        if (state.stateName.trim().isEmpty) {
+          AppSnackbar.showGlobalError(
+            title: 'Validation Error',
+            message: 'Please select a state.',
+          );
+          return false;
+        }
         if (state.district == null || state.district!.trim().isEmpty) {
           AppSnackbar.showGlobalError(
             title: 'Validation Error',

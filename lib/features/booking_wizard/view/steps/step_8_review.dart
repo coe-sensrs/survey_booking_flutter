@@ -114,7 +114,7 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
             title: '2. State & District',
             stepNum: 2,
             items: [
-              'State: ${state.stateName}',
+              'State: ${state.stateName.isNotEmpty ? state.stateName : "Not selected"}',
               'District: ${state.district ?? "Not selected"}',
             ],
           ),

@@ -1,75 +1,25 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 
+import '../../../../core/providers/core_providers.dart';
 import '../../viewmodel/booking_wizard_viewmodel.dart';
-import '../../../../core/widgets/keyboard_dismiss_wrapper.dart';
 
-class Step2StateDistrict extends ConsumerStatefulWidget {
+class Step2StateDistrict extends ConsumerWidget {
   const Step2StateDistrict({super.key});
 
   @override
-  ConsumerState<Step2StateDistrict> createState() => _Step2StateDistrictState();
-}
-
-class _Step2StateDistrictState extends ConsumerState<Step2StateDistrict> {
-  List<String> _districts = [];
-  bool _isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadReferenceData();
-  }
-
-  Future<void> _loadReferenceData() async {
-    try {
-      final jsonString = await rootBundle.loadString(
-        'assets/india_states_districts.json',
-      );
-      final data = jsonDecode(jsonString) as Map<String, dynamic>;
-      final statesList = data['states'] as List<dynamic>;
-
-      final punjab = statesList.firstWhere(
-        (s) => s['state'] == 'Punjab',
-        orElse: () => statesList.first,
-      );
-
-      final districtList = (punjab['districts'] as List<dynamic>)
-          .map((e) => e.toString())
-          .toList();
-
-      setState(() {
-        _districts = districtList;
-        _isLoading = false;
-      });
-
-      final wizardState = ref.read(bookingWizardViewModelProvider);
-      if (wizardState.district == null && _districts.isNotEmpty) {
-        ref
-            .read(bookingWizardViewModelProvider.notifier)
-            .updateState(
-              wizardState.copyWith(
-                stateName: 'Punjab',
-                district: _districts.first,
-              ),
-            );
-      }
-    } catch (e) {
-      setState(() => _isLoading = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final wizardState = ref.watch(bookingWizardViewModelProvider);
+    final statesAsync = ref.watch(indiaStatesProvider);
     final colorScheme = Theme.of(context).colorScheme;
 
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final selectedState = wizardState.stateName;
+    final isStateSelected = selectedState.trim().isNotEmpty;
+
+    final districtsAsync = isStateSelected
+        ? ref.watch(districtsForStateProvider(selectedState))
+        : null;
 
     return SingleChildScrollView(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
@@ -83,7 +33,7 @@ class _Step2StateDistrictState extends ConsumerState<Step2StateDistrict> {
           ),
           SizedBox(height: 6.h),
           Text(
-            'Select the district in Punjab where the survey is required.',
+            'Select the state/UT and district where the survey will be conducted.',
             style: TextStyle(
               fontSize: 13.sp,
               color: colorScheme.onSurface.withValues(alpha: 0.6),
@@ -91,40 +41,230 @@ class _Step2StateDistrictState extends ConsumerState<Step2StateDistrict> {
           ),
           SizedBox(height: 20.h),
 
-          // State Field (ReadOnly: Punjab)
-          TextFormField(
-            initialValue: 'Punjab',
-            readOnly: true,
-            onTapOutside: AppKeyboardDismiss.onTapOutside,
-            decoration: const InputDecoration(
-              labelText: 'State',
-              prefixIcon: Icon(Icons.map),
-            ),
+          // ── State Dropdown ────────────────────────────────────────────────
+          statesAsync.when(
+            data: (states) {
+              final isCurrentStateValid =
+                  isStateSelected && states.contains(selectedState);
+
+              return DropdownButtonFormField<String>(
+                key: const ValueKey('state_dropdown'),
+                initialValue: isCurrentStateValid ? selectedState : null,
+                decoration: const InputDecoration(
+                  labelText: 'State / Union Territory *',
+                  hintText: 'Select State or UT',
+                  prefixIcon: Icon(Icons.map_outlined),
+                ),
+                items: states.map((stateItem) {
+                  return DropdownMenuItem<String>(
+                    value: stateItem,
+                    child: Text(stateItem),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    ref
+                        .read(bookingWizardViewModelProvider.notifier)
+                        .selectState(val);
+                  }
+                },
+                onTap: () => FocusScope.of(context).unfocus(),
+              );
+            },
+            loading: () {
+              return DropdownButtonFormField<String>(
+                key: const ValueKey('state_dropdown_loading'),
+                initialValue: null,
+                items: null,
+                onChanged: null,
+                decoration: InputDecoration(
+                  labelText: 'State / Union Territory *',
+                  hintText: 'Loading states & union territories...',
+                  prefixIcon: const Icon(Icons.map_outlined),
+                  suffixIcon: SizedBox(
+                    width: 20.w,
+                    height: 20.h,
+                    child: const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
+              );
+            },
+            error: (err, _) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DropdownButtonFormField<String>(
+                    key: const ValueKey('state_dropdown_error'),
+                    initialValue: null,
+                    items: null,
+                    onChanged: null,
+                    decoration: InputDecoration(
+                      labelText: 'State / Union Territory *',
+                      hintText: 'Failed to load states',
+                      prefixIcon: Icon(
+                        Icons.error_outline,
+                        color: colorScheme.error,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 6.h),
+                  TextButton.icon(
+                    onPressed: () => ref.invalidate(indiaStatesProvider),
+                    icon: const Icon(Icons.refresh, size: 16),
+                    label: const Text('Retry loading states'),
+                  ),
+                ],
+              );
+            },
           ),
 
           SizedBox(height: 16.h),
 
-          // District Dropdown
-          DropdownButtonFormField<String>(
-            initialValue: _districts.contains(wizardState.district)
-                ? wizardState.district
-                : (_districts.isNotEmpty ? _districts.first : null),
-            decoration: const InputDecoration(
-              labelText: 'District *',
-              prefixIcon: Icon(Icons.location_city),
+          // ── District Dropdown (Cascading) ─────────────────────────────────
+          if (!isStateSelected) ...[
+            // Disabled when no state is selected
+            DropdownButtonFormField<String>(
+              key: const ValueKey('district_dropdown_disabled'),
+              initialValue: null,
+              items: null,
+              onChanged: null,
+              decoration: InputDecoration(
+                labelText: 'District *',
+                hintText: 'Select a state first',
+                prefixIcon: const Icon(Icons.location_city_outlined),
+                helperText: 'Select a state above to view available districts',
+                helperStyle: TextStyle(
+                  fontSize: 12.sp,
+                  color: colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
             ),
-            items: _districts.map((dist) {
-              return DropdownMenuItem<String>(value: dist, child: Text(dist));
-            }).toList(),
-            onChanged: (val) {
-              if (val != null) {
-                ref
-                    .read(bookingWizardViewModelProvider.notifier)
-                    .updateState(
-                      wizardState.copyWith(stateName: 'Punjab', district: val),
+          ] else if (districtsAsync != null) ...[
+            districtsAsync.when(
+              data: (districts) {
+                final isCurrentDistrictValid =
+                    wizardState.district != null &&
+                    districts.contains(wizardState.district);
+
+                return DropdownButtonFormField<String>(
+                  key: ValueKey(
+                    'district_dropdown_${selectedState}_${wizardState.district}',
+                  ),
+                  initialValue: isCurrentDistrictValid
+                      ? wizardState.district
+                      : null,
+                  decoration: InputDecoration(
+                    labelText: 'District *',
+                    hintText: districts.isEmpty
+                        ? 'No districts available'
+                        : 'Select District in $selectedState',
+                    prefixIcon: const Icon(Icons.location_city_outlined),
+                  ),
+                  items: districts.map((districtItem) {
+                    return DropdownMenuItem<String>(
+                      value: districtItem,
+                      child: Text(districtItem),
                     );
-              }
-            },
+                  }).toList(),
+                  onChanged: districts.isEmpty
+                      ? null
+                      : (val) {
+                          if (val != null) {
+                            ref
+                                .read(bookingWizardViewModelProvider.notifier)
+                                .selectDistrict(val);
+                          }
+                        },
+                  onTap: () => FocusScope.of(context).unfocus(),
+                );
+              },
+              loading: () {
+                return DropdownButtonFormField<String>(
+                  key: const ValueKey('district_dropdown_loading'),
+                  initialValue: null,
+                  items: null,
+                  onChanged: null,
+                  decoration: InputDecoration(
+                    labelText: 'District *',
+                    hintText: 'Loading districts for $selectedState...',
+                    prefixIcon: const Icon(Icons.location_city_outlined),
+                    suffixIcon: SizedBox(
+                      width: 20.w,
+                      height: 20.h,
+                      child: const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    ),
+                  ),
+                );
+              },
+              error: (err, _) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    DropdownButtonFormField<String>(
+                      key: const ValueKey('district_dropdown_error'),
+                      initialValue: null,
+                      items: null,
+                      onChanged: null,
+                      decoration: InputDecoration(
+                        labelText: 'District *',
+                        hintText: 'Failed to load districts',
+                        prefixIcon: Icon(
+                          Icons.error_outline,
+                          color: colorScheme.error,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    TextButton.icon(
+                      onPressed: () => ref.invalidate(
+                        districtsForStateProvider(selectedState),
+                      ),
+                      icon: const Icon(Icons.refresh, size: 16),
+                      label: const Text('Retry loading districts'),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ],
+
+          SizedBox(height: 24.h),
+
+          // ── Information Note ──────────────────────────────────────────────
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  size: 20.sp,
+                  color: colorScheme.primary,
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: Text(
+                    'Location data is bundled locally for fast, offline survey booking across all Indian states and union territories.',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: colorScheme.onSurface.withValues(alpha: 0.75),
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -15,6 +15,7 @@ import '../services/analytics_service.dart';
 import '../services/performance_service.dart';
 import '../services/notification_service.dart';
 import '../services/firebase_notification_service.dart';
+import '../services/india_location_service.dart';
 
 // Repositories
 final appointmentRepositoryProvider = Provider<AppointmentRepository>((ref) {
@@ -85,3 +86,19 @@ final _sharedNotificationService = FirebaseNotificationService();
 /// Use [notificationServiceProvider] everywhere else.
 FirebaseNotificationService getNotificationServiceForInit() =>
     _sharedNotificationService;
+
+final indiaLocationServiceProvider = Provider<IndiaLocationService>((ref) {
+  return IndiaLocationService();
+});
+
+final indiaStatesProvider = FutureProvider<List<String>>((ref) async {
+  final service = ref.watch(indiaLocationServiceProvider);
+  return service.getStates();
+});
+
+final districtsForStateProvider =
+    FutureProvider.family<List<String>, String>((ref, stateName) async {
+  if (stateName.trim().isEmpty) return const [];
+  final service = ref.watch(indiaLocationServiceProvider);
+  return service.getDistrictsForState(stateName);
+});
