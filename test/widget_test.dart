@@ -32,32 +32,35 @@ void main() {
       expect(deserialized.photoUrl, isNull);
     });
 
-    test('AppUser equality and hashCode work correctly for identical values', () {
-      final now = DateTime(2026, 9, 24);
-      final user1 = AppUser(
-        uid: 'user_1',
-        role: 'applicant',
-        fullName: 'Same Name',
-        email: 'same@example.com',
-        phone: '1234567890',
-        createdAt: now,
-        updatedAt: now,
-      );
-      final user2 = AppUser(
-        uid: 'user_1',
-        role: 'applicant',
-        fullName: 'Same Name',
-        email: 'same@example.com',
-        phone: '1234567890',
-        createdAt: now,
-        updatedAt: now,
-      );
-      final user3 = user1.copyWith(fullName: 'Different Name');
+    test(
+      'AppUser equality and hashCode work correctly for identical values',
+      () {
+        final now = DateTime(2026, 9, 24);
+        final user1 = AppUser(
+          uid: 'user_1',
+          role: 'applicant',
+          fullName: 'Same Name',
+          email: 'same@example.com',
+          phone: '1234567890',
+          createdAt: now,
+          updatedAt: now,
+        );
+        final user2 = AppUser(
+          uid: 'user_1',
+          role: 'applicant',
+          fullName: 'Same Name',
+          email: 'same@example.com',
+          phone: '1234567890',
+          createdAt: now,
+          updatedAt: now,
+        );
+        final user3 = user1.copyWith(fullName: 'Different Name');
 
-      expect(user1, equals(user2));
-      expect(user1.hashCode, equals(user2.hashCode));
-      expect(user1, isNot(equals(user3)));
-    });
+        expect(user1, equals(user2));
+        expect(user1.hashCode, equals(user2.hashCode));
+        expect(user1, isNot(equals(user3)));
+      },
+    );
   });
 
   group('Booking Wizard Step 7 Permission Documents Tests', () {
@@ -106,5 +109,56 @@ void main() {
       expect(fromMap.permissionDocs.first['fileName'], 'doc1.pdf');
       expect(fromMap.permissionDocs.last['fileName'], 'doc2.png');
     });
+  });
+
+  group('Booking Wizard Step 5 Date Selection Tests', () {
+    test(
+      'WizardStateData copyWith updates startDate and endDate independently',
+      () {
+        final start = DateTime(2026, 10, 10);
+        final end = DateTime(2026, 10, 15);
+
+        var state = const WizardStateData().copyWith(startDate: start);
+        expect(state.startDate, start);
+        expect(state.endDate, isNull);
+
+        state = state.copyWith(endDate: end);
+        expect(state.startDate, start);
+        expect(state.endDate, end);
+      },
+    );
+
+    test(
+      'WizardStateData supports clearEndDate to reset endDate when startDate changes past it',
+      () {
+        final start1 = DateTime(2026, 10, 10);
+        final end1 = DateTime(2026, 10, 12);
+        final state1 = const WizardStateData().copyWith(
+          startDate: start1,
+          endDate: end1,
+        );
+        expect(state1.endDate, end1);
+
+        final start2 = DateTime(2026, 10, 15); // after end1
+        final state2 = state1.copyWith(startDate: start2, clearEndDate: true);
+        expect(state2.startDate, start2);
+        expect(state2.endDate, isNull);
+      },
+    );
+
+    test(
+      'Single-day survey allows startDate equal to endDate with 1-day duration',
+      () {
+        final sameDay = DateTime(2026, 10, 10);
+        final state = const WizardStateData().copyWith(
+          startDate: sameDay,
+          endDate: sameDay,
+        );
+
+        expect(state.startDate, state.endDate);
+        final duration = state.endDate!.difference(state.startDate!).inDays + 1;
+        expect(duration, 1);
+      },
+    );
   });
 }
