@@ -22,7 +22,6 @@ class Step2StateDistrict extends ConsumerWidget {
         : null;
 
     return SingleChildScrollView(
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,6 +48,7 @@ class Step2StateDistrict extends ConsumerWidget {
 
               return DropdownButtonFormField<String>(
                 key: const ValueKey('state_dropdown'),
+                isExpanded: true,
                 initialValue: isCurrentStateValid ? selectedState : null,
                 decoration: const InputDecoration(
                   labelText: 'State / Union Territory *',
@@ -58,7 +58,7 @@ class Step2StateDistrict extends ConsumerWidget {
                 items: states.map((stateItem) {
                   return DropdownMenuItem<String>(
                     value: stateItem,
-                    child: Text(stateItem),
+                    child: Text(stateItem, overflow: TextOverflow.ellipsis),
                   );
                 }).toList(),
                 onChanged: (val) {
@@ -74,6 +74,7 @@ class Step2StateDistrict extends ConsumerWidget {
             loading: () {
               return DropdownButtonFormField<String>(
                 key: const ValueKey('state_dropdown_loading'),
+                isExpanded: true,
                 initialValue: null,
                 items: null,
                 onChanged: null,
@@ -97,6 +98,7 @@ class Step2StateDistrict extends ConsumerWidget {
                 children: [
                   DropdownButtonFormField<String>(
                     key: const ValueKey('state_dropdown_error'),
+                    isExpanded: true,
                     initialValue: null,
                     items: null,
                     onChanged: null,
@@ -127,6 +129,7 @@ class Step2StateDistrict extends ConsumerWidget {
             // Disabled when no state is selected
             DropdownButtonFormField<String>(
               key: const ValueKey('district_dropdown_disabled'),
+              isExpanded: true,
               initialValue: null,
               items: null,
               onChanged: null,
@@ -152,6 +155,7 @@ class Step2StateDistrict extends ConsumerWidget {
                   key: ValueKey(
                     'district_dropdown_${selectedState}_${wizardState.district}',
                   ),
+                  isExpanded: true,
                   initialValue: isCurrentDistrictValid
                       ? wizardState.district
                       : null,
@@ -165,7 +169,10 @@ class Step2StateDistrict extends ConsumerWidget {
                   items: districts.map((districtItem) {
                     return DropdownMenuItem<String>(
                       value: districtItem,
-                      child: Text(districtItem),
+                      child: Text(
+                        districtItem,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     );
                   }).toList(),
                   onChanged: districts.isEmpty
@@ -183,6 +190,7 @@ class Step2StateDistrict extends ConsumerWidget {
               loading: () {
                 return DropdownButtonFormField<String>(
                   key: const ValueKey('district_dropdown_loading'),
+                  isExpanded: true,
                   initialValue: null,
                   items: null,
                   onChanged: null,
@@ -206,6 +214,7 @@ class Step2StateDistrict extends ConsumerWidget {
                   children: [
                     DropdownButtonFormField<String>(
                       key: const ValueKey('district_dropdown_error'),
+                      isExpanded: true,
                       initialValue: null,
                       items: null,
                       onChanged: null,
@@ -231,41 +240,6 @@ class Step2StateDistrict extends ConsumerWidget {
               },
             ),
           ],
-
-          SizedBox(height: 24.h),
-
-          // ── Information Note ──────────────────────────────────────────────
-          Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(
-              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(
-                color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-              ),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  size: 20.sp,
-                  color: colorScheme.primary,
-                ),
-                SizedBox(width: 10.w),
-                Expanded(
-                  child: Text(
-                    'Location data is bundled locally for fast, offline survey booking across all Indian states and union territories.',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: colorScheme.onSurface.withValues(alpha: 0.75),
-                      height: 1.4,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );
