@@ -59,7 +59,8 @@ function makeAppointmentPayload(overrides = {}) {
       sizeBytes: 1024,
       uploadedAt: new Date().toISOString(),
     },
-    preferredDate: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
+    preferredStart: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
+    preferredEnd: new Date(Date.now() + 10 * 24 * 3600 * 1000).toISOString(),
     logistics: {
       coordinatorName: "Coord Name",
       coordinatorDesignation: "Assistant Engineer",

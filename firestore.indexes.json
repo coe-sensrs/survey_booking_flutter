@@ -56,7 +56,7 @@
       "fields": [
         { "fieldPath": "applicantId", "order": "ASCENDING" },
         { "fieldPath": "status", "order": "ASCENDING" },
-        { "fieldPath": "confirmedDate", "order": "ASCENDING" }
+        { "fieldPath": "confirmedStart", "order": "ASCENDING" }
       ]
     },
     {
