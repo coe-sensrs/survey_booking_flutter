@@ -23,6 +23,9 @@ import '../../features/my_bookings/view/appointment_detail_tab_screen.dart';
 import '../../features/my_bookings/view/appointment_detail_screen.dart';
 import '../../features/booking_wizard/view/booking_wizard_screen.dart';
 import '../../features/profile/view/profile_screen.dart';
+import '../../features/campus_visit/view/campus_visit_form_screen.dart';
+import '../../features/my_visits/view/my_visits_screen.dart';
+import '../../features/admin_visits/view/admin_visits_screen.dart';
 
 import '../../features/committee_dashboard/view/committee_shell_screen.dart';
 import '../../features/committee_dashboard/view/committee_dashboard_screen.dart';
@@ -127,6 +130,8 @@ class AppRoutes {
   // Pushed Full-Screen Routes
   static const String appointmentDetail = '/appointment-detail/:id';
   static const String wizard = '/booking-wizard';
+  static const String campusVisitForm = '/campus-visit-form';
+  static const String myVisits = '/my-visits';
 
   // Admin Bottom Navigation Destinations
   static const String adminDashboard = '/admin-dashboard';
@@ -139,6 +144,7 @@ class AppRoutes {
       '/admin-committee-profile/:id';
 
   static const String adminAppointmentDetail = '/admin-appointment/:id';
+  static const String adminVisits = '/admin-visits';
 
   // Committee Bottom Navigation Destinations
   static const String committeeDashboard = '/committee-dashboard';
@@ -261,6 +267,14 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.wizard,
       builder: (context, state) => const BookingWizardScreen(),
     ),
+    GoRoute(
+      path: AppRoutes.campusVisitForm,
+      builder: (context, state) => const CampusVisitFormScreen(),
+    ),
+    GoRoute(
+      path: AppRoutes.myVisits,
+      builder: (context, state) => const MyVisitsScreen(),
+    ),
 
     // -------------------------------------------------------------------------
     // Stateful Shell Route for Admin Bottom Navigation
@@ -340,6 +354,10 @@ final GoRouter appRouter = GoRouter(
         final id = state.pathParameters['id'] ?? '';
         return CommitteeMemberProfileScreen(memberId: id);
       },
+    ),
+    GoRoute(
+      path: AppRoutes.adminVisits,
+      builder: (context, state) => const AdminVisitsScreen(),
     ),
 
     // -------------------------------------------------------------------------
@@ -446,7 +464,9 @@ final GoRouter appRouter = GoRouter(
         loc == AppRoutes.appointmentDetailTab ||
         loc == AppRoutes.profile ||
         loc.startsWith('/appointment-detail') ||
-        loc == AppRoutes.wizard;
+        loc == AppRoutes.wizard ||
+        loc == AppRoutes.campusVisitForm ||
+        loc == AppRoutes.myVisits;
 
     // All admin-only routes
     final isAdminRoute =
@@ -454,6 +474,7 @@ final GoRouter appRouter = GoRouter(
         loc == AppRoutes.adminCommitteeManagement ||
         loc == AppRoutes.adminAddMember ||
         loc == AppRoutes.adminSettings ||
+        loc == AppRoutes.adminVisits ||
         loc.startsWith('/admin-appointment') ||
         loc.startsWith('/admin-committee-profile');
 

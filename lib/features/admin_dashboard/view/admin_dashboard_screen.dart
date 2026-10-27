@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/constants/appointment_status.dart';
 import '../../../core/models/appointment.dart';
+import '../../../core/routing/app_router.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../viewmodel/admin_dashboard_viewmodel.dart';
 
@@ -24,6 +25,11 @@ class AdminDashboardScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.domain_outlined),
+            onPressed: () => context.push(AppRoutes.adminVisits),
+            tooltip: 'Campus Visits Queue',
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () =>
                 ref.read(adminDashboardViewModelProvider.notifier).refresh(),
@@ -39,9 +45,68 @@ class AdminDashboardScreen extends ConsumerWidget {
       body: Column(
         children: [
           _buildStatsRow(context, state),
+          _buildCampusVisitsBanner(context),
           _buildFilterBar(context, ref, state),
           Expanded(child: _buildList(context, ref, state)),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCampusVisitsBanner(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      child: InkWell(
+        onTap: () => context.push(AppRoutes.adminVisits),
+        borderRadius: BorderRadius.circular(10.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(
+              color: theme.colorScheme.primary.withValues(alpha: 0.3),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(
+                Icons.domain_outlined,
+                size: 20.sp,
+                color: theme.colorScheme.primary,
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Campus Visits Management',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      'Review and approve incoming campus delegation visit requests',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20.sp,
+                color: theme.colorScheme.primary,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

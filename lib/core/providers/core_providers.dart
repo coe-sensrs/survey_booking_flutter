@@ -3,11 +3,13 @@ import '../repositories/appointment_repository.dart';
 import '../repositories/user_repository.dart';
 import '../repositories/audit_log_repository.dart';
 import '../repositories/notification_repository.dart';
+import '../repositories/campus_visit_repository.dart';
 import '../models/app_user.dart';
 import '../services/firebase_appointment_repository.dart';
 import '../services/firebase_user_repository.dart';
 import '../services/firebase_audit_log_repository.dart';
 import '../services/firebase_notification_repository.dart';
+import '../services/firebase_campus_visit_repository.dart';
 import '../services/storage_upload_service.dart';
 import '../services/file_open_service.dart';
 import '../services/crash_reporting_service.dart';
@@ -21,6 +23,11 @@ import '../services/india_location_service.dart';
 final appointmentRepositoryProvider = Provider<AppointmentRepository>((ref) {
   return FirebaseAppointmentRepository();
 });
+
+final campusVisitRepositoryProvider = Provider<CampusVisitRepository>((ref) {
+  return FirebaseCampusVisitRepository();
+});
+
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
   return FirebaseUserRepository();

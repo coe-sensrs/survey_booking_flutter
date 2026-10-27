@@ -233,7 +233,32 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
 
-                SizedBox(height: 24.h),
+                SizedBox(height: 16.h),
+
+                // Campus Visits Quick Access
+                Row(
+                  children: [
+                    Expanded(
+                      child: _CampusVisitActionCard(
+                        title: 'Book Campus Visit',
+                        subtitle: 'IIT Ropar delegation tour',
+                        icon: Icons.domain_add_outlined,
+                        onTap: () => context.push(AppRoutes.campusVisitForm),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: _CampusVisitActionCard(
+                        title: 'My Campus Visits',
+                        subtitle: 'Track review status',
+                        icon: Icons.event_available_outlined,
+                        onTap: () => context.push(AppRoutes.myVisits),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 20.h),
 
                 homeState.when(
                   loading: () => const Center(
@@ -432,6 +457,76 @@ class HomeScreen extends ConsumerWidget {
         style: TextStyle(
           fontSize: 11.sp,
           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
+      ),
+    );
+  }
+}
+
+class _CampusVisitActionCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  const _CampusVisitActionCard({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14.r),
+        side: BorderSide(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20.sp,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13.5.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );
