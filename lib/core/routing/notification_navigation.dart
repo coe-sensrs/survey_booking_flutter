@@ -65,6 +65,20 @@ class NotificationNavigation {
         }
         return null;
 
+      // ── Campus visits lifecycle ──────────────────────────────────────────
+      case NotificationType.visitSubmitted:
+        if (role == 'admin') {
+          return AppRoutes.adminVisits;
+        }
+        return null;
+
+      case NotificationType.visitApproved:
+      case NotificationType.visitRejected:
+        if (role == 'applicant') {
+          return AppRoutes.myVisits;
+        }
+        return null;
+
       // ── Unknown types: no navigation, no crash ───────────────────────────
       case NotificationType.unknown:
         return null;
@@ -76,7 +90,11 @@ class NotificationNavigation {
   /// Null routes (unknown types or missing data) are silently ignored.
   /// The target screen performs its own Firestore authorization check —
   /// the appointmentId in the payload is only a navigation hint.
-  static void navigate(GoRouter router, NotificationMessage message, String role) {
+  static void navigate(
+    GoRouter router,
+    NotificationMessage message,
+    String role,
+  ) {
     final route = resolveRoute(message, role);
     if (route == null) return;
     router.push(route);

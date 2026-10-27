@@ -44,6 +44,19 @@ const PAYLOAD_MAP: Record<NotificationTypeValue, {title: string; body: string}> 
         title: "Survey Task Assigned",
         body: "A fieldwork task has been assigned. Please check the details.",
     },
+    // Campus visit lifecycle
+    visit_submitted: {
+        title: "New Campus Visit Request",
+        body: "A new campus visit request has been submitted and requires review.",
+    },
+    visit_approved: {
+        title: "Campus Visit Approved",
+        body: "Your campus visit request has been approved. Please check the details.",
+    },
+    visit_rejected: {
+        title: "Campus Visit Update",
+        body: "Your campus visit request has been reviewed. Please check the details.",
+    },
 };
 
 /**

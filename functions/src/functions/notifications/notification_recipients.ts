@@ -67,6 +67,14 @@ export function getRecipientUids(
             ...(appointment.assignedTaskMemberId ? [appointment.assignedTaskMemberId] : []),
         ];
 
+    // Campus visit — admin tokens fetched via getAdminFcmTokens() in the CF
+    case "visit_submitted":
+        return [];
+
+    case "visit_approved":
+    case "visit_rejected":
+        return appointment.applicantId ? [appointment.applicantId] : [];
+
     default:
         return [];
     }

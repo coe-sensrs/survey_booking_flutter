@@ -13,3 +13,7 @@ export {
     assignFieldworkTask,
 } from "./functions/appointments/admin_appointment_mutations";
 export {updateCommitteeMember} from "./functions/admin/update_committee_member";
+// Campus visit booking
+export {submitCampusVisit} from "./functions/campus_visits/submit_campus_visit";
+export {reviewCampusVisit} from "./functions/campus_visits/review_campus_visit";
+

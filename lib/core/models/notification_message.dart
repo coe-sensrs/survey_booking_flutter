@@ -9,6 +9,9 @@ enum NotificationType {
   clarificationReply,
   approved,
   taskAssigned,
+  visitSubmitted,
+  visitApproved,
+  visitRejected,
   unknown;
 
   static NotificationType fromString(String? value) {
@@ -27,6 +30,12 @@ enum NotificationType {
         return NotificationType.approved;
       case 'task_assigned':
         return NotificationType.taskAssigned;
+      case 'visit_submitted':
+        return NotificationType.visitSubmitted;
+      case 'visit_approved':
+        return NotificationType.visitApproved;
+      case 'visit_rejected':
+        return NotificationType.visitRejected;
       default:
         // Unknown types are silently degraded — must not crash the app.
         return NotificationType.unknown;
