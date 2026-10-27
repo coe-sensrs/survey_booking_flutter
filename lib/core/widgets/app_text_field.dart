@@ -17,6 +17,8 @@ class AppTextField extends StatelessWidget {
   final VoidCallback? onTap;
   final List<TextInputFormatter>? inputFormatters;
   final TapRegionCallback? onTapOutside;
+  final TextCapitalization textCapitalization;
+  final int? minLines;
 
   const AppTextField({
     super.key,
@@ -27,6 +29,8 @@ class AppTextField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
+    this.minLines,
+    this.textCapitalization = TextCapitalization.none,
     this.suffixIcon,
     this.prefixIcon,
     this.onChanged,
@@ -52,6 +56,8 @@ class AppTextField extends StatelessWidget {
           obscureText: obscureText,
           keyboardType: keyboardType,
           maxLines: maxLines,
+          minLines: minLines,
+          textCapitalization: textCapitalization,
           onChanged: onChanged,
           readOnly: readOnly,
           onTap: onTap,
