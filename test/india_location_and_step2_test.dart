@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -345,6 +346,155 @@ void main() {
           findsOneWidget,
         );
         expect(container.read(bookingWizardViewModelProvider).district, isNull);
+      },
+    );
+
+    testWidgets(
+      'State dropdown loading state does not overflow on 360px device width',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              indiaStatesProvider.overrideWith(
+                (ref) => Completer<List<String>>().future,
+              ),
+              authViewModelProvider.overrideWith(_FakeAuthViewModel.new),
+            ],
+            child: ScreenUtilPlusInit(
+              designSize: const Size(360, 690),
+              builder: (context, child) =>
+                  const MaterialApp(home: Scaffold(body: Step2StateDistrict())),
+            ),
+          ),
+        );
+
+        await tester.pump();
+        expect(
+          find.byKey(const ValueKey('state_dropdown_loading')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'State dropdown loaded with long state name does not overflow on 360px device width',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              indiaStatesProvider.overrideWith((ref) async => [
+                'Dadra and Nagar Haveli and Daman and Diu',
+                'Andaman and Nicobar Islands',
+              ]),
+              authViewModelProvider.overrideWith(_FakeAuthViewModel.new),
+            ],
+            child: ScreenUtilPlusInit(
+              designSize: const Size(360, 690),
+              builder: (context, child) =>
+                  const MaterialApp(home: Scaffold(body: Step2StateDistrict())),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(find.byKey(const ValueKey('state_dropdown')), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'District dropdown loading with long state name does not overflow on 360px device width',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        const longState = 'Dadra and Nagar Haveli and Daman and Diu';
+        final container = ProviderContainer(
+          overrides: [
+            indiaStatesProvider.overrideWith((ref) async => [longState]),
+            districtsForStateProvider(longState).overrideWith(
+              (ref) => Completer<List<String>>().future,
+            ),
+            authViewModelProvider.overrideWith(_FakeAuthViewModel.new),
+          ],
+        );
+        container
+            .read(bookingWizardViewModelProvider.notifier)
+            .selectState(longState);
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: ScreenUtilPlusInit(
+              designSize: const Size(360, 690),
+              builder: (context, child) =>
+                  const MaterialApp(home: Scaffold(body: Step2StateDistrict())),
+            ),
+          ),
+        );
+
+        await tester.pump();
+        expect(
+          find.byKey(const ValueKey('district_dropdown_loading')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'District dropdown loaded with long district name does not overflow on 360px device width',
+      (tester) async {
+        tester.view.physicalSize = const Size(360, 640);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
+
+        const longState = 'Dadra and Nagar Haveli and Daman and Diu';
+        const longDistrict = 'Dadra and Nagar Haveli District Administrative Unit';
+        final container = ProviderContainer(
+          overrides: [
+            indiaStatesProvider.overrideWith((ref) async => [longState]),
+            districtsForStateProvider(longState).overrideWith(
+              (ref) async => [longDistrict, 'Daman', 'Diu'],
+            ),
+            authViewModelProvider.overrideWith(_FakeAuthViewModel.new),
+          ],
+        );
+        container
+            .read(bookingWizardViewModelProvider.notifier)
+            .selectState(longState);
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: ScreenUtilPlusInit(
+              designSize: const Size(360, 690),
+              builder: (context, child) =>
+                  const MaterialApp(home: Scaffold(body: Step2StateDistrict())),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        expect(
+          find.byKey(const ValueKey('district_dropdown_Dadra and Nagar Haveli and Daman and Diu_null')),
+          findsOneWidget,
+        );
+        expect(tester.takeException(), isNull);
       },
     );
   });
