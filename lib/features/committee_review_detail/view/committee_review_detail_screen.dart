@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:survey_desk/core/constants/survey_type.dart';
 
 import '../../../core/constants/appointment_status.dart';
 import '../../../core/models/appointment.dart';
@@ -129,7 +130,10 @@ class _ReviewDetailBody extends ConsumerWidget {
           SizedBox(height: 16.h),
 
           // --- KML / KMZ Boundary File ---
-          if (appointment.kmlFile != null) ...[
+          if (appointment.kmlFile != null &&
+              appointment.surveyType != SurveyType.socioEconomicSurvey &&
+              appointment.kmlFile!.storagePath != 'spatial_not_required' &&
+              appointment.kmlFile!.storagePath != 'not_required') ...[
             _SectionTitle('Survey Boundary File'),
             KmlFileTile(
               storagePath: appointment.kmlFile!.storagePath,

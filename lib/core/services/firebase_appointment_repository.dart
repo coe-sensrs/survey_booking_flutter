@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import '../models/appointment.dart';
 import '../repositories/appointment_repository.dart';
 import '../constants/appointment_status.dart';
+import '../constants/survey_type.dart';
 
 class FirebaseAppointmentRepository implements AppointmentRepository {
   final FirebaseFirestore _firestore;
@@ -174,7 +175,16 @@ class FirebaseAppointmentRepository implements AppointmentRepository {
       'district': appointment.district,
       'xenDetails': appointment.xenDetails.toJson(),
       'areaName': appointment.areaName,
-      'kmlFile': appointment.kmlFile?.toJson(),
+      'kmlFile': appointment.kmlFile?.toJson() ??
+          (appointment.surveyType == SurveyType.socioEconomicSurvey
+              ? {
+                  'storagePath': 'spatial_not_required',
+                  'originalFileName': 'spatial_not_required',
+                  'fileType': 'none',
+                  'sizeBytes': 0,
+                  'uploadedAt': DateTime.now().toIso8601String(),
+                }
+              : null),
       'preferredStart': appointment.preferredStart.toIso8601String(),
       'preferredEnd': appointment.preferredEnd.toIso8601String(),
       'logistics': appointment.logistics.toJson(),

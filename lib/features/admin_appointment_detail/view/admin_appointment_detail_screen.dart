@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
 import 'package:intl/intl.dart';
+import 'package:survey_desk/core/constants/survey_type.dart';
 import 'package:survey_desk/features/admin_appointment_detail/viewmodel/admin_appointment_detail_viewmodel.dart';
 
 import '../../../core/constants/appointment_status.dart';
@@ -91,7 +92,11 @@ class AdminAppointmentDetailScreen extends ConsumerWidget {
                 SizedBox(height: 32.h),
 
                 // --- Survey Boundary File ---
-                if (appointment.kmlFile != null) ...[
+                if (appointment.kmlFile != null &&
+                    appointment.surveyType != SurveyType.socioEconomicSurvey &&
+                    appointment.kmlFile!.storagePath !=
+                        'spatial_not_required' &&
+                    appointment.kmlFile!.storagePath != 'not_required') ...[
                   _buildSectionTitle(context, 'Survey Boundary File'),
                   KmlFileTile(
                     storagePath: appointment.kmlFile!.storagePath,

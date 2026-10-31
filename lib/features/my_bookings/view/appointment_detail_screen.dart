@@ -292,7 +292,12 @@ class _AppointmentDetailScreenState
                   SizedBox(height: 16.h),
 
                   // KML File Section
-                  if (appointment.kmlFile != null) ...[
+                  if (appointment.kmlFile != null &&
+                      appointment.surveyType !=
+                          SurveyType.socioEconomicSurvey &&
+                      appointment.kmlFile!.storagePath !=
+                          'spatial_not_required' &&
+                      appointment.kmlFile!.storagePath != 'not_required') ...[
                     _buildDetailSectionHeader(
                       title: 'Survey Area Map File (KML/KMZ)',
                       icon: Icons.map,

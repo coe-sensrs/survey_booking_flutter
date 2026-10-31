@@ -90,7 +90,13 @@ class Appointment {
       areaName: map['areaName'] as String? ?? '',
       kmlFile: map['kmlFile'] != null &&
               map['kmlFile'] is Map &&
-              (map['kmlFile'] as Map).isNotEmpty
+              (map['kmlFile'] as Map).isNotEmpty &&
+              map['kmlFile']['storagePath'] != null &&
+              (map['kmlFile']['storagePath'] as String).isNotEmpty &&
+              map['kmlFile']['storagePath'] != 'spatial_not_required' &&
+              map['kmlFile']['storagePath'] != 'not_required' &&
+              SurveyType.fromCode(map['surveyType'] as String? ?? '') !=
+                  SurveyType.socioEconomicSurvey
           ? KmlFile.fromMap(map['kmlFile'] as Map<String, dynamic>)
           : null,
       preferredStart:
