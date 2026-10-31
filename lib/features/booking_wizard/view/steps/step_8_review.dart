@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil_plus/flutter_screenutil_plus.dart';
@@ -51,9 +52,15 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
       }
     } catch (e) {
       if (mounted) {
+        String cleanMessage = e.toString();
+        if (e is FirebaseFunctionsException && e.message != null) {
+          cleanMessage = e.message!;
+        } else if (cleanMessage.startsWith('Exception: ')) {
+          cleanMessage = cleanMessage.substring('Exception: '.length);
+        }
         AppSnackbar.showGlobalError(
           title: 'Submission Failed',
-          message: 'Booking submission failed: $e',
+          message: cleanMessage,
         );
       }
     } finally {
@@ -72,8 +79,8 @@ class _Step8ReviewState extends ConsumerState<Step8Review> {
     final formattedDate = state.startDate != null && state.endDate != null
         ? '${DateFormat('dd MMM').format(state.startDate!)} - ${DateFormat('dd MMM yyyy').format(state.endDate!)} (${state.endDate!.difference(state.startDate!).inDays + 1} calendar days)'
         : state.startDate != null
-            ? DateFormat('EEEE, dd MMMM yyyy').format(state.startDate!)
-            : 'Not selected';
+        ? DateFormat('EEEE, dd MMMM yyyy').format(state.startDate!)
+        : 'Not selected';
 
     final isSocioEconomic =
         state.surveyType == SurveyType.socioEconomicSurvey.code;
