@@ -57,6 +57,7 @@ dependencies:
   image: ^4.9.1
   flex_color_scheme: ^8.4.0
   flutter_pdfview: ^1.4.5
+  crypto: ^3.0.6
 
   cloud_firestore: ^6.8.0
   firebase_core: ^4.13.0
@@ -122,6 +123,7 @@ flutter:
   assets:
     - assets/
     - assets/images/
+    - assets/india_states_districts.json
 
 
   # To add assets to your application, add an assets section, like this:
