@@ -7,7 +7,10 @@ import 'package:intl/intl.dart';
 import '../../../core/constants/appointment_status.dart';
 import '../../../core/models/appointment.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/campus_visit_indicator_pill.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../admin_visits/viewmodel/admin_visits_viewmodel.dart';
 import '../viewmodel/admin_dashboard_viewmodel.dart';
 
 class AdminDashboardScreen extends ConsumerWidget {
@@ -54,61 +57,7 @@ class AdminDashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildCampusVisitsBanner(BuildContext context) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-      child: InkWell(
-        onTap: () => context.push(AppRoutes.adminVisits),
-        borderRadius: BorderRadius.circular(10.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(
-              color: theme.colorScheme.primary.withValues(alpha: 0.3),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.domain_outlined,
-                size: 20.sp,
-                color: theme.colorScheme.primary,
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Campus Visits Management',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.bold,
-                        color: theme.colorScheme.onSurface,
-                      ),
-                    ),
-                    Text(
-                      'Review and approve incoming campus delegation visit requests',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.chevron_right,
-                size: 20.sp,
-                color: theme.colorScheme.primary,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return const _CampusVisitsBanner();
   }
 
   Widget _buildStatsRow(BuildContext context, AdminDashboardState state) {
@@ -258,6 +207,140 @@ class AdminDashboardScreen extends ConsumerWidget {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _CampusVisitsBanner extends ConsumerWidget {
+  const _CampusVisitsBanner();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final indicator = ref.watch(adminCampusVisitIndicatorProvider);
+
+    final hasPending = indicator.hasPending;
+    final hasUnseen = indicator.hasUnseen;
+
+    final borderColor = hasPending
+        ? AppStatusColors.pending.withValues(alpha: hasUnseen ? 0.85 : 0.45)
+        : theme.colorScheme.primary.withValues(alpha: 0.3);
+
+    final backgroundColor = hasUnseen
+        ? AppStatusColors.pending.withValues(alpha: isDark ? 0.14 : 0.08)
+        : theme.colorScheme.primaryContainer.withValues(alpha: 0.35);
+
+    String formatCount(int count) => count > 99 ? '99+' : '$count';
+
+    final subtitle = hasUnseen
+        ? '${formatCount(indicator.unseenCount)} new ${indicator.unseenCount == 1 ? 'request' : 'requests'} awaiting review'
+        : hasPending
+        ? '${formatCount(indicator.pendingCount)} pending ${indicator.pendingCount == 1 ? 'request' : 'requests'} to review'
+        : 'Review and approve incoming campus delegation visit requests';
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+      child: InkWell(
+        onTap: () => context.push(AppRoutes.adminVisits),
+        borderRadius: BorderRadius.circular(10.r),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 220),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(10.r),
+            border: Border.all(
+              color: borderColor,
+              width: hasUnseen ? 1.5 : 1.0,
+            ),
+          ),
+          child: Row(
+            children: [
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Icon(
+                    Icons.domain_outlined,
+                    size: 20.sp,
+                    color: hasPending
+                        ? Color.lerp(
+                            AppStatusColors.pending,
+                            theme.colorScheme.onSurface,
+                            isDark ? 0.1 : 0.25,
+                          )
+                        : theme.colorScheme.primary,
+                  ),
+                  if (hasUnseen)
+                    Positioned(
+                      top: -2.h,
+                      right: -3.w,
+                      child: Container(
+                        width: 8.w,
+                        height: 8.w,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.error,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: theme.colorScheme.surface,
+                            width: 1.2,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              SizedBox(width: 10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Campus Visits Management',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.bold,
+                        color: theme.colorScheme.onSurface,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: hasUnseen
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (hasPending) ...[
+                SizedBox(width: 8.w),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: 118.w),
+                  child: CampusVisitIndicatorPill(
+                    label: '${formatCount(indicator.pendingCount)} Pending',
+                    color: AppStatusColors.pending,
+                    showDot: hasUnseen,
+                  ),
+                ),
+              ],
+              SizedBox(width: 4.w),
+              Icon(
+                Icons.chevron_right,
+                size: 20.sp,
+                color: theme.colorScheme.primary,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -28,11 +28,37 @@ final _applicantVisitFilterProvider =
     );
 
 /// Screen for applicants to track and manage their booked campus visits.
-class MyVisitsScreen extends ConsumerWidget {
+class MyVisitsScreen extends ConsumerStatefulWidget {
   const MyVisitsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyVisitsScreen> createState() => _MyVisitsScreenState();
+}
+
+class _MyVisitsScreenState extends ConsumerState<MyVisitsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final uid = ref.read(authViewModelProvider).value?.uid;
+      if (uid != null && uid.isNotEmpty) {
+        _markSeen(uid, ref.read(myVisitsProvider(uid)));
+      }
+    });
+  }
+
+  void _markSeen(String uid, AsyncValue<List<CampusVisit>> visitsAsync) {
+    final visits = visitsAsync.value;
+    if (visits != null) {
+      ref
+          .read(applicantSeenVisitsProvider.notifier)
+          .markReviewedVisitsSeen(uid, visits);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authViewModelProvider).value;
     final selectedFilter = ref.watch(_applicantVisitFilterProvider);
 
@@ -41,6 +67,22 @@ class MyVisitsScreen extends ConsumerWidget {
     }
 
     final visitsAsync = ref.watch(myVisitsProvider(user.uid));
+    final hasUnread = ref.watch(
+      applicantCampusVisitIndicatorProvider.select((s) => s.hasUnread),
+    );
+
+    if (hasUnread && visitsAsync.hasValue) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _markSeen(user.uid, visitsAsync);
+        }
+      });
+    }
+
+    ref.listen<AsyncValue<List<CampusVisit>>>(
+      myVisitsProvider(user.uid),
+      (_, next) => _markSeen(user.uid, next),
+    );
 
     final filterOptions = [
       {'label': 'All', 'code': null},
@@ -273,6 +315,7 @@ class _VisitCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  SizedBox(width: 8.w),
                   CampusVisitStatusBadge(status: visit.status),
                 ],
               ),
@@ -293,11 +336,13 @@ class _VisitCard extends StatelessWidget {
                     color: theme.colorScheme.primary,
                   ),
                   SizedBox(width: 6.w),
-                  Text(
-                    'Delegation: ${visit.delegationSize} ${visit.delegationSize == 1 ? 'person' : 'people'}',
-                    style: TextStyle(
-                      fontSize: 12.5.sp,
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      'Delegation: ${visit.delegationSize} ${visit.delegationSize == 1 ? 'person' : 'people'}',
+                      style: TextStyle(
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],

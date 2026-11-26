@@ -12,13 +12,65 @@ import '../viewmodel/admin_visits_viewmodel.dart';
 import 'admin_visit_review_sheet.dart';
 
 /// Screen for administrators to view, filter, and review all campus visit requests.
-class AdminVisitsScreen extends ConsumerWidget {
+class AdminVisitsScreen extends ConsumerStatefulWidget {
   const AdminVisitsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AdminVisitsScreen> createState() => _AdminVisitsScreenState();
+}
+
+class _AdminVisitsScreenState extends ConsumerState<AdminVisitsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final filter = ref.read(adminVisitsFilterProvider);
+      _markSeenIfVisible(filter, ref.read(adminVisitsProvider(filter)));
+    });
+  }
+
+  void _markSeenIfVisible(
+    String? filter,
+    AsyncValue<List<CampusVisit>> visitsAsync,
+  ) {
+    final showsPending =
+        filter == null || filter == CampusVisitStatus.pending.code;
+    if (!showsPending) return;
+    final visits = visitsAsync.value;
+    if (visits != null) {
+      ref
+          .read(adminSeenVisitIdsProvider.notifier)
+          .markPendingVisitsSeen(visits);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final selectedFilter = ref.watch(adminVisitsFilterProvider);
     final visitsAsync = ref.watch(adminVisitsProvider(selectedFilter));
+    final hasUnseen = ref.watch(
+      adminCampusVisitIndicatorProvider.select((s) => s.hasUnseen),
+    );
+    final showsPending =
+        selectedFilter == null ||
+        selectedFilter == CampusVisitStatus.pending.code;
+
+    if (showsPending && hasUnseen && visitsAsync.hasValue) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _markSeenIfVisible(selectedFilter, visitsAsync);
+        }
+      });
+    }
+
+    ref.listen<AsyncValue<List<CampusVisit>>>(
+      adminVisitsProvider(selectedFilter),
+      (_, next) => _markSeenIfVisible(selectedFilter, next),
+    );
+    ref.listen<String?>(adminVisitsFilterProvider, (_, nextFilter) {
+      _markSeenIfVisible(nextFilter, ref.read(adminVisitsProvider(nextFilter)));
+    });
 
     final filterOptions = [
       {'label': 'All', 'code': null},
@@ -139,6 +191,7 @@ class AdminVisitsScreen extends ConsumerWidget {
                     ref.invalidate(adminVisitsProvider(selectedFilter));
                   },
                   child: ListView.separated(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.w,
                       vertical: 12.h,
@@ -241,34 +294,46 @@ class _AdminVisitCard extends StatelessWidget {
               SizedBox(height: 12.h),
 
               // Date, Session & Delegation
-              Row(
+              Wrap(
+                spacing: 12.w,
+                runSpacing: 6.h,
+                crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  Icon(
-                    Icons.calendar_today,
-                    size: 15.sp,
-                    color: theme.colorScheme.primary,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.calendar_today,
+                        size: 15.sp,
+                        color: theme.colorScheme.primary,
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        dateStr,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    dateStr,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Icon(
-                    Icons.access_time,
-                    size: 15.sp,
-                    color: theme.colorScheme.primary,
-                  ),
-                  SizedBox(width: 6.w),
-                  Text(
-                    visit.sessionDisplayName,
-                    style: TextStyle(
-                      fontSize: 12.5.sp,
-                      color: theme.colorScheme.onSurfaceVariant,
-                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.access_time,
+                        size: 15.sp,
+                        color: theme.colorScheme.primary,
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        visit.sessionDisplayName,
+                        style: TextStyle(
+                          fontSize: 12.5.sp,
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -282,9 +347,11 @@ class _AdminVisitCard extends StatelessWidget {
                     color: theme.colorScheme.primary,
                   ),
                   SizedBox(width: 6.w),
-                  Text(
-                    'Delegation size: ${visit.delegationSize} ${visit.delegationSize == 1 ? 'member' : 'members'}',
-                    style: TextStyle(fontSize: 12.5.sp),
+                  Expanded(
+                    child: Text(
+                      'Delegation size: ${visit.delegationSize} ${visit.delegationSize == 1 ? 'member' : 'members'}',
+                      style: TextStyle(fontSize: 12.5.sp),
+                    ),
                   ),
                 ],
               ),
@@ -311,6 +378,8 @@ class _AdminVisitCard extends StatelessWidget {
                     OutlinedButton.icon(
                       onPressed: onTap,
                       style: OutlinedButton.styleFrom(
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         padding: EdgeInsets.symmetric(
                           horizontal: 14.w,
                           vertical: 6.h,
@@ -326,6 +395,8 @@ class _AdminVisitCard extends StatelessWidget {
                     TextButton.icon(
                       onPressed: onTap,
                       style: TextButton.styleFrom(
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         padding: EdgeInsets.symmetric(
                           horizontal: 10.w,
                           vertical: 6.h,

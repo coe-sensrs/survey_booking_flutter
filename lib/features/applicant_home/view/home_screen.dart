@@ -6,11 +6,14 @@ import 'package:intl/intl.dart';
 
 import '../../../core/models/audit_log_entry.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/appointment_booking_card.dart';
+import '../../../core/widgets/campus_visit_indicator_pill.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../auth/viewmodel/auth_viewmodel.dart';
 import '../../booking_wizard/viewmodel/booking_wizard_viewmodel.dart';
+import '../../my_visits/viewmodel/my_visits_viewmodel.dart';
 import '../viewmodel/home_viewmodel.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -247,14 +250,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                     ),
                     SizedBox(width: 12.w),
-                    Expanded(
-                      child: _CampusVisitActionCard(
-                        title: 'My Campus Visits',
-                        subtitle: 'Track review status',
-                        icon: Icons.event_available_outlined,
-                        onTap: () => context.push(AppRoutes.myVisits),
-                      ),
-                    ),
+                    const Expanded(child: _MyCampusVisitsCard()),
                   ],
                 ),
 
@@ -463,28 +459,88 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
+class _MyCampusVisitsCard extends ConsumerWidget {
+  const _MyCampusVisitsCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final indicator = ref.watch(applicantCampusVisitIndicatorProvider);
+    final theme = Theme.of(context);
+
+    Color? badgeColor;
+    String? badgeLabel;
+    var subtitle = 'Track review status';
+
+    String formatCount(int count) => count > 99 ? '99+' : '$count';
+
+    if (indicator.hasUnread) {
+      if (indicator.unseenApprovedCount > 0 &&
+          indicator.unseenRejectedCount == 0) {
+        badgeColor = AppStatusColors.approved;
+        badgeLabel = indicator.unseenApprovedCount == 1
+            ? 'Approved'
+            : '${formatCount(indicator.unseenApprovedCount)} Approved';
+      } else if (indicator.unseenRejectedCount > 0 &&
+          indicator.unseenApprovedCount == 0) {
+        badgeColor = AppStatusColors.rejected;
+        badgeLabel = indicator.unseenRejectedCount == 1
+            ? 'Rejected'
+            : '${formatCount(indicator.unseenRejectedCount)} Rejected';
+      } else {
+        badgeColor = theme.colorScheme.primary;
+        badgeLabel = '${formatCount(indicator.totalUnread)} Updates';
+      }
+      subtitle = indicator.totalUnread == 1
+          ? 'Tap to view decision'
+          : '${formatCount(indicator.totalUnread)} updates • Tap to view';
+    }
+
+    return _CampusVisitActionCard(
+      title: 'My Campus Visits',
+      subtitle: subtitle,
+      icon: Icons.event_available_outlined,
+      onTap: () => context.push(AppRoutes.myVisits),
+      badgeLabel: badgeLabel,
+      badgeColor: badgeColor,
+    );
+  }
+}
+
 class _CampusVisitActionCard extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
   final VoidCallback onTap;
+  final String? badgeLabel;
+  final Color? badgeColor;
 
   const _CampusVisitActionCard({
     required this.title,
     required this.subtitle,
     required this.icon,
     required this.onTap,
+    this.badgeLabel,
+    this.badgeColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final hasBadge = badgeLabel != null && badgeColor != null;
+
     return Card(
       elevation: 0,
+      color: hasBadge
+          ? badgeColor!.withValues(alpha: isDark ? 0.12 : 0.06)
+          : null,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14.r),
         side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+          color: hasBadge
+              ? badgeColor!.withValues(alpha: 0.75)
+              : theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+          width: hasBadge ? 1.5 : 1.0,
         ),
       ),
       child: InkWell(
@@ -495,21 +551,75 @@ class _CampusVisitActionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                child: Icon(
-                  icon,
-                  size: 20.sp,
-                  color: theme.colorScheme.primary,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color:
+                              (hasBadge
+                                      ? badgeColor!
+                                      : theme.colorScheme.primary)
+                                  .withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 20.sp,
+                          color: hasBadge
+                              ? Color.lerp(
+                                  badgeColor!,
+                                  theme.colorScheme.onSurface,
+                                  isDark ? 0.1 : 0.25,
+                                )
+                              : theme.colorScheme.primary,
+                        ),
+                      ),
+                      if (hasBadge)
+                        Positioned(
+                          top: -2.h,
+                          right: -2.w,
+                          child: Container(
+                            width: 8.w,
+                            height: 8.w,
+                            decoration: BoxDecoration(
+                              color: badgeColor,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: theme.colorScheme.surface,
+                                width: 1.2,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (hasBadge) ...[
+                    SizedBox(width: 6.w),
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: CampusVisitIndicatorPill(
+                          label: badgeLabel!,
+                          color: badgeColor!,
+                          showDot: true,
+                          dotColor: badgeColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
               SizedBox(height: 10.h),
               Text(
                 title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: 13.5.sp,
                   fontWeight: FontWeight.bold,
@@ -521,6 +631,7 @@ class _CampusVisitActionCard extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11.sp,
                   color: theme.colorScheme.onSurfaceVariant,
+                  fontWeight: hasBadge ? FontWeight.w600 : FontWeight.normal,
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
