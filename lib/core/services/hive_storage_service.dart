@@ -20,6 +20,8 @@ class HiveStorageService {
   static const _keyWizardDraft = 'draft';
   static const _keyNotificationPromptSeen = 'notification_prompt_seen';
   static const _keyCachedUser = 'cached_app_user';
+  static const _keyAdminSeenVisitIds = 'admin_seen_pending_visit_ids';
+  static const _keyApplicantSeenVisitsPrefix = 'applicant_seen_visits_';
 
   // -- Initialization --------------------------------------------------------
 
@@ -108,6 +110,43 @@ class HiveStorageService {
 
   /// Clears all entries from the generic cache (e.g., on logout).
   static Future<void> clearCache() => Hive.box(_cacheBox).clear();
+
+  // -- Campus Visit Unseen Indicators ---------------------------------------
+
+  /// Returns the set of pending campus visit IDs already seen by the admin.
+  static Set<String> getAdminSeenVisitIds() {
+    if (!Hive.isBoxOpen(_cacheBox)) return const {};
+    final raw = Hive.box(_cacheBox).get(_keyAdminSeenVisitIds);
+    if (raw is List) {
+      return raw.map((e) => e.toString()).toSet();
+    }
+    return const {};
+  }
+
+  /// Persists the set of pending campus visit IDs already seen by the admin.
+  static Future<void> saveAdminSeenVisitIds(Set<String> ids) async {
+    if (!Hive.isBoxOpen(_cacheBox)) return;
+    await Hive.box(_cacheBox).put(_keyAdminSeenVisitIds, ids.toList());
+  }
+
+  /// Returns a map of `visitId -> status:updatedAtMs` seen by [uid].
+  static Map<String, String> getApplicantSeenVisitStates(String uid) {
+    if (uid.isEmpty || !Hive.isBoxOpen(_cacheBox)) return const {};
+    final raw = Hive.box(_cacheBox).get('$_keyApplicantSeenVisitsPrefix$uid');
+    if (raw is Map) {
+      return raw.map((k, v) => MapEntry(k.toString(), v.toString()));
+    }
+    return const {};
+  }
+
+  /// Persists the map of `visitId -> status:updatedAtMs` seen by [uid].
+  static Future<void> saveApplicantSeenVisitStates(
+    String uid,
+    Map<String, String> states,
+  ) async {
+    if (uid.isEmpty || !Hive.isBoxOpen(_cacheBox)) return;
+    await Hive.box(_cacheBox).put('$_keyApplicantSeenVisitsPrefix$uid', states);
+  }
 
   // -- Global Reset ----------------------------------------------------------
 
