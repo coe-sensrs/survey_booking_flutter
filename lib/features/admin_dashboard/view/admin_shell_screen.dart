@@ -53,13 +53,13 @@ class AdminShellScreen extends StatelessWidget {
             labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
             destinations: const [
               NavigationDestination(
-                icon: Icon(Icons.grid_view_outlined),
-                selectedIcon: Icon(Icons.grid_view),
+                icon: Icon(Icons.dashboard_outlined),
+                selectedIcon: Icon(Icons.dashboard),
                 label: 'Overview',
               ),
               NavigationDestination(
-                icon: Icon(Icons.people_outline),
-                selectedIcon: Icon(Icons.people),
+                icon: Icon(Icons.group_outlined),
+                selectedIcon: Icon(Icons.group),
                 label: 'Committees',
               ),
               NavigationDestination(
